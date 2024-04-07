@@ -35,7 +35,7 @@ class EventoFactory extends Factory
             "respuesta"=> null, 
             "idUsuario" => 1,  
             "idModalidad" => 1,
-            "idEstado" => 1,
+            "idEstado" => $this->faker->numberBetween(1,4),
             "idtipo" => 1,
         ];
     }
