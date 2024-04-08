@@ -32,6 +32,7 @@ class EventoResource extends JsonResource
             #'estado' => $this->postal_code,
             #'tipo' => $this->postal_code,
             'evaluation' => new EvaluacionResource($this->whenLoaded('evaluacion')),
+            'status' => new EstadoResource($this->whenLoaded('estado')),
             'idTipo' => $this->idTipo,
             
         ];

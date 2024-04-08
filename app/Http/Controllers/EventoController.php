@@ -30,15 +30,17 @@ class EventoController extends Controller
         $filter = new EventoFilter();
         $queryItems = $filter->transform($request);
         
-        $includeEvaluation = $request->query("evaluaciones");
+        $includeEvaluacion = $request->query("evaluacion");
+        $includeEstado = $request->query("estado");
 
         $eventos = Evento::where($queryItems);
         
         
-        if ($includeEvaluation) {
-            
+        if ($includeEvaluacion) {
             $eventos = $eventos->with("evaluacion");
-            
+        }
+        if ($includeEstado) {
+            $eventos = $eventos->with("estado");
         }
         
 

@@ -28,4 +28,8 @@ class Evento extends Model
     public function evaluacion() {
         return $this->hasOne(Evaluacion::class, 'idEvento');
     }
+
+    public function estado() {
+        return $this->belongsTo( Estado::class, 'idEstado', 'id');
+    }
 }
