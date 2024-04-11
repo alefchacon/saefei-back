@@ -2,19 +2,18 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Estado;
-use App\Http\Requests\StoreEstadoRequest;
-use App\Http\Requests\UpdateEstadoRequest;
+use App\Models\Espacio;
+use Illuminate\Http\Request;
 
-class EstadoController extends Controller
+class EspacioController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $estados = Estado::all();
-        return response()->json($estados);
+        $espacios = Espacio::all();
+        return response()->json($espacios);
     }
 
     /**
@@ -28,15 +27,15 @@ class EstadoController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreEstadoRequest $request)
+    public function store(Request $request)
     {
-        $estado = new Estado();
-        $estado->fill($request->all());
-        $estado->save();
+        $espacio = new Espacio();
+        $espacio->fill($request->all());
+        $espacio->save();
 
         $response = [
-            'message' => 'Estado creado existosamente',
-            'estado' => $estado
+            'message' => 'Espacio creado exitosamente',
+            'espacio' => $espacio
         ];
 
         return response()->json($response);
@@ -45,7 +44,7 @@ class EstadoController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Estado $estado)
+    public function show(Espacio $espacio)
     {
         //
     }
@@ -53,7 +52,7 @@ class EstadoController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Estado $estado)
+    public function edit(Espacio $espacio)
     {
         //
     }
@@ -61,7 +60,7 @@ class EstadoController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateEstadoRequest $request, Estado $estado)
+    public function update(Request $request, Espacio $espacio)
     {
         //
     }
@@ -69,7 +68,7 @@ class EstadoController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Estado $estado)
+    public function destroy(Espacio $espacio)
     {
         //
     }
