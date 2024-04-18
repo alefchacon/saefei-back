@@ -117,8 +117,7 @@ class EventoController extends Controller
 			"usuario" => $usuario,
 			"modalidades" => $modalidades,
 			"estados" => $estados,
-			"tipos" => $tipos,
-
+			"tipos" => $tipos
             ]);
     }    /**
      * Update a existing resource in storage.
