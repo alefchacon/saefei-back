@@ -12,6 +12,7 @@ use App\Http\Controllers\PlataformaController;
 use App\Http\Controllers\ProgramaEducativoController;
 use App\Http\Controllers\PublicidadController;
 use App\Http\Controllers\SolicitudEspacioController;
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\TipoController;
 use App\Models\Difusion;
 use App\Models\Espacio;
@@ -19,14 +20,21 @@ use App\Models\Estado;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
+/*
 Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
     return $request->user();
 });
+*/
+
 
 Route::group(['/api'], function () {
     Route::apiResource('evaluaciones', EvaluacionController::class);
     Route::apiResource('eventos', EventoController::class);
     Route::apiResource('estados', EstadoController::class);
+
+    Route::post('login', [AuthController::class, 'login']);
+    Route::post('logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
+
     Route::apiResource('difusiones', DifusionController::class);
     Route::apiResource('invitados', InvitadoController::class);
     Route::apiResource('modalidades', ModalidadController::class);
@@ -34,6 +42,7 @@ Route::group(['/api'], function () {
     Route::apiResource('programasEducativos', ProgramaEducativoController::class);
     Route::apiResource('publicidad', PublicidadController::class);
     Route::apiResource('tipos', TipoController::class);
+
 });
 
 Route::group(['/api'], function (){

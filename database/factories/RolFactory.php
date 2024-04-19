@@ -3,12 +3,11 @@
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Arr;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Estado>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Rol>
  */
-class EstadoFactory extends Factory
+class RolFactory extends Factory
 {
     /**
      * Define the model's default state.
@@ -17,7 +16,6 @@ class EstadoFactory extends Factory
      */
     public function definition(): array
     {
-        
         return [
             'nombre' => "asdf",
         ];
