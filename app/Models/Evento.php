@@ -29,16 +29,23 @@ class Evento extends Model
         "idTipo",
     ];
 
+    public function usuario() {
+        return $this->belongsTo( User::class, 'idUsuario', 'id');
+    }
+
+    public function evaluacion() {
+        return $this->hasOne( Evaluacion::class, 'idEvento', 'id');
+    }
     public function estado() {
-        return $this->hasOne( Estado::class, 'idEstado', 'id');
+        return $this->belongsTo( Estado::class, 'idEstado', 'id');
     }
 
     public function modalidad(){
-        return $this->hasOne(Modalidad::class, 'idModalidad', 'id');
+        return $this->belongsTo(Modalidad::class, 'idModalidad', 'id');
     }
 
     public function tipo(){
-        return $this->hasOne(Tipo::class, 'idTipo', 'id');
+        return $this->belongsTo(Tipo::class, 'idTipo', 'id');
     }
 
 }

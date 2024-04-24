@@ -20,15 +20,8 @@ class UserSeeder extends Seeder
             'apellidoPaterno' => 'Chacon',
             'email' => 'asdf@asdf.com',
             'apellidoMaterno' => 'Fernandez',
-            'password' => Hash::make('asdf'),
-            'idRol' => 3,
-        ]);
-        User::create([
-            'nombres' => 'Alejandro',
-            'apellidoPaterno' => 'Chacon',
-            'email' => 'qwer@qwer.com',
-            'apellidoMaterno' => 'Fernandez',
-            'password' => Hash::make('qwer'),
+            'puesto' => 'best boy',
+            //'password' => Hash::make('asdf'),
             'idRol' => 3,
         ]);
     }

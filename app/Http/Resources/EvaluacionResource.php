@@ -29,7 +29,11 @@ class EvaluacionResource extends JsonResource
             'problemsResources' => $this->problemasRecursos,
             'improvementsResources' => $this->mejorasRecursos,
             'additional' => $this->adicional,
-            'eventId' => $this->idEvento
+            
+            'idEvento' => $this->idEvento,
+            
+            'evidences' => new EvidenciaCollection($this->whenLoaded('evidencias')),
+
         ];
     }
 }

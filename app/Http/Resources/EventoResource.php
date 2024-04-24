@@ -27,12 +27,13 @@ class EventoResource extends JsonResource
             'needsNotifyUVPress' => $this->requiereNotificarPrensaUV,
             'additional' => $this->adicional,
             'response' => $this->respuesta,
-            #'usuario' => $this->postal_code,
-            #'modalidad' => $this->postal_code,
-            #'estado' => $this->postal_code,
-            #'tipo' => $this->postal_code,
             'evaluation' => new EvaluacionResource($this->whenLoaded('evaluacion')),
-            'status' => new EstadoResource($this->whenLoaded('estado')),
+
+
+            'user' => new UserResource($this->whenLoaded('usuario')),
+            'type' => new CatalogoResource($this->whenLoaded('tipo')),
+            'status' => new CatalogoResource($this->whenLoaded('estado')),
+            'mode' => new CatalogoResource($this->whenLoaded('modalidad')),
             'idTipo' => $this->idTipo,
             
         ];

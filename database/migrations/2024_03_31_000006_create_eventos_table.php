@@ -29,12 +29,12 @@ return new class extends Migration
             $table->text("adicional")->nullable();
             $table->text("respuesta")->nullable();
 
-            // $table->bigInteger("idUsuario");
+            $table->unsignedBigInteger("idUsuario");
             $table->unsignedBigInteger("idModalidad");
             $table->unsignedBigInteger("idEstado");
             $table->unsignedBigInteger("idTipo");
 
-            // $table->foreign("idUsuario")->references("id")->on("users");
+            $table->foreign("idUsuario")->references("id")->on("users");
             $table->foreign("idModalidad")->references("id")->on("modalidads");
             $table->foreign("idEstado")->references("id")->on("estados");
             $table->foreign("idTipo")->references("id")->on("tipos");

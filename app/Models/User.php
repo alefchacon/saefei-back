@@ -18,9 +18,13 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $fillable = [
-        'name',
+        'nombres',
+        'apellidoPaterno',
+        'apellidoMaterno',
         'email',
-        'password',
+        'puesto',
+        'idRol'
+        //'password',
     ];
 
     /**
@@ -29,7 +33,7 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $hidden = [
-        'password',
+        //'password',
         'remember_token',
     ];
 
@@ -48,5 +52,9 @@ class User extends Authenticatable
 
     public function rol() {
         return $this->belongsTo(Rol::class, 'idRol', 'id');
+    }
+
+    public function eventos() {
+        return $this->hasMany( Evento::class, 'idUsuario', 'id');
     }
 }

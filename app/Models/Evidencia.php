@@ -5,14 +5,16 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Modalidad extends Model
+class Evidencia extends Model
 {
     use HasFactory;
+
     protected $fillable = [
-        'nombre'
+        "archivo",
+        "idEvaluacion"
     ];
 
-    public function evento(){
-        $this->hasMany(Evento::class, 'idEvento');
+    public function evaluacion() {
+        return $this->belongsTo( Evaluacion::class, 'idEvaluacion', 'id');
     }
 }

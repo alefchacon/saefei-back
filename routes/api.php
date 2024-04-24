@@ -12,8 +12,10 @@ use App\Http\Controllers\PlataformaController;
 use App\Http\Controllers\ProgramaEducativoController;
 use App\Http\Controllers\PublicidadController;
 use App\Http\Controllers\SolicitudEspacioController;
-use App\Http\Controllers\AuthController;
+use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\TipoController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\RolController;
 use App\Models\Difusion;
 use App\Models\Espacio;
 use App\Models\Estado;
@@ -30,8 +32,10 @@ Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
 Route::group(['/api'], function () {
     Route::apiResource('evaluaciones', EvaluacionController::class);
     Route::apiResource('eventos', EventoController::class);
+    Route::get('eventos/{id}', [EventoController::class]);
     Route::apiResource('estados', EstadoController::class);
-
+    Route::apiResource('usuarios', UserController::class);
+    Route::apiResource('roles', RolController::class);
     Route::post('login', [AuthController::class, 'login']);
     Route::post('logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
 
