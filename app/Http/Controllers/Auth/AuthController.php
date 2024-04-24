@@ -1,11 +1,13 @@
 <?php
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Auth;
 
 use Illuminate\Console\Command;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use App\Http\Controllers\Controller;
+use App\Http\Controllers\Auth\LDAPValidator;
 
 class AuthController extends Controller
 {
@@ -14,24 +16,35 @@ class AuthController extends Controller
     {
         $request->validate([
             'email' => 'required|email',
-            'password' => 'required',
         ]);
 
         $user = User::where('email', $request->email)->with('rol')->first();
 
+        $validationResult = LDAPValidator::validate($request);
+
+        /*
         if (!$user || !Hash::check($request->password, $user->password)) {
             return response()->json(['message' => 'Las credenciales son incorrectas.'], 401);
+        }*/
+
+        if (!$user || $validationResult['status'] != 200) {
+            return response()->json(
+                ['message' => $validationResult['message']], 
+                $validationResult['status']
+            );
         }
 
         $response = [
-            'message' => 'Bienvenido',
-            'token' => $user->createToken('authToken'),
+            'message' => $validationResult['message'],
+            'token' => $user->createToken('authToken', abilities: [$user->rol->nombre]),
             'user' => $user
         ];
 
-        return json_encode($response);
+        return response()->json($response, $validationResult['status']);
     }
-    
+
+
+
     // Method to handle user logout
     public function logout(Request $request)
     {
@@ -40,16 +53,17 @@ class AuthController extends Controller
         if (!$user) {
             return response()->json(['message' => 'No authenticated user'], 401);
         }
-    
+
         $user->currentAccessToken()->delete();
-    
+
         // Optionally, revoke all tokens...
         // $user->tokens()->delete();
-    
+
         return response()->json(['message' => 'Successfully logged out']);
     }
 
-    public function debugOutput() {
+    public function debugOutput()
+    {
     }
 }
 

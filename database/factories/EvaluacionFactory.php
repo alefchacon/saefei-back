@@ -21,18 +21,18 @@ class EvaluacionFactory extends Factory
     {
         return [
             "calificacionAtencion" => $this->faker->numberBetween(1, 5),
-            "razonCalificacionAtencion" => $this->faker->paragraph(),
+            "razonCalificacionAtencion" => $this->faker->sentence(),
             "calificacionComunicacion" => $this->faker->numberBetween(1, 5),
-            "mejorasApoyo" => $this->faker->paragraph(),
+            "mejorasApoyo" => $this->faker->sentence(),
             "calificacionEspacio" => $this->faker->numberBetween(1, 5),
-            "problemasEspacio" => $this->faker->paragraph(),
+            "problemasEspacio" => $this->faker->sentence(),
             "calificacionCentroComputo" => $this->faker->numberBetween(1, 5),
-            "razonCalificacionCentroComputo" => $this->faker->paragraph(),
+            "razonCalificacionCentroComputo" => $this->faker->sentence(),
             "calificacionRecursos" => $this->faker->numberBetween(1, 5),
-            "razonCalificacionRecursos" => $this->faker->paragraph(),
-            "problemasRecursos" => $this->faker->paragraph(),
-            "mejorasRecursos" => $this->faker->paragraph(),
-            "adicional" => $this->faker->paragraph(),
+            "razonCalificacionRecursos" => $this->faker->sentence(),
+            "problemasRecursos" => $this->faker->sentence(),
+            "mejorasRecursos" => $this->faker->sentence(),
+            "adicional" => $this->faker->sentence(),
             "idEvento" => Evento::factory()
             
         ];

@@ -21,7 +21,7 @@ class Evaluacion extends Model
         "razonCalificacionCentroComputo",
         "calificacionRecursos",
         "razonCalificacionRecursos",
-        "problemaRecursos",
+        "problemasRecursos",
         "mejorasRecursos",
         "adicional",
         "idEvento"
@@ -29,6 +29,9 @@ class Evaluacion extends Model
 
     public function evento() {
         return $this->belongsTo(Evento::class);
+    }
+    public function evidencias() {
+        return $this->hasMany(Evidencia::class, 'idEvaluacion', 'id');
     }
 }
 
