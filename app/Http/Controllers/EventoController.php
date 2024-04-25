@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\EventoResource;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\Evento;
@@ -11,6 +12,7 @@ use App\Models\Estado;
 use App\Models\Tipo;
 use App\Filters\EventoFilter;
 use App\Http\Resources\EventoCollection;
+use Exception;
 
 /**
  * Description of EventoController
@@ -45,20 +47,29 @@ class EventoController extends Controller
         
 
         return new EventoCollection($eventos->paginate()->appends($request->query())); 
-    }    /**
+    }    
+    
+    
+    /**
      * Display the specified resource.
      *
      * @param  Request  $request
      * @param  Evento  $evento
      * @return \Illuminate\Http\Response
      */
-    public function show(Request $request, Evento $evento)
+    public function show($id)
     {
-        return view('pages.eventos.show', [
-                'record' =>$evento,
-        ]);
+        $evento = Evento::with(['estado', 'evaluacion', 'tipo', 'modalidad', 'usuario'])->find($id);
+        if (!$evento) {
+            return response()->json(['message' => 'No existe ese evento'], 404);
+        }
 
-    }    /**
+        return new EventoResource($evento);
+
+    }    
+
+
+    /**
      * Show the form for creating a new resource.
      *
      * @param  Request  $request
@@ -105,21 +116,24 @@ class EventoController extends Controller
      * @param  Evento  $evento
      * @return \Illuminate\Http\Response
      */
-    public function edit(Request $request, Evento $evento)
+    public function edit(Request $request, $id)
     {
-		$usuario = Usuario::all(['id']);
-		$modalidades = Modalidade::all(['id']);
-		$estados = Estado::all(['id']);
-		$tipos = Tipo::all(['id']);
+        $status = 500;
+        $message = "Algo falló";
+        try{
+            $model = Evento::with("estado")->findOrFail($request->id);
+            $model->update($request->all());
+            
+            $status = 200;
+        } catch (Exception $ex){
+            $message = $ex->getMessage();
+        }finally {
+            return response()->json([
+                'message' => 'Evaluation updated successfully',
+                'data' => new EventoResource($model),
+            ], $status);
+        }
 
-        return view('pages.eventos.edit', [
-            'model' => $evento,
-			"usuario" => $usuario,
-			"modalidades" => $modalidades,
-			"estados" => $estados,
-			"tipos" => $tipos,
-
-            ]);
     }    /**
      * Update a existing resource in storage.
      *
@@ -129,16 +143,23 @@ class EventoController extends Controller
      */
     public function update(Request $request,Evento $evento)
     {
-        $evento->fill($request->all());
-
-        if ($evento->save()) {
-            
-            session()->flash('app_message', 'Evento successfully updated');
-            return redirect()->route('eventos.index');
-            } else {
-                session()->flash('app_error', 'Something is wrong while updating Evento');
-            }
-        return redirect()->back();
+        $status = 500;
+        $message = "Algo falló";
+        try{
+            $model = Evento::findOrFail($evento->id);
+            $model->update($request->all());
+            $model->load("estado");
+            $message = "El evento ha sido " . $model->estado->nombre;
+            $status = 200;
+        } catch (Exception $ex){
+            $message = $ex->getMessage();
+        }finally {
+            return response()->json([
+                'message' => $message,
+                'data' => new EventoResource($model),
+                'payload' => $request->toArray()
+            ], $status);
+        }
     }    /**
      * Delete a  resource from  storage.
      *

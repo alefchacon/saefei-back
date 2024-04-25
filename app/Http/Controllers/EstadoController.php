@@ -13,7 +13,8 @@ class EstadoController extends Controller
      */
     public function index()
     {
-        //
+        $estados = Estado::all();
+        return response()->json($estados);
     }
 
     /**
@@ -29,7 +30,16 @@ class EstadoController extends Controller
      */
     public function store(StoreEstadoRequest $request)
     {
-        //
+        $estado = new Estado();
+        $estado->fill($request->all());
+        $estado->save();
+
+        $response = [
+            'message' => 'Estado creado existosamente',
+            'estado' => $estado
+        ];
+
+        return response()->json($response);
     }
 
     /**

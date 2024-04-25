@@ -6,8 +6,11 @@ use App\Http\Resources\EvaluacionResource;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\Evaluacion;
+use App\Models\Evidencia;
 use App\Models\Evento;
-use App\Resources\EvaluacionCollection;
+use App\Http\Resources\EvaluacionCollection;
+use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\DB;
 
 
 /**
@@ -25,7 +28,8 @@ class EvaluacionController extends Controller
      */
     public function index(Request $request)	
     {
-        return Evaluacion::all();
+        return new EvaluacionCollection(Evaluacion::with('evidencias')->get());
+        
     }    /**
      * Display the specified resource.
      *
@@ -55,19 +59,41 @@ class EvaluacionController extends Controller
      */
     public function store(Request $request)
     {
-        
-        $model=new Evaluacion;
+        $message = "Algo falló";
+        $code = 500;
 
-        error_log($request);
-        $model->fill($request->all());
-        if ($model->save()) {
-            
-            session()->flash('app_message', 'Ev aluacion saved successfully');
-            return redirect()->route('evaluaciones.index');
-            } else {
-                session()->flash('app_message', 'Something is wrong while saving Evaluacion');
+        DB::beginTransaction();
+        try{
+            $evaluation = Evaluacion::create($request->all());
+
+            if ($request->has('evidencias')) {
+
+                foreach ($request->evidencias as $evidenceData) {
+                    $file = $evidenceData['archivo'];
+                    $fileContent = file_get_contents($file->getRealPath());
+
+                    $evidence = new Evidencia();
+                    $evidence->file_content = $fileContent;  // Storing the binary data
+                    $evidence->idEvaluacion = $evaluation->id; // Make sure you have a relationship or a foreign key setup
+                    $evidence->save();
+
+                }
             }
-        return redirect()->back();
+
+            DB::commit();
+
+
+            $message = 'Evaluación registrada';
+            $code = 201;
+        }catch (\Exception $ex) {
+            $message = $ex->getMessage();
+            \DB::rollBack();
+        }finally{
+            
+            return response()->json([
+                'message' => $message,
+                'data'=> $request->toArray()], $code);
+        } 
     } /**
      * Show the form for editing the specified resource.
      *

@@ -22,14 +22,30 @@ class Evento extends Model
         "requiereMaestroDeObra",
         "requiereNotificarPrensaUV",
         "adicional",
-        "respuesta"
+        "respuesta",
+        "idUsuario",
+        "idModalidad",
+        "idEstado",
+        "idTipo",
     ];
 
-    public function evaluacion() {
-        return $this->hasOne(Evaluacion::class, 'idEvento');
+    public function usuario() {
+        return $this->belongsTo( User::class, 'idUsuario', 'id');
     }
 
+    public function evaluacion() {
+        return $this->hasOne( Evaluacion::class, 'idEvento', 'id');
+    }
     public function estado() {
         return $this->belongsTo( Estado::class, 'idEstado', 'id');
     }
+
+    public function modalidad(){
+        return $this->belongsTo(Modalidad::class, 'idModalidad', 'id');
+    }
+
+    public function tipo(){
+        return $this->belongsTo(Tipo::class, 'idTipo', 'id');
+    }
+
 }

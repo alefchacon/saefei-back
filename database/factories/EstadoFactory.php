@@ -19,7 +19,7 @@ class EstadoFactory extends Factory
     {
         
         return [
-            'nombre' => "asdf", // Randomly selects one of the four names
+            'nombre' => "asdf",
         ];
     }
 }
