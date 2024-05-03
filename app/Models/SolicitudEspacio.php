@@ -9,24 +9,32 @@ class SolicitudEspacio extends Model
 {
     use HasFactory;
 
+    public $timestamps = false;
+
     protected $fillable = [
+        'idUsuario',
         'idEspacio',
         'idEstado',
-        'idHorario',
+        'idEvento',
         'respuesta'
     ];
     
 
     
+    public function usuario(){
+        return $this->belongsTo(User::class, 'idUsuario', 'id');
+    }
+
     public function estado(){
-        return $this->hasOne(Estado::class, 'idEstado');
+        return $this->belongsTo(Estado::class, 'idEstado', 'id');
     }
 
     public function espacio(){
-        return $this->hasOne(Espacio::class, 'idEspacio');
+        return $this->belongsTo(Espacio::class, 'idEspacio', 'id');
     }
 
-    public function horario(){
-        return $this->hasOne(Horario::class, 'idHorario');
+    public function evento(){
+        return $this->belongsTo(Evento::class, 'idEvento', 'id');
     }
+
 }

@@ -21,7 +21,6 @@ class Evaluacion extends Model
         "razonCalificacionCentroComputo",
         "calificacionRecursos",
         "razonCalificacionRecursos",
-        "problemasRecursos",
         "mejorasRecursos",
         "adicional",
         "idEvento"

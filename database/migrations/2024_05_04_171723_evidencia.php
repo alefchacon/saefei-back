@@ -15,7 +15,9 @@ return new class extends Migration
             
             $table->id()->primary()->unsigned()->unique();
             $table->timestamps();
-            
+            $table->text("nombre");
+            $table->text("tipo");
+
             $table->unsignedBigInteger('idEvaluacion');
 
             $table->foreign('idEvaluacion')->references('id')->on('evaluaciones');

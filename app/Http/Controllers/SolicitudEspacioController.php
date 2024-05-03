@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\SolicitudEspacioResource;
 use App\Models\Espacio;
-use App\Models\Horario;
+use App\Models\User;
 use App\Models\SolicitudEspacio;
 use Illuminate\Http\Request;
 
@@ -14,7 +15,11 @@ class SolicitudEspacioController extends Controller
      */
     public function index()
     {
-        $solicitudes = SolicitudEspacio::all();
+        $solicitudes = SolicitudEspacio::with([
+            "usuario", 
+            "estado", 
+            "espacio", 
+        ])->get();
         return response()->json($solicitudes);
     }
 
@@ -31,21 +36,38 @@ class SolicitudEspacioController extends Controller
      */
     public function store(Request $request)
     {
+        $message = "Algo falló.";
+        $status = 500;
+        $data = "";
+
         $solicitud = new SolicitudEspacio();
-        $solicitud->fill($request->all());
-        $solicitud->save();
+        try {
 
-        $espacio = Espacio::find($request->idEspacio);
-        $horario = Horario::find($request->idHorario);
-        
-        $response = [
-            'mesage' => 'Solicitud realizada. Espere confirmacion',
-            'solicitud' => $solicitud->respuesta,
-            'espacio' => $espacio->nombre,
-            'horario' => $horario->inicio
-        ];
+            $solicitud->fill($request->all());
 
-        return response()->json($response);
+            $solicitud->save();
+            
+            $solicitud->with([
+                "usuario", 
+                "estado", 
+                "espacio", 
+            ])->get();
+            
+            $message = 'Solicitud realizada. Espere confirmacion';
+            $status = 201;
+            $data = new SolicitudEspacioResource($solicitud);
+
+        } catch (\Exception $ex){
+            //No regresar excepciones: cambiar a mensaje personalizado y ambiguo.
+            $message = $ex->getMessage();
+        } finally {
+            
+            return response()->json([
+                'message' => $message,
+                'data' => $data,
+            ], $status);
+        }
+
     }
 
     /**

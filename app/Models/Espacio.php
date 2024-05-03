@@ -16,7 +16,7 @@ class Espacio extends Model
         "estado"
     ];
 
-    public function solicitudEspacio(){
-        return $this->belongsTo(SolicitudEspacio::class, 'idSolicitud');
+    public function solicitudesEspacios(){
+        return $this->hasMany(SolicitudEspacio::class, 'idSolicitud', 'id');
     }
 }

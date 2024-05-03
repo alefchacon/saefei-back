@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\DB;
  * @author Alejandro Chacón
  */
 
+
 class EvaluacionController extends Controller
 {
        /**
@@ -58,28 +59,16 @@ class EvaluacionController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
-    {
-        $message = "Algo falló";
-        $code = 500;
+    {0;
 
         DB::beginTransaction();
+        $code = 500;
+        $evaluation = new Evaluacion;
         try{
             $evaluation = Evaluacion::create($request->all());
-
-            if ($request->has('evidencias')) {
-
-                foreach ($request->evidencias as $evidenceData) {
-                    $file = $evidenceData['archivo'];
-                    $fileContent = file_get_contents($file->getRealPath());
-
-                    $evidence = new Evidencia();
-                    $evidence->file_content = $fileContent;  // Storing the binary data
-                    $evidence->idEvaluacion = $evaluation->id; // Make sure you have a relationship or a foreign key setup
-                    $evidence->save();
-
-                }
-            }
-
+            $event = Evento::find($evaluation->idEvento);
+            $event->idEstado = 3;
+            $event->save();
             DB::commit();
 
 
@@ -92,7 +81,7 @@ class EvaluacionController extends Controller
             
             return response()->json([
                 'message' => $message,
-                'data'=> $request->toArray()], $code);
+                'data' => new EvaluacionResource($evaluation)], $code);
         } 
     } /**
      * Show the form for editing the specified resource.
@@ -146,5 +135,41 @@ class EvaluacionController extends Controller
             }
 
         return redirect()->back();
+    }
+
+    public function uploadEvidence(Request $request){
+        DB::beginTransaction();
+        try{
+            $evidence = $request->input('Evidencia');
+
+            
+            if ($request->hasFile('Evidencia.archivo')) {
+                $file = $request->file('Evidencia.archivo');
+                if ($file->isValid()) {
+                    $blob = file_get_contents($file->getPathname());
+                    $evaluationId = $evidence['idEvaluacion'] ?? null;
+                    
+                    $document = new Evidencia;
+                    $document->archivo = $blob;
+                    $document->tipo = $evidence['tipo'];
+                    $document->nombre = $evidence['nombre'];
+                    $document->idEvaluacion = $evaluationId;
+                    $document->save();
+        
+                    DB::commit();
+                    return response()->json(['message' => 'File and evaluation ID uploaded successfully']);
+                }
+            }
+            $message = 'Evaluación registrada';
+            $code = 201;
+        }catch (\Exception $ex) {
+            $message = $ex->getMessage();
+            \DB::rollBack();
+        }finally{
+            
+            return response()->json([
+                'message' => $message,
+                'data'=> $evidence], $code);
+        };
     }
 }

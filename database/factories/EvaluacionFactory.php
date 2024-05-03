@@ -30,7 +30,6 @@ class EvaluacionFactory extends Factory
             "razonCalificacionCentroComputo" => $this->faker->sentence(),
             "calificacionRecursos" => $this->faker->numberBetween(1, 5),
             "razonCalificacionRecursos" => $this->faker->sentence(),
-            "problemasRecursos" => $this->faker->sentence(),
             "mejorasRecursos" => $this->faker->sentence(),
             "adicional" => $this->faker->sentence(),
             "idEvento" => Evento::factory()

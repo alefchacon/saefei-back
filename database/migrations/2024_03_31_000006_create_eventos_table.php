@@ -28,6 +28,8 @@ return new class extends Migration
             $table->boolean("requiereNotificarPrensaUV");
             $table->text("adicional")->nullable();
             $table->text("respuesta")->nullable();
+            $table->date("inicio");
+            $table->date("fin");
 
             $table->unsignedBigInteger("idUsuario");
             $table->unsignedBigInteger("idModalidad");

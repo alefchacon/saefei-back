@@ -14,11 +14,6 @@ use App\Filters\EventoFilter;
 use App\Http\Resources\EventoCollection;
 use Exception;
 
-/**
- * Description of EventoController
- *
- * @author Tuhin Bepari <digitaldreams40@gmail.com>
- */
 
 class EventoController extends Controller
 {
@@ -35,8 +30,10 @@ class EventoController extends Controller
         $includeEvaluacion = $request->query("evaluacion");
         $includeEstado = $request->query("estado");
 
+
         $eventos = Evento::where($queryItems);
         
+
         
         if ($includeEvaluacion) {
             $eventos = $eventos->with("evaluacion");
@@ -49,6 +46,21 @@ class EventoController extends Controller
         return new EventoCollection($eventos->paginate()->appends($request->query())); 
     }    
     
+    public function getEventosPorMes(Request $request)
+    {
+        $anio = $request->input('year');
+        $mes = $request->input('month');
+
+
+        $events = Evento::encontrarPor($anio, $mes)->load("solicitudesEspacios");
+        $events = Evento::with([
+            'solicitudesEspacios.usuario', 
+            'solicitudesEspacios.espacio', 
+            'solicitudesEspacios.estado'
+            ])->get();
+
+        return new EventoCollection($events);
+    }
     
     /**
      * Display the specified resource.
