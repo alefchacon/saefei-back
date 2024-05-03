@@ -19,8 +19,9 @@ class EventoFactory extends Factory
      */
     public function definition(): array
     {
-
         $nombre = $this->faker->company();
+        $start = $this->faker->dateTime();
+        $end = $start->modify('+1 day');
         return [
             "nombre" => $nombre,
             "descripcion" => $nombre,
@@ -32,6 +33,8 @@ class EventoFactory extends Factory
             "requiereMaestroDeObra" => $this->faker->boolean(),
             "requiereNotificarPrensaUV" => $this->faker->boolean(),
             "adicional" => $this->faker->paragraph(),
+            "inicio" => $start,
+            "fin" => $end,
             "respuesta"=> null, 
             "idUsuario" => 1,  
             "idModalidad" => 1,

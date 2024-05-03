@@ -21,6 +21,10 @@ class Evento extends Model
         "requiereFinDeSemana",
         "requiereMaestroDeObra",
         "requiereNotificarPrensaUV",
+
+        "inicio",
+        "fin",
+
         "adicional",
         "respuesta",
         "idUsuario",
@@ -48,4 +52,20 @@ class Evento extends Model
         return $this->belongsTo(Tipo::class, 'idTipo', 'id');
     }
 
+    public function solicitudesEspacios(){
+        return $this->hasMany(SolicitudEspacio::class, 'idEvento', 'id');
+    }
+
+    public static function encontrarPor($anio, $mes){
+        return self::whereHas('solicitudesEspacios', function ($query) use ($anio, $mes) {
+            $query->whereYear('inicio', '=', $anio)
+                  ->whereMonth('inicio', '=', $mes);
+        })
+        ->with([ 
+            'solicitudesEspacios.usuario', 
+            'solicitudesEspacios.espacio', 
+            'solicitudesEspacios.estado'
+        ])
+        ->get();
+    }
 }

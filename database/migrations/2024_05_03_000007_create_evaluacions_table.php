@@ -18,16 +18,15 @@ return new class extends Migration
             $table->integer("calificacionAtencion");
             $table->text("razonCalificacionAtencion");
             $table->integer("calificacionComunicacion");
-            $table->text("mejorasApoyo");
+            $table->text("mejorasApoyo")->nullable()->default("Sin comentarios.");
             $table->integer("calificacionEspacio");
-            $table->text("problemasEspacio");
+            $table->text("problemasEspacio")->nullable()->default("Sin comentarios.");
             $table->integer("calificacionCentroComputo");
             $table->text("razonCalificacionCentroComputo");
             $table->integer("calificacionRecursos");
             $table->text("razonCalificacionRecursos");
-            $table->text("problemasRecursos");
-            $table->text("mejorasRecursos");
-            $table->text("adicional");
+            $table->text("mejorasRecursos")->nullable()->default("Sin comentarios.");
+            $table->text("adicional")->nullable()->default("Sin comentarios.");
 
             $table->integer("idEvento");
 

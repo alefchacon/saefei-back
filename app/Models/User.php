@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class User extends Authenticatable
 {
@@ -57,4 +58,8 @@ class User extends Authenticatable
     public function eventos() {
         return $this->hasMany( Evento::class, 'idUsuario', 'id');
     }
+    public function solicitudesEspacios() {
+        return $this->hasMany( SolicitudEspacio::class, 'idUsuario', 'id');
+    }
+
 }

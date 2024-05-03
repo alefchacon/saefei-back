@@ -15,4 +15,7 @@ class Estado extends Model
     public function eventos(){
         return $this->hasMany(Evento::class, 'idEstado', 'id');
     }
+    public function solicitudesEspacios(){
+        return $this->hasMany(SolicitudEspacio::class, 'idEstado', 'id');
+    }
 }

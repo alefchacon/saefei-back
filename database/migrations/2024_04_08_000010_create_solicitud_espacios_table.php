@@ -12,17 +12,20 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('solicitud_espacios', function (Blueprint $table) {
-            $table->id();
-            $table->string('respuesta');
-            $table->timestamps(false);
+            $table->id()->primary()->unsigned()->unique();
+            $table->string('respuesta')->nullable();
+            $table->dateTime('inicio');
+            $table->dateTime('fin');
 
+            $table->unsignedBigInteger('idUsuario');
             $table->unsignedBigInteger('idEspacio');
             $table->unsignedBigInteger('idEstado');
-            $table->unsignedBigInteger('idHorario');
+            $table->unsignedBigInteger('idEvento');
             
+            $table->foreign('idUsuario')->references('id')->on('users');
             $table->foreign('idEspacio')->references('id')->on('espacios');
             $table->foreign('idEstado')->references('id')->on('estados');
-            $table->foreign('idHorario')->references('id')->on('horarios');
+            $table->foreign('idEvento')->references('id')->on('eventos');
         });
     }
 

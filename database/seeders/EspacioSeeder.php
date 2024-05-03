@@ -4,15 +4,19 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use App\Models\Rol;
+use App\Models\Espacio;
 
-class RolSeeder extends Seeder
+class EspacioSeeder extends Seeder
 {
+    /**
+     * Run the database seeds.
+     */
     public function run(): void
     {
-        $names = ['Organizador', 'Administrador de Espacios', 'Técnico Académico', 'Responsable'];
+        $names = ['Auditorio', 'Audiovisual', 'Salón de Cristal', 'Baño'];
+
         foreach ($names as $name) {
-            Rol::factory()->create([
+            Espacio::factory()->create([
                 'nombre' => $name,
             ]);
         }
