@@ -41,7 +41,7 @@ Route::group(['/api'], function () {
     Route::get('eventos/{id}', [EventoController::class]);
     Route::post('login', [AuthController::class, 'login']);
     Route::post('logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
-
+    
     Route::apiResource('difusiones', DifusionController::class);
     Route::apiResource('invitados', InvitadoController::class);
     Route::apiResource('modalidades', ModalidadController::class);
@@ -49,11 +49,12 @@ Route::group(['/api'], function () {
     Route::apiResource('programasEducativos', ProgramaEducativoController::class);
     Route::apiResource('publicidad', PublicidadController::class);
     Route::apiResource('tipos', TipoController::class);
-
+    
+    Route::apiResource('espacios', EspacioController::class);
+    Route::post('espacios/libres', [EspacioController::class, 'getEspaciosLibres']);
 });
 
 Route::group(['/api'], function (){
     Route::apiResource('solicitud', SolicitudEspacioController::class);
-    Route::apiResource('espacios', EspacioController::class);
     Route::apiResource('horarios', HorarioController::class);
 });

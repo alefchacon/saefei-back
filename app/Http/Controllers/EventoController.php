@@ -53,11 +53,7 @@ class EventoController extends Controller
 
 
         $events = Evento::encontrarPor($anio, $mes)->load("solicitudesEspacios");
-        $events = Evento::with([
-            'solicitudesEspacios.usuario', 
-            'solicitudesEspacios.espacio', 
-            'solicitudesEspacios.estado'
-            ])->get();
+
 
         return new EventoCollection($events);
     }

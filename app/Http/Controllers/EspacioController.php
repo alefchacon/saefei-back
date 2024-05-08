@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\EspacioCollection;
 use App\Models\Espacio;
 use Illuminate\Http\Request;
 
@@ -13,7 +14,18 @@ class EspacioController extends Controller
     public function index()
     {
         $espacios = Espacio::all();
-        return response()->json($espacios);
+        return new EspacioCollection($espacios);
+    }
+
+    public function getEspaciosLibres(Request $request)
+    {
+        $inicio = $request->input('inicio');
+        $fin = $request->input('fin');
+
+
+        $events = Espacio::encontrarPor($inicio, $fin);
+
+        return new EspacioCollection($events);
     }
 
     /**
