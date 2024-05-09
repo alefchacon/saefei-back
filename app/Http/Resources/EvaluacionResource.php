@@ -26,7 +26,6 @@ class EvaluacionResource extends JsonResource
             'ratingComputerCenterReason' => $this->razonCalificacionCentroComputo,
             'ratingResources' => $this->calificacionRecursos,
             'ratingResourcesReason' => $this->razonCalificacionRecursos,
-            'problemsResources' => $this->problemasRecursos,
             'improvementsResources' => $this->mejorasRecursos,
             'additional' => $this->adicional,
             

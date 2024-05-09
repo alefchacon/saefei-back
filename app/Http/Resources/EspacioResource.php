@@ -5,7 +5,7 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class EvidenciaResource extends JsonResource
+class EspacioResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -13,13 +13,14 @@ class EvidenciaResource extends JsonResource
      * @return array<string, mixed>
      */
     public function toArray(Request $request): array
-    {
+    {   
+        $reservations = new SolicitudEspacioCollection($this->whenLoaded('solicitudesEspacios'));
         return [
             'id' => $this->id,
-            'file' => $this->archivo,
-            'type' => $this->type,
             'name' => $this->nombre,
-            'idEvaluacion' => $this->idEvaluacion
+            'description' => $this->descripcion,
+            'reservations' => $reservations,
+
         ];
     }
 }

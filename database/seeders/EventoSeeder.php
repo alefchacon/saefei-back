@@ -16,5 +16,6 @@ class EventoSeeder extends Seeder
         //Evento::factory()->count(10)->create();
         Evento::factory()->count(5)->hasEvaluacion(1)->create();
         Evento::factory()->count(5)->hasEvaluacion(0)->create();
+
     }
 }

@@ -10,8 +10,10 @@ class Evidencia extends Model
     use HasFactory;
 
     protected $fillable = [
+        "nombre",
+        "tipo",
+        "idEvaluacion",
         "archivo",
-        "idEvaluacion"
     ];
 
     public function evaluacion() {

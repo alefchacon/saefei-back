@@ -16,7 +16,24 @@ class Espacio extends Model
         "estado"
     ];
 
-    public function solicitudEspacio(){
-        return $this->belongsTo(SolicitudEspacio::class, 'idSolicitud');
+    public function solicitudesEspacios(){
+        return $this->hasMany(SolicitudEspacio::class, 'idEspacio', 'id');
+    }
+
+    public static function encontrarPor($inicio, $fin,){
+        $reservados = self::whereHas('solicitudesEspacios', function ($query) use ($inicio, $fin) {
+            $query->where('inicio', '<=', $inicio)
+                  ->where('fin', '>=', $fin)
+                  ->orWhere('inicio', '<=', $inicio)
+                  ->where('fin', '>=', $inicio)
+                  ->orWhere('inicio', '>=', $inicio)
+                  ->where('inicio', '<=', $fin);
+        })
+        ->get()
+        ->load("solicitudesEspacios");
+        $idReservados = $reservados->pluck("id");
+        $disponibles = self::whereNotIn('id', $idReservados)->get();
+        $resultado = $reservados->merge($disponibles);
+        return $resultado;
     }
 }
