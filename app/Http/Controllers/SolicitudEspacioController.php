@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\SolicitudEspacioCollection;
 use App\Http\Resources\SolicitudEspacioResource;
 use App\Models\Espacio;
 use App\Models\User;
@@ -20,7 +21,7 @@ class SolicitudEspacioController extends Controller
             "estado", 
             "espacio", 
         ])->get();
-        return response()->json($solicitudes);
+        return new SolicitudEspacioCollection($solicitudes);
     }
 
     /**
@@ -89,9 +90,25 @@ class SolicitudEspacioController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, SolicitudEspacio $solicitudEspacio)
+    public function update(Request $request)
     {
-        //
+        $status = 500;
+        $message = "Algo falló";
+        try{
+            $model = SolicitudEspacio::findOrFail($request->id);
+            $model->update($request->all());
+            //$model->load("espacio");
+            $message = "Reservación actualizada";
+            $status = 200;
+        } catch (\Exception $ex){
+            $message = $ex->getMessage();
+        }finally {
+            return response()->json([
+                'message' => $message,
+                'data' => isset($model) ? new SolicitudEspacioResource($model) : null,
+                'payload' => $request->toArray()
+            ], $status);
+        }
     }
 
     /**
