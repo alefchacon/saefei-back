@@ -8,10 +8,12 @@ use Illuminate\Database\Eloquent\Model;
 class SolicitudEspacio extends Model
 {
     use HasFactory;
-
+    protected $table = 'solicitud_espacios';
     public $timestamps = false;
 
     protected $fillable = [
+        'inicio',
+        'fin',
         'idUsuario',
         'idEspacio',
         'idEstado',

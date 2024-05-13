@@ -20,17 +20,35 @@ class Espacio extends Model
         return $this->hasMany(SolicitudEspacio::class, 'idEspacio', 'id');
     }
 
-    public static function encontrarPor($inicio, $fin,){
+    public static function encontrarPorHorario($inicio, $fin,){
         $reservados = self::whereHas('solicitudesEspacios', function ($query) use ($inicio, $fin) {
-            $query->where('inicio', '<=', $inicio)
-                  ->where('fin', '>=', $fin)
-                  ->orWhere('inicio', '<=', $inicio)
-                  ->where('fin', '>=', $inicio)
-                  ->orWhere('inicio', '>=', $inicio)
-                  ->where('inicio', '<=', $fin);
+            $query->where('inicio',     '<=', $inicio)
+                  ->where('fin',        '>=', $fin)
+                  ->orWhere('inicio',   '<=', $inicio)
+                  ->where('fin',        '>=', $inicio)
+                  ->orWhere('inicio',   '>=', $inicio)
+                  ->where('inicio',     '<=', $fin);
         })
-        ->get()
-        ->load("solicitudesEspacios");
+        ->with([ 
+            'solicitudesEspacios'
+        ])
+        ->get();
+        $idReservados = $reservados->pluck("id");
+        $disponibles = self::whereNotIn('id', $idReservados)->get();
+        $resultado = $reservados->merge($disponibles);
+        return $resultado;
+    }
+    public static function encontrarPor($fecha){
+        $reservados = self::whereHas('solicitudesEspacios', function ($query) use ($fecha) {
+            $query->whereDate('inicio', '=', $fecha)
+                  ->whereDate('fin', '=', $fecha);
+        })
+        ->with([ 'solicitudesEspacios' => function ($query) use ($fecha) {
+            $query->whereDate('inicio', '=', $fecha)
+                  ->whereDate('fin', '=', $fecha)
+                  ->where('idEstado', "=", 2);
+        }])
+        ->get();
         $idReservados = $reservados->pluck("id");
         $disponibles = self::whereNotIn('id', $idReservados)->get();
         $resultado = $reservados->merge($disponibles);
