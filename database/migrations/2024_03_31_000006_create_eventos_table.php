@@ -28,8 +28,8 @@ return new class extends Migration
             $table->boolean("requiereFinDeSemana");
             $table->boolean("requiereMaestroDeObra");
             $table->boolean("requiereNotificarPrensaUV");
-            $table->text("adicional")->nullable();
-            $table->text("respuesta")->nullable();
+            $table->string("adicional")->nullable();
+            $table->string("respuesta")->nullable();
             $table->date("inicio");
             $table->date("fin");
 
@@ -38,15 +38,17 @@ return new class extends Migration
             $table->unsignedBigInteger("idEstado");
             $table->unsignedBigInteger("idTipo");
             $table->unsignedBigInteger("idPrograma");
+            $table->unsignedBigInteger('idPlataforma');
 
             $table->foreign("idUsuario")->references("id")->on("users");
             $table->foreign("idModalidad")->references("id")->on("modalidads");
             $table->foreign("idEstado")->references("id")->on("estados");
             $table->foreign("idTipo")->references("id")->on("tipos");
             $table->foreign('idPrograma')->references("id")->on("programa_educativos");
+            $table->foreign("idPlataforma")->references("id")->on("plataformas");
             $table->timestamps(false);
         });
-        // DB::statement("ALTER TABLE eventos ADD cronograma MEDIUMBLOB NULL");
+        DB::statement("ALTER TABLE eventos ADD cronograma MEDIUMBLOB NULL");
     }
 
     /**

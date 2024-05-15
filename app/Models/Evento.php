@@ -32,6 +32,8 @@ class Evento extends Model
         "respuesta",
         "idUsuario",
         "idModalidad",
+        "idPrograma",
+        "idPlataforma",
         "idEstado",
         "idTipo",
     ];
