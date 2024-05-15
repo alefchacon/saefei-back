@@ -52,7 +52,7 @@ class EventoController extends Controller
         $mes = $request->input('month');
 
 
-        $events = Evento::encontrarPor($anio, $mes)->load("solicitudesEspacios");
+        $events = Evento::encontrarPor($anio, $mes);
 
 
         return new EventoCollection($events);
@@ -189,7 +189,7 @@ class EventoController extends Controller
             $model = Evento::findOrFail($evento->id);
             $model->update($request->all());
             $model->load("estado");
-            $message = "El evento ha sido " . $model->estado->nombre;
+            $message = "Evento actualizado";
             $status = 200;
         } catch (Exception $ex) {
             $message = $ex->getMessage();
@@ -197,7 +197,7 @@ class EventoController extends Controller
             return response()->json([
                 'message' => $message,
                 'data' => new EventoResource($model),
-                'payload' => $request->toArray()
+                'payload' => $evento->toArray()
             ], $status);
         }
     }

@@ -19,8 +19,8 @@ return new class extends Migration
 
             $table->unsignedBigInteger('idUsuario');
             $table->unsignedBigInteger('idEspacio');
-            $table->unsignedBigInteger('idEstado');
-            $table->unsignedBigInteger('idEvento');
+            $table->unsignedBigInteger('idEstado')->default(1);
+            $table->unsignedBigInteger('idEvento')->nullable();
             
             $table->foreign('idUsuario')->references('id')->on('users');
             $table->foreign('idEspacio')->references('id')->on('espacios');

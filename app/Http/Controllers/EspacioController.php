@@ -19,11 +19,11 @@ class EspacioController extends Controller
 
     public function getEspaciosLibres(Request $request)
     {
-        $inicio = $request->input('inicio');
-        $fin = $request->input('fin');
+        $fecha = $request->input('fecha');
 
 
-        $events = Espacio::encontrarPor($inicio, $fin);
+        $events = Espacio::encontrarPor($fecha);
+
 
         return new EspacioCollection($events);
     }

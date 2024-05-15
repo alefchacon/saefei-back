@@ -51,10 +51,11 @@ Route::group(['/api'], function () {
     Route::apiResource('tipos', TipoController::class);
     
     Route::apiResource('espacios', EspacioController::class);
-    Route::post('espacios/libres', [EspacioController::class, 'getEspaciosLibres']);
+    Route::post('espacios/reservaciones', [EspacioController::class, 'getEspaciosLibres']);
+    Route::put('espacios/reservaciones', [EspacioController::class, 'getEspaciosLibres']);
+    Route::apiResource('solicitud', SolicitudEspacioController::class);
 });
 
 Route::group(['/api'], function (){
-    Route::apiResource('solicitud', SolicitudEspacioController::class);
     Route::apiResource('horarios', HorarioController::class);
 });
