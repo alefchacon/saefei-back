@@ -36,7 +36,10 @@ Route::group(['/api'], function () {
     Route::post('eventos/mes', [EventoController::class, 'getEventosPorMes']);
     Route::apiResource('evidencias', EvidenciaController::class);
     Route::apiResource('estados', EstadoController::class);
+
     Route::apiResource('usuarios', UserController::class);
+    Route::put('usuarios', [UserController::class, "update"]);
+    
     Route::apiResource('roles', RolController::class);
     Route::get('eventos/{id}', [EventoController::class]);
     Route::post('login', [AuthController::class, 'login']);
@@ -53,7 +56,9 @@ Route::group(['/api'], function () {
     Route::apiResource('espacios', EspacioController::class);
     Route::post('espacios/reservaciones', [EspacioController::class, 'getEspaciosLibres']);
     Route::put('espacios/reservaciones', [EspacioController::class, 'getEspaciosLibres']);
+
     Route::apiResource('solicitud', SolicitudEspacioController::class);
+    Route::put('solicitud', [SolicitudEspacioController::class, 'update']);
 });
 
 Route::group(['/api'], function (){
