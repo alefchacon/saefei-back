@@ -92,9 +92,25 @@ class UserController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request)
     {
-        //
+        $status = 500;
+        $message = "Algo falló";
+        try{
+            $model = User::findOrFail($request->id);
+            $model->update($request->all());
+            $model->load("rol");
+            $message = "Usuario actualizado";
+            $status = 200;
+        } catch (\Exception $ex){
+            $message = $ex->getMessage();
+        }finally {
+            return response()->json([
+                'message' => $message,
+                'data' => isset($model) ? new UserResource($model) : null,
+                'payload' => $request->toArray()
+            ], $status);
+        }
     }
 
     /**

@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 class User extends Authenticatable
 {
     use HasFactory, Notifiable, HasApiTokens;
+    protected $table = 'users';
 
     /**
      * The attributes that are mass assignable.
