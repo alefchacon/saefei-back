@@ -9,7 +9,7 @@ class Evaluacion extends Model
 {
     protected $table = 'evaluaciones';
     use HasFactory;
-    public $timestamps = false;
+    //public $timestamps = false;
     protected $fillable = [
         "calificacionAtencion",
         "razonCalificacionAtencion",

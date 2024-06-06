@@ -36,8 +36,7 @@ class AuthController extends Controller
 
         $response = [
             'message' => $validationResult['message'],
-            'token' => $user->createToken('authToken', abilities: [$user->rol->nombre]),
-            'user' => $user
+            'token' => $user->createToken('authToken', abilities: [$user->rol->nombre])->plainTextToken,
         ];
 
         return response()->json($response, $validationResult['status']);

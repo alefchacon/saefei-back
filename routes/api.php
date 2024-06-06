@@ -34,6 +34,7 @@ Route::group(['/api'], function () {
     Route::apiResource('evaluaciones', EvaluacionController::class);
     Route::apiResource('eventos', EventoController::class);
     Route::post('eventos/mes', [EventoController::class, 'getEventosPorMes']);
+    Route::post('eventos/nombre', [EventoController::class, 'getEventosPorNombre']);
     Route::apiResource('evidencias', EvidenciaController::class);
     Route::apiResource('estados', EstadoController::class);
 
@@ -59,8 +60,8 @@ Route::group(['/api'], function () {
 
     Route::apiResource('solicitud', SolicitudEspacioController::class);
     Route::put('solicitud', [SolicitudEspacioController::class, 'update']);
+    Route::apiResource('horarios', HorarioController::class);
 });
 
 Route::group(['/api'], function (){
-    Route::apiResource('horarios', HorarioController::class);
 });
