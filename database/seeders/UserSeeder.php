@@ -18,10 +18,17 @@ class UserSeeder extends Seeder
         User::create([
             'nombres' => 'Alejandro',
             'apellidoPaterno' => 'Chacon',
-            'email' => 'asdf@asdf.com',
+            'email' => 'vitocfdz@gmail.com',
             'apellidoMaterno' => 'Fernandez',
             'puesto' => 'best boy',
-            //'password' => Hash::make('asdf'),
+            'idRol' => 3,
+        ]);
+        User::create([
+            'nombres' => 'Karla',
+            'apellidoPaterno' => 'Beltrán',
+            'email' => 'maledict@protonmail.com',
+            'apellidoMaterno' => 'Zamora',
+            'puesto' => 'best girl',
             'idRol' => 3,
         ]);
     }

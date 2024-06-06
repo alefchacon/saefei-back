@@ -9,7 +9,7 @@ class Evento extends Model
 {
     use HasFactory;
     protected $table = 'eventos';
-    public $timestamps = false;
+    //public $timestamps = false;
     protected $fillable = [
         "nombre",
         "descripcion",
@@ -65,7 +65,6 @@ class Evento extends Model
             'solicitudesEspacios.usuario', 
             'solicitudesEspacios.espacio', 
             'solicitudesEspacios.estado'
-        ])
-        ->get();
+        ]);
     }
 }

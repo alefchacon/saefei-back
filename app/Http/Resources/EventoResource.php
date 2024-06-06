@@ -27,6 +27,7 @@ class EventoResource extends JsonResource
             'needsNotifyUVPress' => $this->requiereNotificarPrensaUV,
             'additional' => $this->adicional,
             'response' => $this->respuesta,
+            'createdAt' => $this->created_at,       
 
             'start' => $this->inicio,
             'end' => $this->fin,
@@ -36,7 +37,7 @@ class EventoResource extends JsonResource
             'user' => new UserResource($this->whenLoaded('usuario')),
             'type' => new CatalogoResource($this->whenLoaded('tipo')),
             'status' => new CatalogoResource($this->whenLoaded('estado')),
-            'mode' => new CatalogoResource($this->whenLoaded('modalidad')),            
+            'mode' => new CatalogoResource($this->whenLoaded('modalidad')),     
         ];
     }
 }
