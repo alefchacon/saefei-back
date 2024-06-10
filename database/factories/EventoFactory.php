@@ -36,7 +36,8 @@ class EventoFactory extends Factory
             "inicio" => $start,
             "fin" => $end,
             "respuesta"=> null, 
-            "idUsuario" => 1,  
+            "idUsuario" => $this->faker->numberBetween(1,3),
+            
             "idModalidad" => 1,
             "idEstado" => $this->faker->numberBetween(1,4),
             "idtipo" => 1,

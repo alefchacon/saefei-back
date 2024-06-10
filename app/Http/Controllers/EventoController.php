@@ -79,7 +79,7 @@ class EventoController extends Controller
     }
 
     
-    private function filterEventsByName($eventos, $searchString, $threshold = 5)
+    private function filterEventsByName($eventos, $searchString, $threshold = 3)
     {
         return $eventos->filter(function ($event) use ($searchString, $threshold) {
             $mainString = $event->nombre;
