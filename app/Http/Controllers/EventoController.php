@@ -11,12 +11,17 @@ use App\Models\Estado;
 use App\Models\Tipo;
 use App\Filters\EventoFilter;
 use App\Http\Resources\EventoCollection;
+use Dotenv\Exception\ValidationException;
+use Exception;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use InvalidArgumentException;
 
 /**
  * Description of EventoController
  *
  * @author Tuhin Bepari <digitaldreams40@gmail.com>
  */
+use function Pest\Laravel\json;
 
 class EventoController extends Controller
 {
@@ -87,18 +92,62 @@ class EventoController extends Controller
      */
     public function store(Request $request)
     {
-        $model=new Evento;
-        $model->fill($request->all());
 
-        if ($model->save()) {
-            
-            session()->flash('app_message', 'Evento saved successfully');
-            return redirect()->route('eventos.index');
-            } else {
-                session()->flash('app_message', 'Something is wrong while saving Evento');
+        try {
+            $model = new Evento;
+            $model->nombreOrganizador = $request->nombreOrganizador;
+            $model->puesto = $request->puesto;
+            $model->email = $request->email;
+            $model->nombre = $request->nombre;
+            $model->descripcion = $request->descripcion;
+            $model->numParticipantes = $request->numParticipantes;
+            $model->requisitosCentroComputo = $request->requisitosCentroComputo;
+            $model->numParticipantesExternos = $request->numParticipantesExternos;
+            $model->requiereEstacionamiento = $request->requiereEstacionamiento;
+            $model->requiereFinDeSemana = $request->requiereFinDeSemana;
+            $model->requiereMaestroDeObra = $request->requiereMaestroDeObra;
+            $model->requiereNotificarPrensaUV = $request->requiereNotificarPrensaUV;
+            $model->adicional = $request->adicional;
+            $model->inicio = $request->inicio;
+            $model->fin = $request->fin;
+            $model->idUsuario = $request->idUsuario;
+            $model->idModalidad = $request->idModalidad;
+            $model->idEstado = $request->idEstado;
+            $model->idTipo = $request->idTipo;
+            $model->idPrograma = $request->idPrograma;
+            $model->idPlataforma = $request->idPlataforma;
+            // $model->idEspacio = $request->idEspcacio;
+
+            try {
+                $file = $request->file('cronograma');
+                if ($file->isValid()) {
+                    $blob = file_get_contents($file->getRealPath());
+                    $model->cronograma = $blob;
+                }
+                $message = 'Evento registrado. ';
+                // $model->save();
+            } catch (Exception $ex) {
+                $message = "Error";
+                return response()->json([
+                    'message' => $ex
+                ]);
             }
-        return redirect()->back();
-    } /**
+
+            if ($model->save()) {
+                return response()->json([
+                    'message' => $message,
+                    'evento' => $model->id,
+                ], 200);
+            }
+        } catch (Exception $ex) {
+            $message = "Error";
+            return response()->json([
+                'message' => $ex
+            ]);
+        }
+    }
+
+    /**
      * Show the form for editing the specified resource.
      *
      * @param  Request  $request

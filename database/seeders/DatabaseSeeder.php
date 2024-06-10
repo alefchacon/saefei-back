@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Plataforma;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -17,7 +18,9 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             EventoSeeder::class,
-            EstadoSeeder::class
+            EstadoSeeder::class,
+            // PlataformaSeeder::class,
+            // ProgramasSeeder::class,
         ]);
     }
 }

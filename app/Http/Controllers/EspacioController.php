@@ -14,6 +14,18 @@ class EspacioController extends Controller
     {
         $espacios = Espacio::all();
         return response()->json($espacios);
+        // return new EspacioCollection($espacios);
+    }
+
+    public function getEspaciosLibres(Request $request)
+    {
+        $fecha = $request->input('fecha');
+
+
+        $events = Espacio::encontrarPor($fecha);
+
+
+        return new EspacioCollection($events);
     }
 
     /**

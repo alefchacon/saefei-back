@@ -13,6 +13,10 @@ use App\Http\Controllers\ProgramaEducativoController;
 use App\Http\Controllers\PublicidadController;
 use App\Http\Controllers\SolicitudEspacioController;
 use App\Http\Controllers\TipoController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\RolController;
+use App\Http\Controllers\EvidenciaController;
+use App\Http\Controllers\MaterialDifusionController;
 use App\Models\Difusion;
 use App\Models\Espacio;
 use App\Models\Estado;
@@ -34,6 +38,13 @@ Route::group(['/api'], function () {
     Route::apiResource('programasEducativos', ProgramaEducativoController::class);
     Route::apiResource('publicidad', PublicidadController::class);
     Route::apiResource('tipos', TipoController::class);
+    
+    Route::apiResource('espacios', EspacioController::class);
+    Route::post('espacios/reservaciones', [EspacioController::class, 'getEspaciosLibres']);
+    Route::put('espacios/reservaciones', [EspacioController::class, 'getEspaciosLibres']);
+    Route::apiResource('solicitud', SolicitudEspacioController::class);
+
+    Route::apiResource('materialDifusion', MaterialDifusionController::class);
 });
 
 Route::group(['/api'], function (){
