@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Auth\LDAPValidator;
+use Carbon\Carbon;
+use Config;
 
 class AuthController extends Controller
 {
@@ -20,23 +22,25 @@ class AuthController extends Controller
 
         $user = User::where('email', $request->email)->with('rol')->first();
 
-        $validationResult = LDAPValidator::validate($request);
-
-        /*
-        if (!$user || !Hash::check($request->password, $user->password)) {
-            return response()->json(['message' => 'Las credenciales son incorrectas.'], 401);
-        }*/
+        
+        // [!IMPORTANTE!] Esta línea forza el login: quitar para despliegue
+        $validationResult =  [
+            "status" => 200,
+            "message" => "ESTE LOG IN FUE FALSIFICADO. Si ves este mensaje, eres dev y desactivaste la validación LDAP :D",
+        ];
+        //$validationResult = LDAPValidator::validate($request);
 
         if (!$user || $validationResult['status'] != 200) {
-            return response()->json(
-                ['message' => $validationResult['message']], 
+            return response()->json([
+                'message' => $validationResult['message'],
+            ], 
                 $validationResult['status']
             );
         }
 
         $response = [
             'message' => $validationResult['message'],
-            'token' => $user->createToken('authToken', abilities: [$user->rol->nombre])->plainTextToken,
+            'token' => $user->createToken('access_token', abilities: [$user->rol->nombre], expiresAt: now()->addMinutes(config('sanctum.expiration')))->plainTextToken,
         ];
 
         return response()->json($response, $validationResult['status']);

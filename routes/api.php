@@ -32,14 +32,15 @@ Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
 
 Route::group(['/api'], function () {
     Route::apiResource('evaluaciones', EvaluacionController::class);
-    Route::apiResource('eventos', EventoController::class);
     Route::post('eventos/mes', [EventoController::class, 'getEventosPorMes']);
     Route::post('eventos/nombre', [EventoController::class, 'getEventosPorNombre']);
     Route::apiResource('evidencias', EvidenciaController::class);
     Route::apiResource('estados', EstadoController::class);
-
+    
     Route::apiResource('usuarios', UserController::class);
     Route::put('usuarios', [UserController::class, "update"]);
+
+    Route::get('perfil', [UserController::class, "showByToken"]);
     
     Route::apiResource('roles', RolController::class);
     Route::get('eventos/{id}', [EventoController::class]);
@@ -57,11 +58,12 @@ Route::group(['/api'], function () {
     Route::apiResource('espacios', EspacioController::class);
     Route::post('espacios/reservaciones', [EspacioController::class, 'getEspaciosLibres']);
     Route::put('espacios/reservaciones', [EspacioController::class, 'getEspaciosLibres']);
-
+    
     Route::apiResource('solicitud', SolicitudEspacioController::class);
     Route::put('solicitud', [SolicitudEspacioController::class, 'update']);
     Route::apiResource('horarios', HorarioController::class);
-});
-
-Route::group(['/api'], function (){
+    });
+    
+    Route::group(['/api', 'middleware' => 'auth:sanctum'], function (){
+    Route::apiResource('eventos', EventoController::class);
 });

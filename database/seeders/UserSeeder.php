@@ -31,5 +31,13 @@ class UserSeeder extends Seeder
             'puesto' => 'best girl',
             'idRol' => 3,
         ]);
+        User::create([
+            'nombres' => 'Esteban',
+            'apellidoPaterno' => 'Márquez',
+            'email' => 'maledict@proton.me',
+            'apellidoMaterno' => 'Gonzáles',
+            'puesto' => 'my man',
+            'idRol' => 3,
+        ]);
     }
 }

@@ -8,6 +8,8 @@ use App\Filters\UsuarioFilter;
 use App\Models\User;
 use App\Http\Resources\UserCollection;
 use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\Hash;
+use Laravel\Sanctum\PersonalAccessToken;
 
 class UserController extends Controller
 {
@@ -79,6 +81,39 @@ class UserController extends Controller
     public function show(string $id)
     {
         //
+    }
+    /**
+     * Mostrar usu
+     */
+    public function showByToken(Request $request)
+    {
+        
+        if ($request->bearerToken() == null) {
+            return response()->json([
+                'message' => "Unauthenticated",
+                ], 401);
+        }
+        //Laravel regresa el token como <token ID>|<token>, pero para autenticar el token sólo se debe
+        //user el <token>, entonces se remueve el <token ID> y el |.
+        
+        $tokenParts = explode("|", $request->bearerToken());
+        if (count($tokenParts) < 2) {
+            return response()->json([
+                'message' => "Unauthenticated",
+                ], 401);
+        }
+
+        $token = $tokenParts[1];
+
+        $user = \DB::table("users")
+            ->join("personal_access_tokens", "users.id", "=", "personal_access_tokens.tokenable_id")
+            ->where("personal_access_tokens.token", "=", hash("sha256", $token))
+            ->select("users.*")
+            ->get();
+
+        return response()->json([
+            'bearer_token' => $user,
+        ], 200);
     }
 
     /**
