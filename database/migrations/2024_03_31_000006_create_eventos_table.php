@@ -19,6 +19,12 @@ return new class extends Migration
 
             $table->string("nombre");
             $table->string("descripcion");
+            $table->string("pagina")->nullable()->default("uv.mx/fei");
+            $table->string("ambito");
+            $table->string("audiencias");
+            $table->string("eje");
+            $table->string("tematicas");
+            $table->string("plataformas")->nullable();
             $table->integer("numParticipantes");
             $table->string("requisitosCentroComputo");
             $table->integer("numParticipantesExternos");
@@ -26,8 +32,8 @@ return new class extends Migration
             $table->boolean("requiereFinDeSemana");
             $table->boolean("requiereMaestroDeObra");
             $table->boolean("requiereNotificarPrensaUV");
-            $table->text("adicional")->nullable();
-            $table->text("respuesta")->nullable();
+            $table->string("adicional")->nullable();
+            $table->string("respuesta")->nullable();
             $table->date("inicio");
             $table->date("fin");
 

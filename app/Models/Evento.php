@@ -13,8 +13,14 @@ class Evento extends Model
     protected $fillable = [
         "nombre",
         "descripcion",
+
+        "audiencias",
+        "ambito",
+        "eje",
+        "tematicas",
+        "plataformas",
+        
         "numParticipantes",
-        "cronograma",
         "requisitosCentroComputo",
         "numParticipantesExternos",
         "requiereEstacionamiento",
@@ -40,6 +46,12 @@ class Evento extends Model
     public function evaluacion() {
         return $this->hasOne( Evaluacion::class, 'idEvento', 'id');
     }
+    public function cronograma() {
+        return $this->hasOne( Cronograma::class, 'idEvento', 'id');
+    }
+    public function publicidades() {
+        return $this->hasMany( Publicidad::class, 'idEvento', 'id');
+    }
     public function estado() {
         return $this->belongsTo( Estado::class, 'idEstado', 'id');
     }
@@ -54,6 +66,10 @@ class Evento extends Model
 
     public function solicitudesEspacios(){
         return $this->hasMany(SolicitudEspacio::class, 'idEvento', 'id');
+    }
+
+    public function programasEducativos(){
+        return $this->belongsToMany(ProgramaEducativo::class, "eventos_programaeducativos", "idEvento", "idProgramaEducativo");
     }
 
     public static function encontrarPor($anio, $mes){

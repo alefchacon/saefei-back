@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\CatalogoResource;
+use App\Http\Resources\CatalogoCollection;
 use App\Models\ProgramaEducativo;
 use Illuminate\Http\Request;
 
@@ -13,7 +15,7 @@ class ProgramaEducativoController extends Controller
     public function index()
     {
         $programas = ProgramaEducativo::all();
-        return response()->json($programas);
+        return new CatalogoCollection($programas);
     }
 
     /**

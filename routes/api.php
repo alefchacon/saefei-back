@@ -36,6 +36,7 @@ Route::group(['/api'], function () {
     Route::post('eventos/nombre', [EventoController::class, 'getEventosPorNombre']);
     Route::apiResource('evidencias', EvidenciaController::class);
     Route::apiResource('estados', EstadoController::class);
+    Route::get('eventos/{id}', [EventoController::class, "show"]);
     
     Route::apiResource('usuarios', UserController::class);
     Route::put('usuarios', [UserController::class, "update"]);
@@ -43,7 +44,6 @@ Route::group(['/api'], function () {
     Route::get('perfil', [UserController::class, "showByToken"]);
     
     Route::apiResource('roles', RolController::class);
-    Route::get('eventos/{id}', [EventoController::class]);
     Route::post('login', [AuthController::class, 'login']);
     Route::post('logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
     
@@ -51,7 +51,7 @@ Route::group(['/api'], function () {
     Route::apiResource('invitados', InvitadoController::class);
     Route::apiResource('modalidades', ModalidadController::class);
     Route::apiResource('plataformas', PlataformaController::class);
-    Route::apiResource('programasEducativos', ProgramaEducativoController::class);
+    Route::apiResource('programaseducativos', ProgramaEducativoController::class);
     Route::apiResource('publicidad', PublicidadController::class);
     Route::apiResource('tipos', TipoController::class);
     
@@ -60,10 +60,14 @@ Route::group(['/api'], function () {
     Route::put('espacios/reservaciones', [EspacioController::class, 'getEspaciosLibres']);
     
     Route::apiResource('solicitud', SolicitudEspacioController::class);
+    Route::post('solicitud/disponibles', [SolicitudEspacioController::class, 'getAvailableReservations']);
     Route::put('solicitud', [SolicitudEspacioController::class, 'update']);
     Route::apiResource('horarios', HorarioController::class);
+
+    Route::apiResource('eventos', EventoController::class);
+
     });
     
-    Route::group(['/api', 'middleware' => 'auth:sanctum'], function (){
-    Route::apiResource('eventos', EventoController::class);
+Route::group(['/api', 'middleware' => 'auth:sanctum'], function (){
+        
 });

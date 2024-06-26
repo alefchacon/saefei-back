@@ -11,14 +11,20 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('eventos_programaeducativos', function (Blueprint $table) {
-            $table->unsignedBigInteger('idEvento');
-            $table->unsignedBigInteger('idProgramaEducativo');
+        Schema::create('publicidades', function (Blueprint $table) {
+            
+            $table->id()->primary()->unsigned()->unique();
             $table->timestamps();
+            $table->text("nombre");
+            $table->text("tipo");
+
+            $table->unsignedBigInteger('idEvento');
 
             $table->foreign('idEvento')->references('id')->on('eventos');
-            $table->foreign('idProgramaEducativo')->references('id')->on('programa_educativos');
+
         });
+        DB::statement("ALTER TABLE publicidades ADD archivo MEDIUMBLOB");
+
     }
 
     /**
@@ -26,6 +32,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('eventos_programaseducativos');
+        Schema::dropIfExists('evidencias');
     }
 };
