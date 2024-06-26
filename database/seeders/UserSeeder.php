@@ -21,7 +21,7 @@ class UserSeeder extends Seeder
             'email' => 'vitocfdz@gmail.com',
             'apellidoMaterno' => 'Fernandez',
             'puesto' => 'best boy',
-            'idRol' => 3,
+            'idRol' => 5,
         ]);
         User::create([
             'nombres' => 'Karla',

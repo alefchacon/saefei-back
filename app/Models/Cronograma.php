@@ -5,16 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Publicidad extends Model
+class Cronograma extends Model
 {
     use HasFactory;
-    protected $table = 'publicidades';
 
     protected $fillable = [
-        'archivo',
         "nombre",
         "tipo",
-        'idEvento'
+        "idEvento",
+        "archivo",
     ];
 
     public function evento() {

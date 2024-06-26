@@ -17,6 +17,14 @@ class EventoResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->nombre,
+            'page' => $this->pagina,
+
+            'audiences' => $this->audiencias,
+            'scope' => $this->ambito,
+            'axi' => $this->eje,
+            'themes' => $this->tematicas,
+            'platforms' => $this->platformas,
+
             'description' => $this->descripcion,
             'numParticipants' => $this->numParticipantes,
             'cronogram' => $this->cronograma,
@@ -38,6 +46,7 @@ class EventoResource extends JsonResource
             'type' => new CatalogoResource($this->whenLoaded('tipo')),
             'status' => new CatalogoResource($this->whenLoaded('estado')),
             'mode' => new CatalogoResource($this->whenLoaded('modalidad')),     
+            'programs' => new CatalogoCollection($this->whenLoaded("programasEducativos"))
         ];
     }
 }

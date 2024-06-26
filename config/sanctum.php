@@ -22,6 +22,13 @@ return [
         env('FRONTEND_URL') ? ','.parse_url(env('FRONTEND_URL'), PHP_URL_HOST) : ''
     ))),
 
+    'cookie' => [
+        'name' => 'sanctum_api_token',
+        'same_site' => 'strict',
+        'secure' => env('SESSION_SECURE_COOKIE', true),
+        'http_only' => true,
+    ],
+
     /*
     |--------------------------------------------------------------------------
     | Sanctum Guards

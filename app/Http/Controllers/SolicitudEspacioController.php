@@ -8,6 +8,8 @@ use App\Models\Espacio;
 use App\Models\User;
 use App\Models\SolicitudEspacio;
 use Illuminate\Http\Request;
+use App\Filters\SolicitudEspacioFilter;
+
 
 class SolicitudEspacioController extends Controller
 {
@@ -21,6 +23,21 @@ class SolicitudEspacioController extends Controller
             "estado", 
             "espacio", 
         ])->get();
+        return new SolicitudEspacioCollection($solicitudes);
+    }
+    public function getAvailableReservations(Request $request)
+    {
+        $idUsuario = $request->input("idUsuario");
+
+        $solicitudes = SolicitudEspacio
+            ::where("idUsuario", "=", $idUsuario)
+            ->where("idEstado", "=", 2)
+            ->with([
+                "usuario", 
+                "estado", 
+                "espacio", 
+            ])->get();
+
         return new SolicitudEspacioCollection($solicitudes);
     }
 

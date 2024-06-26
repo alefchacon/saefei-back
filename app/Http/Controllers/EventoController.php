@@ -3,18 +3,24 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\EventoResource;
+use App\Http\Resources\SolicitudEspacioCollection;
+use App\Models\Cronograma;
+use App\Models\Eventos_ProgramaEducativos;
+use App\Models\Difusion;
+use App\Models\Publicidad;
+use App\Models\User;
+use App\Models\SolicitudEspacio;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\Evento;
-use App\Models\Usuario;
 use App\Models\Modalidade;
 use App\Models\Estado;
 use App\Models\Tipo;
 use App\Filters\EventoFilter;
 use App\Http\Resources\EventoCollection;
 use Exception;
-
+use App\Mail\Mailer;
 
 class EventoController extends Controller
 {
@@ -34,7 +40,7 @@ class EventoController extends Controller
         $orderByCreatedAt = $request->query("porFechaEnvio");
         $eventName = $request->query("nombre");
 
-        $eventos = Evento::where($queryItems);
+        $eventos = Evento::where($queryItems)->with('programasEducativos');
 
         if ($eventName){
             $eventos = $this->getEventsByName($request, $eventos);
@@ -54,6 +60,7 @@ class EventoController extends Controller
         
 
         return new EventoCollection($eventos->paginate(5)->appends($request->query())); 
+        //return $eventos->paginate(5)->appends($request->query()); 
     }    
     
     public function getEventsByName(Request $request, Builder|Evento $eventos){
@@ -176,18 +183,135 @@ class EventoController extends Controller
      */
     public function store(Request $request)
     {
-        $model=new Evento;
-        $model->fill($request->all());
+        
 
-        if ($model->save()) {
+
+
+        $code = 500;
+        $message = 'Evaluación registrada';
+        \DB::beginTransaction();
+        $event = new Evento;
+
+        try{
             
-            session()->flash('app_message', 'Evento saved successfully');
-            return redirect()->route('eventos.index');
-            } else {
-                session()->flash('app_message', 'Something is wrong while saving Evento');
+            //$event = Evento::create($request->all() );
+            //$event->save();
+            
+           // $programas = json_decode($request->input("programas"), true);
+            
+           /*
+            foreach ($programas as $programa){
+                /*
+                Uso una consulta parametrizada en lugar de métodos de Eloquent
+                por que, por alguna razón, PHP no reconoce la existencia de 
+                la clase Eventos_ProgramaEducativos, pese a que ya se importó
+                y todo. 
+                
+                El error que arroja es el siguiente. Para obtenerlo, el try-catch
+                debe atrapar \Error en lugar de \Exception. 
+                
+                "Class "App\Models\Eventos_ProgramaEducativos" not found"
+                
+                */
+                
+                
+                /*
+                \DB::insert("INSERT INTO eventos_programaeducativos (idEvento, idProgramaEducativo) VALUES (?, ?)", [$event->id, $programa["id"]]);
+                
+                
             }
-        return redirect()->back();
-    } /**
+            */
+            
+            //RESERVACIONES
+            /*
+            $reservaciones = json_decode($request->input("reservaciones"), true);
+            foreach ($reservaciones as $reservacion) {
+                $reservationModel = SolicitudEspacio::findOrFail($reservacion["id"]);
+                $reservationModel->idEstado = 3;
+                $reservationModel->save();
+            }
+            */
+
+            /*
+            $organizer = User::findOrFail($request->input("idUsuario"));
+            Mailer::sendEmail(to: $organizer);
+            
+            $coordinators = User::where("idRol", 5)->get();
+            foreach($coordinators as $coordinator){
+                Mailer::sendEmail(to: $coordinator);
+            }
+            */
+            //$message  =$this->storePublicidad($request);
+            //$message =$request->file("difusion");
+
+            if ($request->hasFile('cronograma')) {
+            
+                $cronograma = new Cronograma();
+                $file = $request->file('cronograma');
+                if ($file->isValid()) {
+                    $blob = file_get_contents($file->getRealPath());
+                    
+    
+                    
+                    $cronograma->archivo = $blob;
+                    $cronograma->tipo = $file->getMimeType();
+                    $cronograma->nombre = $file->getClientOriginalName();
+                    $cronograma->idEvento = 1;
+                    $cronograma->save();
+                    
+        
+                }
+            }
+    
+
+            $message = $request->hasFile('cronograma');
+
+            $code = 201;
+            \DB::commit
+            
+            ();
+        } catch (\Exception $ex) {
+            $message = $ex->getMessage();
+            \DB::rollBack();
+        }finally{
+            
+            return response()->json([
+                'message' => $message,
+                'data' => $request->input("difusion")], $code);
+            } 
+            
+            //return response()->json($request);
+        } 
+    
+    private function storePublicidad(Request $request){
+        if (!$request->hasFile('difusion')) {
+            return "a";
+        }
+
+        $difusiones = $request->file("difusion");
+
+        foreach ($difusiones as $difusion){
+            if (!$difusion->isValid()) {
+                return response()->json("Los archivos no pudieron procesarse", 500);
+            }
+        }
+
+
+        foreach ($difusiones as $file){
+            $publicidad = new Publicidad();
+            $blob = file_get_contents($file->getRealPath());
+            $publicidad->archivo = $blob;
+            $publicidad->tipo = $file->getMimeType();
+            $publicidad->nombre = $file->getClientOriginalName();
+            $publicidad->idEvento = 1;
+            $publicidad->save();
+        }
+        return "b";
+    }
+    
+    
+    
+    /**
      * Show the form for editing the specified resource.
      *
      * @param  Request  $request
