@@ -16,6 +16,11 @@ class Evidencia extends Model
         "archivo",
     ];
 
+    public function getArchivoAttribute($value)
+    {
+        return base64_encode($this->attributes['archivo']);
+    }
+
     public function evaluacion() {
         return $this->belongsTo( Evaluacion::class, 'idEvaluacion', 'id');
     }
