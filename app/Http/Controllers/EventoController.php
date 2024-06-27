@@ -41,7 +41,7 @@ class EventoController extends Controller
         $eventName = $request->query("nombre");
         $startYearMonth = $request->query("inicio");
 
-        $eventos = Evento::where($queryItems)->with('programasEducativos');
+        $eventos = Evento::where($queryItems)->with(['programasEducativos', 'usuario']);
 
         if ($eventName){
             $eventos = $this->getEventsByName($request, $eventos);
@@ -61,7 +61,11 @@ class EventoController extends Controller
         if ($includeEstado) {
             $eventos = $eventos->with("estado");
         }
-        
+
+        if ($startYearMonth){
+
+            return new EventoCollection($eventos->paginate(1000)->appends($request->query())); 
+        }
 
         return new EventoCollection($eventos->paginate(5)->appends($request->query())); 
         //return $eventos->paginate(5)->appends($request->query()); 
