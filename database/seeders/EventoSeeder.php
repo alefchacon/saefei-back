@@ -16,6 +16,8 @@ class EventoSeeder extends Seeder
         //Evento::factory()->count(10)->create();
         Evento::factory()->create([
             'nombre' => "Seminario de Investigación de Ingeniería de Software",
+            "tematicas" => "Biodiversidad e integridad ecosistémica;Disciplinar;Estilos de vida y patrones de consumo",
+            "audiencias" => "Académicos;Personal Administrativo;Estudiantes;Público en general",
             'idUsuario' => 1
         ]);
         Evento::factory()->create([

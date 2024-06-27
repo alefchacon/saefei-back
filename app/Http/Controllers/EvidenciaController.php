@@ -67,10 +67,13 @@ class EvidenciaController extends Controller
                     $document->idEvaluacion = $idEvaluacion;
                     $document->save();
         
+                    $message = 'Evaluación registrada: ';
+                    $code = 201;
                 }
+            } else {
+                $message = 'Sin evidencia';
+                $code = 400;
             }
-            $message = 'Evaluación registrada: ';
-            $code = 201;
         }catch (Exception $ex) {
             $message = $ex->getMessage();
         }finally{
