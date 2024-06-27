@@ -39,11 +39,15 @@ class EventoController extends Controller
         $orderByNombre = $request->query("porAlfabetico");
         $orderByCreatedAt = $request->query("porFechaEnvio");
         $eventName = $request->query("nombre");
+        $startYearMonth = $request->query("inicio");
 
         $eventos = Evento::where($queryItems)->with('programasEducativos');
 
         if ($eventName){
             $eventos = $this->getEventsByName($request, $eventos);
+        }
+        if ($startYearMonth){
+            $eventos = $eventos->where(\DB::raw("DATE_FORMAT(inicio, '%Y-%m')"), "=", $startYearMonth);
         }
         if ($orderByCreatedAt){
             $eventos = $eventos->orderBy("created_at");
