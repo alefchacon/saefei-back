@@ -40,9 +40,10 @@ class EventoController extends Controller
         $orderByCreatedAt = $request->query("porFechaEnvio");
         $eventName = $request->query("nombre");
         $startYearMonth = $request->query("inicio");
+        $new = $request->query("nuevos");
+        $evaluated = $request->query("evaluados");
 
         $eventos = Evento::where($queryItems)->with(['programasEducativos', 'usuario']);
-
         if ($eventName){
             $eventos = $this->getEventsByName($request, $eventos);
         }
@@ -277,7 +278,7 @@ class EventoController extends Controller
             }
     
 
-            $message = $request->hasFile('cronograma');
+            $message = $request->input('cronograma');
 
             $code = 201;
             \DB::commit

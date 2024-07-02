@@ -10,6 +10,7 @@ class SolicitudEspacioFilter extends Apifilter {
     protected $safeParms = [
         'idEvento' => ['eq', 'is'], 
         'idUsuario' => ['eq'], 
+        'idEstado' => ['eq', 'not'], 
     ];
 
     protected $operatorMap = [
@@ -18,6 +19,7 @@ class SolicitudEspacioFilter extends Apifilter {
         'lte' => '<=',
         'gt' => '>',
         'gte' => '>=',
+        'not' => '!=',
         'is' => 'IS',
     ];
 
