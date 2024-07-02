@@ -7,7 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class Cronograma extends Model
 {
-    use HasFactory;
+
+    protected $table = "cronogramas";
+    
 
     protected $fillable = [
         "nombre",

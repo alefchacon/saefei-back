@@ -16,13 +16,18 @@ class SolicitudEspacioController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $solicitudes = SolicitudEspacio::with([
+        $filter = new SolicitudEspacioFilter();
+        $queryItems = $filter->transform($request);
+        
+        $solicitudes = SolicitudEspacio::where($queryItems)->with([ 
             "usuario", 
             "estado", 
-            "espacio", 
+            "espacio",
         ])->get();
+
+
         return new SolicitudEspacioCollection($solicitudes);
     }
     public function getAvailableReservations(Request $request)

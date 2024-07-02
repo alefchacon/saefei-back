@@ -30,6 +30,7 @@ class SolicitudEspacioSeeder extends Seeder
             SolicitudEspacio::factory()->create([
                 'inicio' => $date,
                 'fin' => $date,
+                'idEstado' => 1
             ]);
         }
     }
