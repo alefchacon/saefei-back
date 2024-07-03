@@ -21,6 +21,10 @@ use App\Filters\EventoFilter;
 use App\Http\Resources\EventoCollection;
 use Exception;
 use App\Mail\Mailer;
+use App\Mail\Mail;
+use App\Mail\MailFactory;
+use App\Models\Enums\EstadoEnum;
+use App\Models\Enums\RolEnum;
 
 class EventoController extends Controller
 {
@@ -178,7 +182,7 @@ class EventoController extends Controller
     {
 		$usuario = Usuario::all(['id']);
 		$modalidades = Modalidade::all(['id']);
-		$estados = Estado::all(['id']);
+		$estados = EstadoEnum::all(['id']);
 		$tipos = Tipo::all(['id']);
 
         return view('pages.eventos.create', [
@@ -336,12 +340,26 @@ class EventoController extends Controller
     {
         $status = 500;
         $message = "Algo falló";
+        \DB::beginTransaction();
         try{
             $model = Evento::with("estado")->findOrFail($request->id);
-            $model->update($request->all());
+
+            if ($model->idEstado !== $request->input("idEstado")){
+                $message = "change status!!!";
+            }
+
+            //$model->update($request->all());
             
+            
+
+            //\DB::commit();
+            
+            //$message = "Evento actualizado";
+            $message = "nope!!!";
+
             $status = 200;
         } catch (Exception $ex){
+            \DB::rollBack();
             $message = $ex->getMessage();
         }finally {
             return response()->json([
@@ -363,20 +381,62 @@ class EventoController extends Controller
         $message = "Algo falló";
         try{
             $model = Evento::findOrFail($evento->id);
+            
+            $modelIdEstado = $model->idEstado;
             $model->update($request->all());
-            $model->load("estado");
+            
+            $requestIdEstado = $request->input("idEstado");
+
+            if ($modelIdEstado != $requestIdEstado){
+                $this->changeEventStatus($model, EstadoEnum::tryFrom($requestIdEstado));
+            } 
+
+            
+            \DB::commit();
+            
+            
             $message = "Evento actualizado";
+            
+            
             $status = 200;
-        } catch (Exception $ex){
+        } catch (\Throwable $ex){
+            \DB::rollBack();
             $message = $ex->getMessage();
         }finally {
             return response()->json([
                 'message' => $message,
                 'data' => new EventoResource($model),
-                'payload' => $evento->toArray()
             ], $status);
         }
-    }    /**
+    } 
+    
+    private function changeEventStatus(Evento $event, EstadoEnum $newIdEstado) {
+
+        $users = [];
+        $mail = new Mail();
+        
+
+        switch ($newIdEstado){
+            case EstadoEnum::aceptado:
+                $mail = MailFactory::GetEventAcceptedMail(event: $event);
+                $users = User::where("id", $event->idUsuario)->get();
+                break;
+            case EstadoEnum::rechazado:
+                $mail = MailFactory::GetEventDeniedMail(event: $event);
+                $users = User::where("id", $event->idUsuario)->get();
+                break;
+            default: 
+                $users = User::where("idRol", RolEnum::coordinador)->get();
+        }
+
+
+        foreach($users as $user){
+            Mailer::sendEmail(to: $user, mail: $mail);
+        } 
+        
+    }
+    
+    /**
      * Delete a  resource from  storage.
      *
      * @param  Request  $request

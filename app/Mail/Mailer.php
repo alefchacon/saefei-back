@@ -25,12 +25,12 @@ class Mailer {
     return $mail;
   }
 
-  static public function sendEmail(User $to) {
+  static public function sendEmail(User $to, Mail $mail) {
 
     $instance = new self();
 
-    $mail = $instance->getMail();
-    $mail->addAddress($to->email, $to->nombres . " " . $to->apellidoPaterno); 
+    $client = $instance->getMail();
+    $client->addAddress($to->email, $to->nombres . " " . $to->apellidoPaterno); 
     // $mail->addReplyTo('info@example.com', 'Information');
     // $mail->addCC('cc@example.com');
     // $mail->addBCC('bcc@example.com');
@@ -39,12 +39,12 @@ class Mailer {
     // $mail->addAttachment('/var/tmp/file.tar.gz');
     // $mail->addAttachment('/tmp/image.jpg', 'new.jpg');
 
-    $mail->isHTML(true);
-    $mail->Subject = 'Here is the subject';
-    $mail->Body    = 'Se ha registrado un nuevo evento';
-    $mail->AltBody = 'This is the body in plain text for non-HTML mail clients';
+    $client->isHTML(true);
+    $client->Subject = $mail->subject;
+    $client->Body    = $mail->body;
+    $client->AltBody = 'This is the body in plain text for non-HTML mail clients';
 
-    $mail->send();
+    $client->send();
   
   }
 
