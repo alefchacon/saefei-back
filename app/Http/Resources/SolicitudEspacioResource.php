@@ -20,6 +20,9 @@ class SolicitudEspacioResource extends JsonResource
             'start' => $this->inicio,
             'end' => $this->fin,
 
+            'notifyAdministrator' => $this->avisarAdministrador,
+            'notifyUser' => $this->avisarUsuario,
+
             'user' => new UserResource($this->whenLoaded('usuario')),
             'space' => new EspacioResource($this->whenLoaded('espacio')),
             'status' => new CatalogoResource($this->whenLoaded('estado')),

@@ -34,6 +34,8 @@ return new class extends Migration
             $table->boolean("requiereNotificarPrensaUV");
             $table->string("adicional")->nullable();
             $table->string("respuesta")->nullable();
+            $table->boolean("avisarCoordinador")->default(0);
+            $table->boolean("avisarUsuario")->default(0);
             $table->date("inicio");
             $table->date("fin");
 
