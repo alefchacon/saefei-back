@@ -35,7 +35,9 @@ class EventoResource extends JsonResource
             'needsNotifyUVPress' => $this->requiereNotificarPrensaUV,
             'additional' => $this->adicional,
             'response' => $this->respuesta,
-            'createdAt' => $this->created_at,       
+            'createdAt' => $this->created_at,     
+            'notifyCoordinator' => $this->avisarCoordinador,
+            'notifyUser' => $this->avisarUsuario,
 
             'start' => $this->inicio,
             'end' => $this->fin,
@@ -46,7 +48,9 @@ class EventoResource extends JsonResource
             'type' => new CatalogoResource($this->whenLoaded('tipo')),
             'status' => new CatalogoResource($this->whenLoaded('estado')),
             'mode' => new CatalogoResource($this->whenLoaded('modalidad')),     
-            'programs' => new CatalogoCollection($this->whenLoaded("programasEducativos"))
+            'programs' => new CatalogoCollection($this->whenLoaded("programasEducativos")),
+
+        
         ];
     }
 }

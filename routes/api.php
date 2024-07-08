@@ -17,6 +17,7 @@ use App\Http\Controllers\TipoController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\RolController;
 use App\Http\Controllers\EvidenciaController;
+use App\Http\Controllers\AvisoController;
 use App\Models\Difusion;
 use App\Models\Espacio;
 use App\Models\Estado;
@@ -61,10 +62,13 @@ Route::group(['/api'], function () {
     
     Route::apiResource('solicitud', SolicitudEspacioController::class);
     Route::post('solicitud/disponibles', [SolicitudEspacioController::class, 'getAvailableReservations']);
-    Route::put('solicitud', [SolicitudEspacioController::class, 'update']);
+    Route::post('solicitud/marcarLeidasUsuario', [SolicitudEspacioController::class, 'markAsUserRead']);
+    //Route::put('solicitud', [SolicitudEspacioController::class, 'update']);
     Route::apiResource('horarios', HorarioController::class);
 
     Route::apiResource('eventos', EventoController::class);
+    Route::apiResource('avisos', AvisoController::class);
+    Route::post('avisos/marcarLeidasUsuario', [AvisoController::class, "markAsUserRead"]);
 
     });
     

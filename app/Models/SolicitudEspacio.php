@@ -18,7 +18,9 @@ class SolicitudEspacio extends Model
         'idEspacio',
         'idEstado',
         'idEvento',
-        'respuesta'
+        'respuesta',
+        'avisarAdministrador',
+        'avisarUsuario',
     ];
     
 

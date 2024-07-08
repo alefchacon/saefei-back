@@ -33,6 +33,9 @@ class Evento extends Model
 
         "adicional",
         "respuesta",
+        "avisarCoordinador",
+        "avisarUsuario",
+
         "idUsuario",
         "idModalidad",
         "idEstado",
@@ -70,6 +73,10 @@ class Evento extends Model
 
     public function programasEducativos(){
         return $this->belongsToMany(ProgramaEducativo::class, "eventos_programaeducativos", "idEvento", "idProgramaEducativo");
+    }
+
+    public function aviso(){
+        return $this->hasOne(Aviso::class, 'idEvento', 'id');
     }
 
     public static function encontrarPor($anio, $mes){

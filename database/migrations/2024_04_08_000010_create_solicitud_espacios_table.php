@@ -17,6 +17,9 @@ return new class extends Migration
             $table->dateTime('inicio');
             $table->dateTime('fin');
 
+            $table->boolean("avisarAdministrador")->default(0);
+            $table->boolean("avisarUsuario")->default(0);
+
             $table->unsignedBigInteger('idUsuario');
             $table->unsignedBigInteger('idEspacio');
             $table->unsignedBigInteger('idEstado')->default(1);

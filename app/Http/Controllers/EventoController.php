@@ -44,8 +44,8 @@ class EventoController extends Controller
         $orderByCreatedAt = $request->query("porFechaEnvio");
         $eventName = $request->query("nombre");
         $startYearMonth = $request->query("inicio");
-        $new = $request->query("nuevos");
-        $evaluated = $request->query("evaluados");
+        $orderByCoordinatorNotice = $request->query("porAvisosCoordinador");
+        $orderByUserNotice = $request->query("porAvisosUsuario");
 
         $eventos = Evento::where($queryItems)->with(['programasEducativos', 'usuario']);
         if ($eventName){
@@ -59,6 +59,12 @@ class EventoController extends Controller
         }
         if ($orderByNombre){
             $eventos = $eventos->orderBy("nombre");
+        }
+        if ($orderByCoordinatorNotice) {
+            $eventos = $eventos->orderByDesc("avisarCoordinador");
+        }
+        if ($orderByUserNotice) {
+            $eventos = $eventos->orderByDesc("avisarUsuario");
         }
         if ($includeEvaluacion) {
             $eventos = $eventos->with("evaluacion");
@@ -171,29 +177,7 @@ class EventoController extends Controller
         return new EventoResource($evento);
     }    
 
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @param  Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function create(Request $request)
-    {
-		$usuario = Usuario::all(['id']);
-		$modalidades = Modalidade::all(['id']);
-		$estados = EstadoEnum::all(['id']);
-		$tipos = Tipo::all(['id']);
-
-        return view('pages.eventos.create', [
-            'model' => new Evento,
-			"usuario" => $usuario,
-			"modalidades" => $modalidades,
-			"estados" => $estados,
-			"tipos" => $tipos,
-
-        ]);
-    }    /**
+   /**
      * Store a newly created resource in storage.
      *
      * @param  Request  $request
@@ -328,47 +312,7 @@ class EventoController extends Controller
     }
     
     
-    
     /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  Request  $request
-     * @param  Evento  $evento
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Request $request, $id)
-    {
-        $status = 500;
-        $message = "Algo falló";
-        \DB::beginTransaction();
-        try{
-            $model = Evento::with("estado")->findOrFail($request->id);
-
-            if ($model->idEstado !== $request->input("idEstado")){
-                $message = "change status!!!";
-            }
-
-            //$model->update($request->all());
-            
-            
-
-            //\DB::commit();
-            
-            //$message = "Evento actualizado";
-            $message = "nope!!!";
-
-            $status = 200;
-        } catch (Exception $ex){
-            \DB::rollBack();
-            $message = $ex->getMessage();
-        }finally {
-            return response()->json([
-                'message' => 'Evaluation updated successfully',
-                'data' => new EventoResource($model),
-            ], $status);
-        }
-
-    }    /**
      * Update a existing resource in storage.
      *
      * @param  Request  $request
@@ -379,24 +323,30 @@ class EventoController extends Controller
     {
         $status = 500;
         $message = "Algo falló";
+
+        $isReply = $request->query("respuesta");
+
+        
+        \DB::beginTransaction();
         try{
-            $model = Evento::findOrFail($evento->id);
             
-            $modelIdEstado = $model->idEstado;
-            $model->update($request->all());
+            $evento->update($request->all());
             
-            $requestIdEstado = $request->input("idEstado");
+            if ($isReply) {
+                    
+                $estado = EstadoEnum::tryFrom(
+                    $request->input("idEstado")
+                );
 
-            if ($modelIdEstado != $requestIdEstado){
-                $this->changeEventStatus($model, EstadoEnum::tryFrom($requestIdEstado));
-            } 
-
+                $this->changeEventStatus($evento, $estado);
+                 
+                $evento->update(["avisarUsuario" => 1]);
+            }
             
             \DB::commit();
             
             
             $message = "Evento actualizado";
-            
             
             $status = 200;
         } catch (\Throwable $ex){
@@ -405,10 +355,11 @@ class EventoController extends Controller
         }finally {
             return response()->json([
                 'message' => $message,
-                'data' => new EventoResource($model),
+                'data' => $evento,
             ], $status);
         }
     } 
+    
     
     private function changeEventStatus(Evento $event, EstadoEnum $newIdEstado) {
 
@@ -435,23 +386,5 @@ class EventoController extends Controller
         } 
         
     }
-    
-    /**
-     * Delete a  resource from  storage.
-     *
-     * @param  Request  $request
-     * @param  Evento  $evento
-     * @return \Illuminate\Http\Response
-     * @throws \Exception
-     */
-    public function destroy(Request $request, Evento $evento)
-    {
-        if ($evento->delete()) {
-                session()->flash('app_message', 'Evento successfully deleted');
-            } else {
-                session()->flash('app_error', 'Error occurred while deleting Evento');
-            }
 
-        return redirect()->back();
-    }
 }
