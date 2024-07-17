@@ -148,18 +148,13 @@ class SolicitudEspacioController extends Controller
                     $request->input("idEstado")
                 );
 
-                //$this->changeEventStatus($evento, $estado);
-                 
-                $solicitud->update(["avisarUsuario" => 1]);
-                $solicitud->update(["avisarAdministrador" => 0]);
+                Aviso::where("idSolicitudEspacio", "=", $solicitud->id)->update([
+                    "avisarUsuario" => 1,
+                    "avisarStaff" => 0
+                ]);             
+                
             }
             
-            if ($markUserRead) {
-                $solicitud->update(["avisarUsuario" => 0]);
-            }
-            if ($markAdminRead) {
-                $solicitud->update(["avisarCoordinador" => 0]);
-            }
             
             \DB::commit();
             

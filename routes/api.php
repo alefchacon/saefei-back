@@ -69,8 +69,9 @@ Route::group(['/api'], function () {
     Route::apiResource('eventos', EventoController::class);
     Route::apiResource('avisos', AvisoController::class);
     Route::post('avisos/marcarLeidasUsuario', [AvisoController::class, "markAsUserRead"]);
-
     });
+
+    
     
 Route::group(['/api', 'middleware' => 'auth:sanctum'], function (){
         
