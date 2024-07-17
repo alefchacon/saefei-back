@@ -44,23 +44,24 @@ class AvisoController extends Controller
         
 
         $noticesCollection = [];
+        $noticeAmount = 0;
         if ($view === "coord"){
             $noticesCollection = Aviso::where("idEvento", "<>", null)->orderByDesc("avisarStaff");
+            $noticeAmount = $this->countNoticeAmount($noticesCollection, "avisarStaff");
         }
         if ($view === "admin"){
             $noticesCollection = Aviso::where("idSolicitudEspacio", "<>", null)->orderByDesc("avisarStaff");;
+            $noticeAmount = $this->countNoticeAmount($noticesCollection, "avisarStaff");
         }
         if ($view === "todos"){
             $noticesCollection = Aviso::orderByDesc("avisarStaff");;
         }
         else if ($forUser){
             $noticesCollection = Aviso::where("idUsuario", "=", $forUser)->orderByDesc("avisarUsuario");;
+            $noticeAmount = $this->countNoticeAmount($noticesCollection, "avisarUsuario");
         }
-        $noticesCollection->with(["evento.solicitudesEspacios.espacio", "solicitudEspacio.espacio", "solicitudEspacio.estado"]);
+        $noticesCollection->with(["evento.solicitudesEspacios.espacio", "solicitudEspacio.espacio", "solicitudEspacio.estado", "solicitudEspacio.usuario"]);
         
-        $noticeAmount = $noticesCollection->get()->filter(function ($notice) {
-            return (($notice->avisarUsuario > 0) || ($notice->avisarStaff > 0)); 
-        })->count();
 
 
         $noticesCollection = new AvisoCollection($noticesCollection->paginate(5)->appends($request->query()));
@@ -73,51 +74,13 @@ class AvisoController extends Controller
         
     }    
 
-    
 
-    
-    
-    /**
-     * Update a existing resource in storage.
-     *
-     * @param  Request  $request
-     * @param  Evento  $evento
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request,Evento $evento)
-    {
-        $status = 500;
-        $message = "Algo falló";
-        try{
-            $model = Evento::findOrFail($evento->id);
-            
-            $modelIdEstado = $model->idEstado;
-            $model->update($request->all());
-            
-            $requestIdEstado = $request->input("idEstado");
+    private function countNoticeAmount(Builder $notices, string $type = "avisarStaff"){
 
-            if ($modelIdEstado != $requestIdEstado){
-                $this->changeEventStatus($model, EstadoEnum::tryFrom($requestIdEstado));
-            } 
-
-            
-            \DB::commit();
-            
-            
-            $message = "Evento actualizado";
-            
-            
-            $status = 200;
-        } catch (\Throwable $ex){
-            \DB::rollBack();
-            $message = $ex->getMessage();
-        }finally {
-            return response()->json([
-                'message' => $message,
-                'data' => new EventoResource($model),
-            ], $status);
-        }
-    } 
+        return $notices->get()->filter(function ($notice) use ($type) {
+            return (($notice[$type] > 0)); 
+        })->count();
+    }
 
     public function markAsUserRead(Request $request)
     {
@@ -125,6 +88,8 @@ class AvisoController extends Controller
         $message = "Algo falló";
 
         $notices = $request->input("notices");
+        $type = $request->query("tipo");
+
         $updatedNotices = [];
         \DB::beginTransaction();
 
@@ -134,10 +99,12 @@ class AvisoController extends Controller
             foreach ($notices as $notice) {
                 $model = Aviso::findOrFail($notice["id"]);
 
-                if ($model->avisarUsuario !== 0){
+                if ($type === "staff"){
+                    $model->update(["avisarStaff" => 0]);
+                } else {
                     $model->update(["avisarUsuario" => 0]);
-                    $noticesUpdated++;
                 }
+                $noticesUpdated++;
                 
                 array_push($updatedNotices, $model);
             } 

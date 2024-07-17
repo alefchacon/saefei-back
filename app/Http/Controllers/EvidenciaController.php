@@ -49,38 +49,39 @@ class EvidenciaController extends Controller
      */
     public function store(Request $request)
     {
-        $document = new Evidencia;
-        $code = 500;
         try{
             
-            
-            if ($request->hasFile('Evidencia.archivo')) {
-                $evidence = $request->input('Evidencia');
-                $file = $request->file('Evidencia.archivo');
-                if ($file->isValid()) {
-                    $blob = file_get_contents($file->getRealPath());
-                    $idEvaluacion = $evidence['idEvaluacion'] ?? null;
-                    
-                    $document->archivo = $blob;
-                    $document->tipo = $file->getMimeType();
-                    $document->nombre = $file->getClientOriginalName();
-                    $document->idEvaluacion = $idEvaluacion;
-                    $document->save();
-        
-                    $message = 'Evaluación registrada: ';
-                    $code = 201;
-                }
-            } else {
-                $message = 'Sin evidencia';
-                $code = 400;
+            if (!$request->hasFile('archivos')) {
+                return response()->json(['error' => 'Debe subir al menos un archivo como evidencia.'], 400);
             }
+            
+            $files = $request->file('archivos');
+
+            foreach ($files as $file){
+                if (!$file->isValid()) {
+                    return response()->json(['error' => 'El archivo ' . $file->getClientOriginalName() . 'no es válido.'], 400);
+                }
+            }
+
+            foreach ($files as $file){
+
+                $blob = file_get_contents($file->getRealPath());
+                $idEvaluacion = $request->input('idEvaluacion');
+                
+                $document = new Evidencia;
+                $document->archivo = $blob;
+                $document->tipo = $file->getMimeType();
+                $document->nombre = $file->getClientOriginalName();
+                $document->idEvaluacion = $idEvaluacion;
+                $document->save();
+            }
+
+            return response()->json(['message' => 'Evidencia registrada'], 201);
+
+            
         }catch (Exception $ex) {
             $message = $ex->getMessage();
-        }finally{
-            
-            return response()->json([
-                'message' => $message], $code);
-        };
+        }
     } /**
      * Show the form for editing the specified resource.
      *

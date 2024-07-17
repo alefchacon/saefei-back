@@ -14,17 +14,15 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\Evento;
-use App\Models\Modalidade;
-use App\Models\Estado;
-use App\Models\Tipo;
+use App\Models\Enums\EstadoEnum;
 use App\Filters\EventoFilter;
 use App\Http\Resources\EventoCollection;
 use Exception;
 use App\Mail\Mailer;
 use App\Mail\Mail;
 use App\Mail\MailFactory;
-use App\Models\Enums\EstadoEnum;
 use App\Models\Enums\RolEnum;
+use App\Models\Aviso;
 
 class EventoController extends Controller
 {
@@ -196,83 +194,44 @@ class EventoController extends Controller
 
         try{
             
-            //$event = Evento::create($request->all() );
-            //$event->save();
+            $event = Evento::create($request->all() );
+            $event->save();
             
-           // $programas = json_decode($request->input("programas"), true);
+            $idEvento = $event->id;
+            $this->storeCronograma($request, $idEvento);
+            $this->storePublicidad($request, $idEvento);
             
-           /*
+            $programas = json_decode($request->input("programas"), true);
             foreach ($programas as $programa){
-                /*
-                Uso una consulta parametrizada en lugar de métodos de Eloquent
-                por que, por alguna razón, PHP no reconoce la existencia de 
-                la clase Eventos_ProgramaEducativos, pese a que ya se importó
-                y todo. 
-                
-                El error que arroja es el siguiente. Para obtenerlo, el try-catch
-                debe atrapar \Error en lugar de \Exception. 
-                
-                "Class "App\Models\Eventos_ProgramaEducativos" not found"
-                
-                */
-                
-                
-                /*
                 \DB::insert("INSERT INTO eventos_programaeducativos (idEvento, idProgramaEducativo) VALUES (?, ?)", [$event->id, $programa["id"]]);
-                
-                
             }
-            */
             
-            //RESERVACIONES
-            /*
             $reservaciones = json_decode($request->input("reservaciones"), true);
             foreach ($reservaciones as $reservacion) {
                 $reservationModel = SolicitudEspacio::findOrFail($reservacion["id"]);
-                $reservationModel->idEstado = 3;
+                $reservationModel->idEstado = EstadoEnum::evaluado;
                 $reservationModel->save();
             }
-            */
-
-            /*
+            
             $organizer = User::findOrFail($request->input("idUsuario"));
-            Mailer::sendEmail(to: $organizer);
+            Mailer::sendEmail(to: $organizer, mail: MailFactory::GetEventNewMail($event));
             
-            $coordinators = User::where("idRol", 5)->get();
+            $coordinators = User::where("idRol", RolEnum::coordinador)->get();
             foreach($coordinators as $coordinator){
-                Mailer::sendEmail(to: $coordinator);
+                Mailer::sendEmail(to: $coordinator, mail: MailFactory::GetEventNewMail($event));
             }
-            */
-            //$message  =$this->storePublicidad($request);
-            //$message =$request->file("difusion");
-
-            if ($request->hasFile('cronograma')) {
             
-                $cronograma = new Cronograma();
-                $file = $request->file('cronograma');
-                if ($file->isValid()) {
-                    $blob = file_get_contents($file->getRealPath());
-                    
-    
-                    
-                    $cronograma->archivo = $blob;
-                    $cronograma->tipo = $file->getMimeType();
-                    $cronograma->nombre = $file->getClientOriginalName();
-                    $cronograma->idEvento = 1;
-                    $cronograma->save();
-                    
-        
-                }
-            }
-    
-
-            $message = $request->input('cronograma');
-
+            Aviso::create([
+                "avisarStaff" => 1,
+                "idUsuario" => $request->idUsuario,
+                "idEvento" => $event->id
+            ]);
+            
             $code = 201;
             \DB::commit
             
             ();
-        } catch (\Exception $ex) {
+        } catch (\Throwable $ex) {
             $message = $ex->getMessage();
             \DB::rollBack();
         }finally{
@@ -284,31 +243,51 @@ class EventoController extends Controller
             
             //return response()->json($request);
         } 
+
+    private function storeCronograma(Request $request, int $idEvento){
+        if (!$request->hasFile('cronograma')) {
+            return;
+        }
+
+        $cronograma = $request->file("cronograma");
+
+        if (!$cronograma->isValid()) {
+            return response()->json(['error' => 'El archivo ' . $cronograma->getClientOriginalName() . 'no es válido.'], 400);
+        }
+
+        $blob = file_get_contents($cronograma->getRealPath());
+        
+        $document = new Cronograma;
+        $document->archivo = $blob;
+        $document->tipo = $cronograma->getMimeType();
+        $document->nombre = $cronograma->getClientOriginalName();
+        $document->idEvento = $idEvento;
+        $document->save();
+    }
     
-    private function storePublicidad(Request $request){
-        if (!$request->hasFile('difusion')) {
+    private function storePublicidad(Request $request, int $idEvento){
+        if (!$request->hasFile('publicidad')) {
             return "a";
         }
 
-        $difusiones = $request->file("difusion");
+        $publicidades = $request->file("publicidad");
 
-        foreach ($difusiones as $difusion){
-            if (!$difusion->isValid()) {
-                return response()->json("Los archivos no pudieron procesarse", 500);
+        foreach ($publicidades as $publicidad){
+            if (!$publicidad->isValid()) {
+                return response()->json(['error' => 'El archivo ' . $publicidad->getClientOriginalName() . 'no es válido.'], 400);
             }
         }
 
-
-        foreach ($difusiones as $file){
+        foreach ($publicidades as $publicidadArchivo){
+            $blob = file_get_contents($publicidadArchivo->getRealPath());
+            
             $publicidad = new Publicidad();
-            $blob = file_get_contents($file->getRealPath());
             $publicidad->archivo = $blob;
-            $publicidad->tipo = $file->getMimeType();
-            $publicidad->nombre = $file->getClientOriginalName();
-            $publicidad->idEvento = 1;
+            $publicidad->tipo = $publicidadArchivo->getMimeType();
+            $publicidad->nombre = $publicidadArchivo->getClientOriginalName();
+            $publicidad->idEvento = $idEvento;
             $publicidad->save();
         }
-        return "b";
     }
     
     
@@ -341,6 +320,10 @@ class EventoController extends Controller
                 $this->changeEventStatus($evento, $estado);
                  
                 $evento->update(["avisarUsuario" => 1]);
+                Aviso::where("idEvento", "=", $evento->id)->update([
+                    "avisarUsuario" => 1,
+                    "avisarStaff" => 0
+                ]);   
             }
             
             \DB::commit();
