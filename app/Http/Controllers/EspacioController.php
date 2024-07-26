@@ -22,10 +22,9 @@ class EspacioController extends Controller
         $fecha = $request->input('fecha');
 
 
-        $events = Espacio::encontrarPor($fecha);
+        $spaces = Espacio::encontrarPor($fecha);
 
-
-        return new EspacioCollection($events);
+        return new EspacioCollection($spaces);
     }
 
     /**

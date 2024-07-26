@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CronogramaController;
 use App\Http\Controllers\DifusionController;
 use App\Http\Controllers\EspacioController;
 use App\Http\Controllers\EstadoController;
@@ -69,6 +70,9 @@ Route::group(['/api'], function () {
     Route::apiResource('eventos', EventoController::class);
     Route::apiResource('avisos', AvisoController::class);
     Route::post('avisos/marcarLeidasUsuario', [AvisoController::class, "markAsUserRead"]);
+
+    Route::apiResource('cronogramas', CronogramaController::class);
+    Route::apiResource('publicidad', PublicidadController::class);
     });
 
     

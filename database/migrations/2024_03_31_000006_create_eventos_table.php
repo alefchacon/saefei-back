@@ -28,6 +28,7 @@ return new class extends Migration
             $table->integer("numParticipantes");
             $table->string("requisitosCentroComputo");
             $table->integer("numParticipantesExternos");
+            $table->boolean("requiereApoyoCentroComputo");
             $table->boolean("requiereEstacionamiento");
             $table->boolean("requiereFinDeSemana");
             $table->boolean("requiereMaestroDeObra");

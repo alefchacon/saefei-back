@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\ArchivoCollection;
 use App\Http\Resources\EventoResource;
 use App\Http\Resources\EvidenciaResource;
 use Illuminate\Http\Request;
@@ -34,10 +35,10 @@ class EvidenciaController extends Controller
      * @param  Evento  $evento
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show($idEvaluacion)
     {
-
-
+        $evidencia = Evidencia::where("idEvaluacion", "=", $idEvaluacion)->get();
+        return new ArchivoCollection($evidencia);
     }    
 
 
@@ -82,35 +83,7 @@ class EvidenciaController extends Controller
         }catch (Exception $ex) {
             $message = $ex->getMessage();
         }
-    } /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  Request  $request
-     * @param  Evento  $evento
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Request $request, $id)
-    {
-    }    /**
-     * Update a existing resource in storage.
-     *
-     * @param  Request  $request
-     * @param  Evento  $evento
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request,Evento $evento)
-    {
+    } 
 
-    }    /**
-     * Delete a  resource from  storage.
-     *
-     * @param  Request  $request
-     * @param  Evento  $evento
-     * @return \Illuminate\Http\Response
-     * @throws \Exception
-     */
-    public function destroy(Request $request, Evento $evento)
-    {
 
-    }
 }

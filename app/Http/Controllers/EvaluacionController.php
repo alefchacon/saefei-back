@@ -38,13 +38,16 @@ class EvaluacionController extends Controller
      * @param  Evaluacion  $evaluacion
      * @return \Illuminate\Http\Response
      */
-    public function show(Request $request, Evaluacion $evaluacion)
+    public function show($idEvento)
     {
-        return view('pages.evaluaciones.show', [
-                'record' =>$evaluacion,
-        ]);
-
-    }    /**
+        $evaluacion = Evaluacion::where("idEvento", "=", $idEvento)->first();
+        if (!$evaluacion){
+            return response()->json(["message" => "No se encontró la evaluación"], 404);
+        }
+        return new EvaluacionResource($evaluacion);
+    }    
+    
+    /**
      * Show the form for creating a new resource.
      *
      * @param  Request  $request
@@ -118,24 +121,7 @@ class EvaluacionController extends Controller
                 session()->flash('app_error', 'Something is wrong while updating Evaluacion');
             }
         return redirect()->back();
-    }    /**
-     * Delete a  resource from  storage.
-     *
-     * @param  Request  $request
-     * @param  Evaluacion  $evaluacion
-     * @return \Illuminate\Http\Response
-     * @throws \Exception
-     */
-    public function destroy(Request $request, Evaluacion $evaluacion)
-    {
-        if ($evaluacion->delete()) {
-                session()->flash('app_message', 'Evaluacion successfully deleted');
-            } else {
-                session()->flash('app_error', 'Error occurred while deleting Evaluacion');
-            }
-
-        return redirect()->back();
-    }
+    }    
 
     public function uploadEvidence(Request $request){
         DB::beginTransaction();

@@ -161,8 +161,8 @@ class EventoController extends Controller
      */
     public function show($id)
     {
-        
-        $evento = Evento::with(['estado', 'evaluacion.evidencias', 'tipo', 'modalidad', 'usuario', 'solicitudesEspacios.espacio'])->find($id);
+
+        $evento = Evento::with(['estado', 'tipo', 'modalidad', 'usuario', 'programasEducativos', 'solicitudesEspacios.espacio', 'evaluacion.evidencias'])->find($id);
         if (!$evento) {
             return response()->json(['message' => 'No existe ese evento'], 404);
         }
@@ -170,8 +170,8 @@ class EventoController extends Controller
         /*
         $evidencia = \DB::select("SELECT * FROM evidencias WHERE id = ?", [1]);
         $base64Data = base64_encode($evidencia[0]->archivo);
-        return $base64Data;
-        */
+        return $base64Data;*/
+        
         return new EventoResource($evento);
     }    
 

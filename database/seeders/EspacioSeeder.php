@@ -13,12 +13,20 @@ class EspacioSeeder extends Seeder
      */
     public function run(): void
     {
-        $names = ['Auditorio', 'Audiovisual', 'Salón de Cristal', 'Baño'];
+        $names = [
+            'Auditorio', 
+            'Audiovisual', 
+            'Salón de Cristal', 
+            'Baño',
+            'Otro lugar',
+        ];
 
         foreach ($names as $name) {
             Espacio::factory()->create([
                 'nombre' => $name,
             ]);
         }
+
+        Espacio::factory()->count(50)->create();
     }
 }
