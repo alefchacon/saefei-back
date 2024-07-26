@@ -18,6 +18,11 @@ class Cronograma extends Model
         "archivo",
     ];
 
+    public function getArchivoAttribute($value)
+    {
+        return base64_encode($this->attributes['archivo']);
+    }
+
     public function evento() {
         return $this->belongsTo( Evento::class, 'idEvento', 'id');
     }

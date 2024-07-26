@@ -58,6 +58,7 @@ class EventoFactory extends Factory
             "requiereFinDeSemana" => $this->faker->boolean(),
             "requiereMaestroDeObra" => $this->faker->boolean(),
             "requiereNotificarPrensaUV" => $this->faker->boolean(),
+            "requiereApoyoCentroComputo" => $this->faker->boolean(),
             "adicional" => $this->faker->paragraph(1),
             "inicio" => $start,
             "fin" => $end,

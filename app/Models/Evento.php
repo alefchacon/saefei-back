@@ -27,7 +27,7 @@ class Evento extends Model
         "requiereFinDeSemana",
         "requiereMaestroDeObra",
         "requiereNotificarPrensaUV",
-
+        "requiereApoyoCentroComputo",
         "inicio",
         "fin",
 
