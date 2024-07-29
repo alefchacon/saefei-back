@@ -41,6 +41,7 @@ class EventoResource extends JsonResource
             'notifyUser' => $this->avisarUsuario,
             'cronogram' => new ArchivoResource($this->whenLoaded('cronograma')),
             'publicity' => new ArchivoCollection($this->whenLoaded('publicidades')),
+            "idEstado" => $this->idEstado,
 
             'start' => $this->inicio,
             'end' => $this->fin,

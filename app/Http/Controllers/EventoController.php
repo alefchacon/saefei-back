@@ -183,10 +183,6 @@ class EventoController extends Controller
      */
     public function store(Request $request)
     {
-        
-
-
-
         $code = 500;
         $message = 'Evaluación registrada';
         \DB::beginTransaction();
@@ -214,11 +210,10 @@ class EventoController extends Controller
             }
             
             $organizer = User::findOrFail($request->input("idUsuario"));
-            Mailer::sendEmail(to: $organizer, mail: MailFactory::GetEventNewMail($event));
             
             $coordinators = User::where("idRol", RolEnum::coordinador)->get();
             foreach($coordinators as $coordinator){
-                Mailer::sendEmail(to: $coordinator, mail: MailFactory::GetEventNewMail($event));
+                Mailer::sendEmail(to: $coordinator, mail: MailFactory::GetEventNewMail($event, $organizer));
             }
             
             Aviso::create([

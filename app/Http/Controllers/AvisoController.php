@@ -46,6 +46,7 @@ class AvisoController extends Controller
         $noticesCollection = [];
         $noticeAmount = 0;
         if ($view === "coord"){
+            
             $noticesCollection = Aviso::where("idEvento", "<>", null)->orderByDesc("avisarStaff");
             $noticeAmount = $this->countNoticeAmount($noticesCollection, "avisarStaff");
         }

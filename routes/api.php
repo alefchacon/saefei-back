@@ -19,6 +19,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\RolController;
 use App\Http\Controllers\EvidenciaController;
 use App\Http\Controllers\AvisoController;
+use App\Http\Controllers\EmailController;
 use App\Models\Difusion;
 use App\Models\Espacio;
 use App\Models\Estado;
@@ -73,6 +74,7 @@ Route::group(['/api'], function () {
 
     Route::apiResource('cronogramas', CronogramaController::class);
     Route::apiResource('publicidad', PublicidadController::class);
+    Route::apiResource('email', EmailController::class);
     });
 
     

@@ -19,6 +19,7 @@ class SolicitudEspacioResource extends JsonResource
             'response' => $this->respuesta,
             'start' => $this->inicio,
             'end' => $this->fin,
+            'idEstado' => $this->idEstado,
 
             'notifyAdministrator' => $this->avisarAdministrador,
             'notifyUser' => $this->avisarUsuario,

@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\Evaluacion;
 use App\Models\Evidencia;
+use App\Models\Aviso;
 use App\Models\Evento;
 use App\Http\Resources\EvaluacionCollection;
 use Illuminate\Database\QueryException;
@@ -47,20 +48,6 @@ class EvaluacionController extends Controller
         return new EvaluacionResource($evaluacion);
     }    
     
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @param  Request  $request
-     */
-    public function create(Request $request)
-    {
-        return new EvaluacionResource(Evaluacion::create($request->all()));
-    }    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(Request $request)
     {0;
 
@@ -72,6 +59,16 @@ class EvaluacionController extends Controller
             $event = Evento::find($evaluation->idEvento);
             $event->idEstado = 3;
             $event->save();
+
+            $this->storeEvidence($request, $evaluation->id);
+
+            Aviso::where("idEvento", "=", $event->id)
+                 ->update([
+                    "avisarUsuario" => 0,
+                    "avisarStaff" => 1
+                 ]);
+
+
             DB::commit();
 
 
@@ -84,25 +81,37 @@ class EvaluacionController extends Controller
             
             return response()->json([
                 'message' => $message,
-                'data' => new EvaluacionResource($evaluation)], $code);
+                'data' => $request->hasFile('evidencias')], $code);
         } 
-    } /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  Request  $request
-     * @param  Evaluacion  $evaluacion
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Request $request, Evaluacion $evaluacion)
-    {
-		$eventos = Evento::all(['id']);
+    } 
 
-        return view('pages.evaluaciones.edit', [
-            'model' => $evaluacion,
-			"eventos" => $eventos,
+    private function storeEvidence(Request $request, int $idEvaluacion){
+        if (!$request->hasFile('evidencias')) {
+            return "a";
+        }
 
-            ]);
-    }    /**
+        $evidencias = $request->file("evidencias");
+
+        foreach ($evidencias as $evidencia){
+            if (!$evidencia->isValid()) {
+                return response()->json(['error' => 'El archivo ' . $evidencia->getClientOriginalName() . 'no es válido.'], 400);
+            }
+        }
+
+        foreach ($evidencias as $evidenciaArchivo){
+            $blob = file_get_contents($evidenciaArchivo->getRealPath());
+            
+            $evidencia = new Evidencia();
+            $evidencia->archivo = $blob;
+            $evidencia->tipo = $evidenciaArchivo->getMimeType();
+            $evidencia->nombre = $evidenciaArchivo->getClientOriginalName();
+            $evidencia->idEvaluacion = $idEvaluacion;
+            $evidencia->save();
+        }
+    }
+    
+    
+    /**
      * Update a existing resource in storage.
      *
      * @param  Request  $request
