@@ -31,6 +31,7 @@ class EvaluacionResource extends JsonResource
             
             'idEvento' => $this->idEvento,
             
+            'evento' =>new EventoCollection($this->whenLoaded('evento')),
             'evidences' => new EvidenciaCollection($this->whenLoaded('evidencias')),
 
         ];

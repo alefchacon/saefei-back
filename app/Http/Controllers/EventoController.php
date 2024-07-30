@@ -303,26 +303,13 @@ class EventoController extends Controller
         
         \DB::beginTransaction();
         try{
-            
+            $originalIdEstado = $evento->idEstado;
+
             $evento->update($request->all());
             
-            if ($isReply) {
-                    
-                $estado = EstadoEnum::tryFrom(
-                    $request->input("idEstado")
-                );
-
-                $this->changeEventStatus($evento, $estado);
-                 
-                $evento->update(["avisarUsuario" => 1]);
-                Aviso::where("idEvento", "=", $evento->id)->update([
-                    "avisarUsuario" => 1,
-                    "avisarStaff" => 0
-                ]);   
-            }
+            $this->handleEventReply($evento, $originalIdEstado);
             
             \DB::commit();
-            
             
             $message = "Evento actualizado";
             
@@ -337,6 +324,26 @@ class EventoController extends Controller
             ], $status);
         }
     } 
+
+    private function handleEventReply(Evento $event, int $originalIdEstado){
+        $replyingToEventOrganizer = 
+            $originalIdEstado !== $event->idEstado;
+
+        if (!$replyingToEventOrganizer){
+            return;
+        }
+
+        $event->load('usuario');
+        $estado = EstadoEnum::tryFrom($event->idEstado);
+
+        MailFactory::sendEventReplyMail($event);
+        
+        Aviso::where("idEvento", "=", $event->id)->update([
+            "avisarUsuario" => 1,
+            "avisarStaff" => 0
+        ]);   
+        
+    }
     
     
     private function changeEventStatus(Evento $event, EstadoEnum $newIdEstado) {
