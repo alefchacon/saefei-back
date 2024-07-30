@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+<style>
+
+  h3, h2{
+    margin: 0
+  }
+  p{
+    margin: 0
+  }
+  .primary{
+    text-decoration: none;
+    color: white !important;
+    background-color: #18529d;
+    padding: 10px 20px;
+    border-radius: 5px;
+  }
+
+</style>
+</head>
+
+
+<body 
+  style="
+    margin: 0; 
+    padding: 0 0 20px 0;">
+  <div 
+    style=" 
+      padding: 10px;
+      margin: 15px 15px 50px 0 ;
+      background-color: rgb(236, 240, 243);
+      border-radius: 10px;" 
+    class="event">
+    <h3>{{eventName}}</h3>
+    <p><b>por:</b> {{organizer}}, {{job}}</p>
+
+    <hr 
+      style="
+        border-top: 3px solid #bbb;
+        margin: 20px 10px;">
+    <p><b>¿Cómo calificaría la atención recibida por parte de la Coordinación de Eventos Académicos?
+    </b></p>
+    <h2 style="color: #18529d;">{{ratingAttention}}</h2>
+    <br>
+    <p><b>¿Cómo calificaría el espacio donde se llevó acabo el evento, en términos de cumplir con sus expectativas y requisitos?
+    </b></p>
+    <h2 style="color: #18529d;">{{ratingSpace}}</h2>
+    <br>
+    <p><b>¿Cómo calificaría la eficiencia del apoyo del Centro de Cómputo para la atención de su evento?
+    </b></p>
+    <h2 style="color: #18529d;">{{ratingComputerCenter}}</h2>
+    <br>
+    <p><b>¿Cómo calificaría la adecuación de los recursos técnicos proporcionados para satisfacer las necesidades del evento?
+    </b></p>
+    <h2 style="color: #18529d;">{{ratingResources}}</h2>
+
+  </div>
+  <a class="primary" href="{{url}}">Ver evaluación completa</a>
+</body>
+</html>

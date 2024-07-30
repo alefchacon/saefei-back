@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\EvaluacionResource;
+use App\Http\Resources\EventoResource;
+use App\Mail\MailFactory;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\Evaluacion;
@@ -56,11 +58,14 @@ class EvaluacionController extends Controller
         $evaluation = new Evaluacion;
         try{
             $evaluation = Evaluacion::create($request->all());
+            $this->storeEvidence($request, $evaluation->id);
+
             $event = Evento::find($evaluation->idEvento);
             $event->idEstado = 3;
             $event->save();
+            $event->load(['evaluacion', 'usuario']);
 
-            $this->storeEvidence($request, $evaluation->id);
+            MailFactory::sendEvaluationNewMail($event);
 
             Aviso::where("idEvento", "=", $event->id)
                  ->update([
@@ -72,7 +77,7 @@ class EvaluacionController extends Controller
             DB::commit();
 
 
-            $message = 'Evaluación registrada';
+            $message = new EventoResource($event);
             $code = 201;
         }catch (\Exception $ex) {
             $message = $ex->getMessage();
