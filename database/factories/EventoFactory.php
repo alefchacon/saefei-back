@@ -49,20 +49,29 @@ class EventoFactory extends Factory
             "audiencias" => $this->faker->randomElement($audiences),
             "eje" => $this->faker->randomElement($axi),
             "tematicas" => $this->faker->randomElement($themes),
-            "plataformas" => $this->faker->randomElement($platforms),
-            
+
+            "inicio" => $start,
+            "fin" => $end,
             "numParticipantes" => $this->faker->numberBetween(1,100),
+            
+            "plataformas" => $this->faker->randomElement($platforms),
+
             "requisitosCentroComputo" => $this->faker->paragraph(1),
+            "requiereTransmisionEnVivo" => $this->faker->boolean(),
+            "presidium" => $this->faker->paragraph(1),
+            "decoracion" => $this->faker->paragraph(1),
             "numParticipantesExternos" => $this->faker->numberBetween(1,100),
             "requiereEstacionamiento" => $this->faker->boolean(),
             "requiereFinDeSemana" => $this->faker->boolean(),
-            "requiereMaestroDeObra" => $this->faker->boolean(),
-            "requiereNotificarPrensaUV" => $this->faker->boolean(),
-            "requiereApoyoCentroComputo" => $this->faker->boolean(),
-            "adicional" => $this->faker->paragraph(1),
-            "inicio" => $start,
-            "fin" => $end,
+            
+            "medios" => "Radio UV",
+            
+            "requiereConstancias" => $this->faker->boolean(),
+            "ponientes" => $this->faker->paragraph(1),
+            
+
             "respuesta"=> null, 
+
             "idUsuario" => $this->faker->numberBetween(1,3),
             
             "idModalidad" => 1,
