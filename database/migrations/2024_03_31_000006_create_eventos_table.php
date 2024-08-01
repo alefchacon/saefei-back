@@ -12,33 +12,50 @@ return new class extends Migration
      */
     public function up(): void
     {
-        
         Schema::create('eventos', function (Blueprint $table) {
 
             $table->id()->primary()->unsigned()->unique();
 
-            $table->string("nombre");
-            $table->string("descripcion");
+            /*DETALLES DEL ORGANIZADOR*/
+            /*DETALLES DEL EVENTO*/
+            $table->string("nombre", 1000);
+            $table->string("descripcion", 1000);
             $table->string("pagina")->nullable()->default("uv.mx/fei");
-            $table->string("ambito");
-            $table->string("audiencias");
-            $table->string("eje");
-            $table->string("tematicas");
-            $table->string("plataformas")->nullable();
-            $table->integer("numParticipantes");
-            $table->string("requisitosCentroComputo");
-            $table->integer("numParticipantesExternos");
-            $table->boolean("requiereApoyoCentroComputo");
-            $table->boolean("requiereEstacionamiento");
-            $table->boolean("requiereFinDeSemana");
-            $table->boolean("requiereMaestroDeObra");
-            $table->boolean("requiereNotificarPrensaUV");
-            $table->string("adicional")->nullable();
-            $table->string("respuesta")->nullable();
-            $table->boolean("avisarCoordinador")->default(0);
-            $table->boolean("avisarUsuario")->default(0);
+            $table->string("ambito", 1000);
+            $table->string("audiencias", 1000);
+            $table->string("eje", 1000);
+            $table->string("tematicas", 1000);
+            
+            /*DETALLES LOGÍSTICOS*/
             $table->date("inicio");
             $table->date("fin");
+            $table->integer("numParticipantes")->default(0);
+            
+            /*ESPACIOS FISICOS*/
+            /*ESPACIOS VIRTUAL*/
+            /*ESPACIOS FISICO Y VIRTUAL*/
+            $table->string("plataformas", 1000)->nullable()->default(config('global.defaultString'));
+
+            /*RECURSOS ADICIONALES*/
+            $table->string("requisitosCentroComputo", 1000)->nullable()->default(config('global.defaultString'));
+            $table->boolean("requiereTransmisionEnVivo");
+            $table->string("presidium", 1000)->nullable()->default(config('global.defaultString'));
+            $table->string("decoracion", 1000)->nullable()->default(config('global.defaultString'));
+            $table->integer("numParticipantesExternos")->nullable()->default(0);
+            $table->boolean("requiereEstacionamiento");
+            $table->boolean("requiereFinDeSemana");
+            
+            /*DIFUSION DEL EVENTO*/
+            $table->string("medios", 1000);
+            
+            /*CONSTANCIAS*/
+            $table->boolean("requiereConstancias");
+            $table->string("ponientes", 1000);
+            
+            /*OTROS COMENTARIOS O SOLICITUDES ESPECIALES*/
+            $table->string("adicional", 1000)->nullable()->default(config('global.defaultString'));
+
+            $table->string("respuesta", 1000)->nullable()->default(config('global.defaultString'));
 
             $table->unsignedBigInteger("idUsuario");
             $table->unsignedBigInteger("idModalidad");
@@ -51,7 +68,7 @@ return new class extends Migration
             $table->foreign("idTipo")->references("id")->on("tipos");
             $table->timestamps(false);
         });
-        // DB::statement("ALTER TABLE eventos ADD cronograma MEDIUMBLOB NULL");
+
     }
 
     /**
