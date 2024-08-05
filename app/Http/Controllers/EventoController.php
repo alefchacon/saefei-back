@@ -146,7 +146,10 @@ class EventoController extends Controller
         $mes = $request->input('month');
 
 
-        $events = Evento::encontrarPor($anio, $mes);
+        $events = Evento::whereYear("inicio", "=", $anio)
+                        ->whereMonth("inicio", "=", $mes)
+                        ->where("idEstado", EstadoEnum::aceptado)
+                        ->with(["solicitudesEspacios.espacio", "modalidad"]);
 
 
         return new EventoCollection($events->paginate());
@@ -189,8 +192,12 @@ class EventoController extends Controller
         $event = new Evento;
 
         try{
-            
-            $event = Evento::create($request->all() );
+
+            $nonNullData = array_filter($request->all(), function ($value) {
+                return !is_null($value);
+            });
+
+            $event = Evento::create($nonNullData);
             $event->save();
             
             $idEvento = $event->id;
@@ -206,6 +213,7 @@ class EventoController extends Controller
             foreach ($reservaciones as $reservacion) {
                 $reservationModel = SolicitudEspacio::findOrFail($reservacion["id"]);
                 $reservationModel->idEstado = EstadoEnum::evaluado;
+                $reservationModel->idEvento = $event->id;
                 $reservationModel->save();
             }
             
@@ -297,15 +305,15 @@ class EventoController extends Controller
     {
         $status = 500;
         $message = "Algo falló";
-
-        $isReply = $request->query("respuesta");
-
         
         \DB::beginTransaction();
         try{
+            $nonNullData = array_filter($request->all(), function ($value) {
+                return !is_null($value);
+            });
             $originalIdEstado = $evento->idEstado;
 
-            $evento->update($request->all());
+            $evento->update($nonNullData);
             
             $this->handleEventReply($evento, $originalIdEstado);
             

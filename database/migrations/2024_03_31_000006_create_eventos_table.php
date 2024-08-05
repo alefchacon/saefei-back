@@ -38,19 +38,19 @@ return new class extends Migration
 
             /*RECURSOS ADICIONALES*/
             $table->string("requisitosCentroComputo", 1000)->nullable()->default(config('global.defaultString'));
-            $table->boolean("requiereTransmisionEnVivo");
+            $table->boolean("requiereTransmisionEnVivo")->default(false);
             $table->string("presidium", 1000)->nullable()->default(config('global.defaultString'));
             $table->string("decoracion", 1000)->nullable()->default(config('global.defaultString'));
             $table->integer("numParticipantesExternos")->nullable()->default(0);
-            $table->boolean("requiereEstacionamiento");
-            $table->boolean("requiereFinDeSemana");
+            $table->boolean("requiereEstacionamiento")->default(false);
+            $table->boolean("requiereFinDeSemana")->default(false);
             
             /*DIFUSION DEL EVENTO*/
             $table->string("medios", 1000);
             
             /*CONSTANCIAS*/
-            $table->boolean("requiereConstancias");
-            $table->string("ponientes", 1000);
+            $table->boolean("requiereConstancias")->default(false);
+            $table->string("ponientes", 1000)->default(false);
             
             /*OTROS COMENTARIOS O SOLICITUDES ESPECIALES*/
             $table->string("adicional", 1000)->nullable()->default(config('global.defaultString'));

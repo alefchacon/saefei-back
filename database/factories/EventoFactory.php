@@ -70,7 +70,7 @@ class EventoFactory extends Factory
             "ponientes" => $this->faker->paragraph(1),
             
 
-            "respuesta"=> null, 
+            "respuesta"=> "N/A", 
 
             "idUsuario" => $this->faker->numberBetween(1,3),
             
