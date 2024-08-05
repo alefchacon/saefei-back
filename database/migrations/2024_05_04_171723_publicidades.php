@@ -15,8 +15,8 @@ return new class extends Migration
             
             $table->id()->primary()->unsigned()->unique();
             $table->timestamps();
-            $table->text("nombre");
-            $table->text("tipo");
+            $table->string("nombre");
+            $table->string("tipo");
 
             $table->unsignedBigInteger('idEvento');
 

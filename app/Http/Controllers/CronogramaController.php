@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Resources\ArchivoResource;
+use App\Http\Resources\ArchivoCollection;
 use App\Http\Resources\EventoResource;
 use App\Http\Resources\AvisoCollection;
 use App\Models\Aviso;
@@ -18,14 +18,11 @@ class CronogramaController extends Controller
      *
      * @param  Request  $request
      */
-    public function show($id)
+    public function show($idEvento)
     {
         
-        $cronograma = Cronograma::where("idEvento", "=", $id)->first();
-        if (!$cronograma) {
-            return response()->json(['message' => 'No existe ese cronograma'], 404);
-        }
+        $cronograma = Cronograma::where("idEvento",$idEvento)->get();
         
-        return new ArchivoResource($cronograma);
+        return new ArchivoCollection($cronograma);
     }  
 }

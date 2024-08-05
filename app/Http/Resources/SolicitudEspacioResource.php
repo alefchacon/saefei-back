@@ -14,10 +14,12 @@ class SolicitudEspacioResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        $startDateTime = new \DateTime($this->inicio);
         return [
             'id' => $this->id,
             'response' => $this->respuesta,
             'start' => $this->inicio,
+            'startTime' => $startDateTime->format('H:i'),
             'end' => $this->fin,
             'idEstado' => $this->idEstado,
 
