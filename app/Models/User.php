@@ -6,6 +6,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Http\Request;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
@@ -59,8 +60,42 @@ class User extends Authenticatable
     public function eventos() {
         return $this->hasMany( Evento::class, 'idUsuario', 'id');
     }
-    public function solicitudesEspacios() {
-        return $this->hasMany( SolicitudEspacio::class, 'idUsuario', 'id');
+    public function reservaciones() {
+        return $this->hasMany( Reservacion::class, 'idUsuario', 'id');
+    }
+
+    public static function findByToken(Request $request){
+        if ($request->header("authorization") == null) {
+            return response()->json([
+                'message' => "Unauthenticated 1",
+            ], 401);
+        }
+
+        //Laravel regresa el token como <token ID>|<token>, pero para autenticar el token sólo se debe
+        //user el <token>, entonces se remueve el <token ID> y el |.
+                
+                        
+        $tokenParts = explode("|", $request->header("authorization"));
+        if (count($tokenParts) < 2) {
+            return response()->json([
+                'message' => "Unauthenticated",
+                
+            ], 401);
+        }
+
+        $token = $tokenParts[1];
+
+        $user = \DB::table("users")
+            ->join("personal_access_tokens", "users.id", "=", "personal_access_tokens.tokenable_id")
+            ->where("personal_access_tokens.token", "=", hash("sha256", $token))
+            ->select(["users.*"])
+            ->get()->first();
+
+        if (!$user){
+            return response()->json(["message"=> "No se encontró al usuaio"], 404);
+        }
+
+        return $user;
     }
 
 }

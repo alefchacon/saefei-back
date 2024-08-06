@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\Evento;
+use App\Models\Respuesta;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -69,14 +70,11 @@ class EventoFactory extends Factory
             "requiereConstancias" => $this->faker->boolean(),
             "ponientes" => $this->faker->paragraph(1),
             
-
-            "respuesta"=> "N/A", 
-
             "idUsuario" => $this->faker->numberBetween(1,3),
             
             "idModalidad" => 1,
+            "idTipo" => 1,
             "idEstado" => $this->faker->numberBetween(1,4),
-            "idtipo" => 1,
         ];
     }
 }

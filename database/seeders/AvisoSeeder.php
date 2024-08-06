@@ -22,7 +22,7 @@ class AvisoSeeder extends Seeder
         }
         foreach ($ids as $id) {
             Aviso::factory()->create([
-                'idSolicitudEspacio' => $id,
+                'idReservacion' => $id,
             ]);
         }
     }

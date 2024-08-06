@@ -2,16 +2,17 @@
 
 namespace Database\Factories;
 
-use App\Models\SolicitudEspacio;
+use App\Models\Reservacion;
+use App\Models\Respuesta;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\SolicitudEspacio>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Reservacion>
  */
-class SolicitudEspacioFactory extends Factory
+class ReservacionFactory extends Factory
 {
-    protected $model = SolicitudEspacio::class;
+    protected $model = Reservacion::class;
     /**
      * Define the model's default state.
      *
@@ -27,8 +28,8 @@ class SolicitudEspacioFactory extends Factory
             "fin" => $end,
             "idUsuario" => 1,  
             "idEspacio" => $this->faker->numberBetween(1,4),
-            "idEstado" => $this->faker->numberBetween(1,4),
             "idEvento" => $this->faker->numberBetween(1,4), 
+            "idEstado" =>  $this->faker->numberBetween(1,4), 
         ];
     }
 }

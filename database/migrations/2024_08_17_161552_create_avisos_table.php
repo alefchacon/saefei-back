@@ -14,18 +14,17 @@ return new class extends Migration
         Schema::create('avisos', function (Blueprint $table) {
             $table->id()->primary()->unsigned()->unique();
 
-            $table->boolean("avisarUsuario")->default(0);
-            $table->boolean("avisarStaff")->default(0);
+            $table->boolean("visto")->default(0);
 
-            $table->unsignedBigInteger("idUsuario");
             $table->unsignedBigInteger("idEvento")->nullable();
-            $table->unsignedBigInteger("idSolicitudEspacio")->nullable();
+            $table->unsignedBigInteger("idReservacion")->nullable();
+            $table->unsignedBigInteger("idUsuario")->nullable();
+            $table->unsignedBigInteger("idEstado");
             
-            
-
-            $table->foreign('idUsuario')->references('id')->on('users')->cascadeOnDelete();
             $table->foreign('idEvento')->references('id')->on('eventos')->cascadeOnDelete();
-            $table->foreign('idSolicitudEspacio')->references('id')->on('solicitud_espacios')->cascadeOnDelete();
+            $table->foreign('idReservacion')->references('id')->on('reservaciones')->cascadeOnDelete();
+            $table->foreign('idUsuario')->references('id')->on('users')->cascadeOnDelete();
+            $table->foreign('idEstado')->references('id')->on('estados')->cascadeOnDelete();
             
             $table->timestamps();
         });
@@ -36,6 +35,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('notificaciones');
+        Schema::dropIfExists('avisos');
     }
 };

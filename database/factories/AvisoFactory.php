@@ -19,13 +19,11 @@ class AvisoFactory extends Factory
     public function definition(): array
     {
         return [
-            "avisarUsuario" => $this->faker->boolean(),
-            "avisarStaff" => 0,
-            "idUsuario" => 1,            
+            "visto" => 0,
             "idEvento" => null,
-            "idSolicitudEspacio" => null,
-            
-                        
+            "idReservacion" => null,
+            "idEstado" => $this->faker->randomElement([1,2,3,4]),
+            "idUsuario" => 3
         ];
     }
 }
