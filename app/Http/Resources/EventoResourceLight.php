@@ -5,7 +5,7 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class EspacioResource extends JsonResource
+class EventoResourceLight extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -13,14 +13,18 @@ class EspacioResource extends JsonResource
      * @return array<string, mixed>
      */
     public function toArray(Request $request): array
-    {   
-        $reservations = new ReservacionCollection($this->whenLoaded('reservaciones'));
+    {
         return [
             'id' => $this->id,
             'name' => $this->nombre,
-            'description' => $this->descripcion,
-            'reservations' => $reservations,
+            'createdAt' => $this->created_at,     
 
+            'start' => $this->inicio,
+            'end' => $this->fin,
+
+            'user' => new UserResource($this->usuario),
+            'status' => new CatalogoResource($this->estado),
+            'mode' => new CatalogoResource($this->whenLoaded('modalidad')),    
         ];
     }
 }

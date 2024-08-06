@@ -28,7 +28,7 @@ class EventoSeeder extends Seeder
             'nombre' => "Coloquio de Sistemas Centrados en el Usuario",
             'idUsuario' => 2,
         ]);
-        Evento::factory()->count(5)->hasEvaluacion(1)->create(["idEstado" => 4]);
+        Evento::factory()->count(5)->hasEvaluacion(1)->hasRespuesta()->create();
         Evento::factory()->count(20)->hasEvaluacion(0)->create();
 
     }

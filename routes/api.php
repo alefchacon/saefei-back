@@ -12,7 +12,7 @@ use App\Http\Controllers\ModalidadController;
 use App\Http\Controllers\PlataformaController;
 use App\Http\Controllers\ProgramaEducativoController;
 use App\Http\Controllers\PublicidadController;
-use App\Http\Controllers\SolicitudEspacioController;
+use App\Http\Controllers\ReservacionController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\TipoController;
 use App\Http\Controllers\UserController;
@@ -35,7 +35,7 @@ Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
 
 Route::group(['/api'], function () {
     Route::apiResource('evaluaciones', EvaluacionController::class);
-    Route::post('eventos/mes', [EventoController::class, 'getEventosPorMes']);
+    Route::post('eventos/mes', [EventoController::class, 'getByMonth']);
     Route::post('eventos/nombre', [EventoController::class, 'getEventosPorNombre']);
     Route::apiResource('evidencias', EvidenciaController::class);
     Route::apiResource('estados', EstadoController::class);
@@ -62,15 +62,16 @@ Route::group(['/api'], function () {
     Route::post('espacios/reservaciones', [EspacioController::class, 'getEspaciosLibres']);
     Route::put('espacios/reservaciones', [EspacioController::class, 'getEspaciosLibres']);
     
-    Route::apiResource('solicitud', SolicitudEspacioController::class);
-    Route::post('solicitud/disponibles', [SolicitudEspacioController::class, 'getAvailableReservations']);
-    Route::post('solicitud/marcarLeidasUsuario', [SolicitudEspacioController::class, 'markAsUserRead']);
+    Route::apiResource('solicitud', ReservacionController::class);
+    Route::post('solicitud/disponibles', [ReservacionController::class, 'getAvailableReservations']);
+    Route::post('solicitud/marcarLeidasUsuario', [ReservacionController::class, 'markAsUserRead']);
     //Route::put('solicitud', [SolicitudEspacioController::class, 'update']);
     Route::apiResource('horarios', HorarioController::class);
 
     Route::apiResource('eventos', EventoController::class);
     Route::apiResource('avisos', AvisoController::class);
-    Route::post('avisos/marcarLeidasUsuario', [AvisoController::class, "markAsUserRead"]);
+    Route::put('avisos', [AvisoController::class, "update"]);
+    //Route::post('avisos/marcarLeidasUsuario', [AvisoController::class, "markAsUserRead"]);
 
     Route::apiResource('cronogramas', CronogramaController::class);
     Route::apiResource('publicidad', PublicidadController::class);

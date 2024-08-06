@@ -2,30 +2,31 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Resources\SolicitudEspacioCollection;
-use App\Http\Resources\SolicitudEspacioResource;
+use App\Http\Resources\ReservacionCollection;
+use App\Http\Resources\ReservacionResource;
+use App\Mail\MailFactory;
 use App\Models\Espacio;
 use App\Models\User;
-use App\Models\SolicitudEspacio;
+use App\Models\Reservacion;
 use App\Models\Aviso;
 use Illuminate\Http\Request;
-use App\Filters\SolicitudEspacioFilter;
+use App\Filters\ReservacionFilter;
 use App\Models\Enums\EstadoEnum;
 
 
-class SolicitudEspacioController extends Controller
+class ReservacionController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
     {
-        $filter = new SolicitudEspacioFilter();
+        $filter = new ReservacionFilter();
         $queryItems = $filter->transform($request);
         $orderByCoordinatorNotice = $request->query("porAvisosAdministrador");
         $orderByUserNotice = $request->query("porAvisosUsuario");
 
-        $solicitudes = SolicitudEspacio::where($queryItems)->with([ 
+        $solicitudes = Reservacion::where($queryItems)->with([ 
             "usuario", 
             "estado", 
             "espacio",
@@ -38,13 +39,13 @@ class SolicitudEspacioController extends Controller
             $solicitudes = $solicitudes->orderByDesc("avisarUsuario");
         }
 
-        return new SolicitudEspacioCollection($solicitudes->paginate(5)->appends($request->query()));
+        return new ReservacionCollection($solicitudes->paginate(5)->appends($request->query()));
     }
     public function getAvailableReservations(Request $request)
     {
         $idUsuario = $request->input("idUsuario");
 
-        $solicitudes = SolicitudEspacio
+        $solicitudes = Reservacion
             ::where("idUsuario", "=", $idUsuario)
             ->where("idEstado", "=", 2)
             ->with([
@@ -53,7 +54,7 @@ class SolicitudEspacioController extends Controller
                 "espacio", 
             ])->get();
 
-        return new SolicitudEspacioCollection($solicitudes);
+        return new ReservacionCollection($solicitudes);
     }
 
     /**
@@ -73,7 +74,7 @@ class SolicitudEspacioController extends Controller
         $status = 500;
         $data = "";
 
-        $solicitud = new SolicitudEspacio();
+        $solicitud = new Reservacion();
         try {
 
             $solicitud->fill($request->all());
@@ -83,7 +84,7 @@ class SolicitudEspacioController extends Controller
             Aviso::create([
                 "avisarStaff" => 1,
                 "idUsuario" => $solicitud->idUsuario,
-                "idSolicitudEspacio" => $solicitud->id
+                "idReservacion" => $solicitud->id
             ]);
 
             $solicitud->with([
@@ -94,7 +95,7 @@ class SolicitudEspacioController extends Controller
             
             $message = 'Solicitud realizada. Espere confirmacion';
             $status = 201;
-            $data = new SolicitudEspacioResource($solicitud);
+            $data = new ReservacionResource($solicitud);
 
         } catch (\Exception $ex){
             //No regresar excepciones: cambiar a mensaje personalizado y ambiguo.
@@ -108,59 +109,37 @@ class SolicitudEspacioController extends Controller
         }
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(SolicitudEspacio $solicitudEspacio)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(SolicitudEspacio $solicitudEspacio)
-    {
-        //
-    }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, SolicitudEspacio $solicitud)
+    public function update(Request $request, Reservacion $reservation)
     {
         $status = 500;
         $message = "Algo falló";
 
-        $isReply = $request->query("respuesta");
-        $markUserRead = $request->query("vistoUsuario");
-        $markAdminRead = $request->query("vistoAdministrador");
-
         \DB::beginTransaction();
 
         try{
+            $nonNullData = array_filter($request->input("model"), function ($value) {
+                return !is_null($value);
+            });
+            $reservation = Reservacion::findOrFail($nonNullData["id"]);
+            $originalIdEstado = $reservation->idEstado;
+            $reservation->update($nonNullData);
 
-            $solicitud->update($request->all());
+            Aviso::notifyResponse(
+                $request->input("idAviso"), 
+                $reservation, 
+                $originalIdEstado
+            );
 
-            if ($isReply) {
-                    
-                $estado = EstadoEnum::tryFrom(
-                    $request->input("idEstado")
-                );
-
-                Aviso::where("idSolicitudEspacio", "=", $solicitud->id)->update([
-                    "avisarUsuario" => 1,
-                    "avisarStaff" => 0
-                ]);             
-                
-            }
-            
             
             \DB::commit();
             
             $message = "Reservación actualizada";
             $status = 200;
-        } catch (\Exception $ex){
+        } catch (\Throwable $ex){
 
             \DB::rollBack();
 
@@ -168,9 +147,26 @@ class SolicitudEspacioController extends Controller
         }finally {
             return response()->json([
                 'message' => $message,
-                'data' => $solicitud,
+                'data' => $reservation,
             ], $status);
         }
+    }
+
+    private function handleReservationReply(Reservacion $reservation, int $originalIdEstado){
+        $replyingToEventOrganizer = 
+            $originalIdEstado !== $reservation->idEstado;
+
+        if (!$replyingToEventOrganizer){
+            return;
+        }
+
+        $reservation->load('usuario');
+
+        //MailFactory::sendEventReplyMail($reservation);
+        
+        Aviso::where("idReservacion", "=", $reservation->id)
+            ->update(["visto" => 1]);  
+        
     }
 
     public function markAsUserRead(Request $request)
@@ -185,7 +181,7 @@ class SolicitudEspacioController extends Controller
         try{
 
             foreach ($reservations as $reservation) {
-                $model = SolicitudEspacio::findOrFail($reservation["id"]);
+                $model = Reservacion::findOrFail($reservation["id"]);
                 $model->update(["avisarUsuario" => 0]);
                 
                 array_push($updatedReservations, $model);
@@ -208,11 +204,4 @@ class SolicitudEspacioController extends Controller
         }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(SolicitudEspacio $solicitudEspacio)
-    {
-        //
-    }
 }

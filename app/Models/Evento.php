@@ -40,7 +40,7 @@ class Evento extends Model
         
         "adicional",
 
-        "respuesta",
+        "observaciones",
 
         "idUsuario",
         "idModalidad",
@@ -73,8 +73,8 @@ class Evento extends Model
         return $this->belongsTo(Tipo::class, 'idTipo', 'id');
     }
 
-    public function solicitudesEspacios(){
-        return $this->hasMany(SolicitudEspacio::class, 'idEvento', 'id');
+    public function reservaciones(){
+        return $this->hasMany(Reservacion::class, 'idEvento', 'id');
     }
 
     public function programasEducativos(){
@@ -84,16 +84,19 @@ class Evento extends Model
     public function aviso(){
         return $this->hasOne(Aviso::class, 'idEvento', 'id');
     }
+    public function respuesta(){
+        return $this->belongsTo(Respuesta::class, 'idRespuesta', 'id');
+    }
 
     public static function encontrarPor($anio, $mes){
-        return self::whereHas('solicitudesEspacios', function ($query) use ($anio, $mes) {
+        return self::whereHas('reservaciones', function ($query) use ($anio, $mes) {
             $query->whereYear('inicio', '=', $anio)
                   ->whereMonth('inicio', '=', $mes);
         })
         ->with([ 
-            'solicitudesEspacios.usuario', 
-            'solicitudesEspacios.espacio', 
-            'solicitudesEspacios.estado'
+            'reservaciones.usuario', 
+            'reservaciones.espacio', 
+            'reservaciones.estado'
         ]);
     }
 }

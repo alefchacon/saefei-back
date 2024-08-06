@@ -5,10 +5,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class SolicitudEspacio extends Model
+class Reservacion extends Model
 {
     use HasFactory;
-    protected $table = 'solicitud_espacios';
+    protected $table = 'reservaciones';
     public $timestamps = false;
 
     protected $fillable = [
@@ -39,6 +39,10 @@ class SolicitudEspacio extends Model
 
     public function evento(){
         return $this->belongsTo(Evento::class, 'idEvento', 'id');
+    }
+
+    public function respuesta(){
+        return $this->belongsTo(Respuesta::class, 'idRespuesta', 'id');
     }
 
 }

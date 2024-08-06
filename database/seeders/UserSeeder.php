@@ -29,7 +29,7 @@ class UserSeeder extends Seeder
             'email' => 'maledict@protonmail.com',
             'apellidoMaterno' => 'Zamora',
             'puesto' => 'best girl',
-            'idRol' => 3,
+            'idRol' => 1,
         ]);
         User::create([
             'nombres' => 'Esteban',
@@ -37,7 +37,7 @@ class UserSeeder extends Seeder
             'email' => 'maledict@proton.me',
             'apellidoMaterno' => 'Gonzáles',
             'puesto' => 'my man',
-            'idRol' => 3,
+            'idRol' => 2,
         ]);
     }
 }

@@ -16,12 +16,12 @@ class Espacio extends Model
         "estado"
     ];
 
-    public function solicitudesEspacios(){
-        return $this->hasMany(SolicitudEspacio::class, 'idEspacio', 'id');
+    public function reservaciones(){
+        return $this->hasMany(Reservacion::class, 'idEspacio', 'id');
     }
 
     public static function encontrarPorHorario($inicio, $fin,){
-        $reservados = self::whereHas('solicitudesEspacios', function ($query) use ($inicio, $fin) {
+        $reservados = self::whereHas('reservaciones', function ($query) use ($inicio, $fin) {
             $query->where('inicio',     '<=', $inicio)
                   ->where('fin',        '>=', $fin)
                   ->orWhere('inicio',   '<=', $inicio)
@@ -30,7 +30,7 @@ class Espacio extends Model
                   ->where('inicio',     '<=', $fin);
         })
         ->with([ 
-            'solicitudesEspacios'
+            'reservaciones'
         ])
         ->get();
         $idReservados = $reservados->pluck("id");
@@ -39,11 +39,11 @@ class Espacio extends Model
         return $resultado;
     }
     public static function encontrarPor($fecha){
-        $reservados = self::whereHas('solicitudesEspacios', function ($query) use ($fecha) {
+        $reservados = self::whereHas('reservaciones', function ($query) use ($fecha) {
             $query->whereDate('inicio', '=', $fecha)
                   ->whereDate('fin', '=', $fecha);
         })
-        ->with([ 'solicitudesEspacios' => function ($query) use ($fecha) {
+        ->with([ 'reservaciones' => function ($query) use ($fecha) {
             $query->whereDate('inicio', '=', $fecha)
                   ->whereDate('fin', '=', $fecha)
                   ->where('idEstado', "=", 2);

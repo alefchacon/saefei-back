@@ -87,31 +87,7 @@ class UserController extends Controller
      */
     public function showByToken(Request $request)
     {
-        if ($request->cookie("api_token") == null) {
-            return response()->json([
-                'message' => "Unauthenticated 1",
-            ], 401);
-        }
-
-        //Laravel regresa el token como <token ID>|<token>, pero para autenticar el token sólo se debe
-        //user el <token>, entonces se remueve el <token ID> y el |.
-                
-                        
-        $tokenParts = explode("|", $request->cookie("api_token"));
-        if (count($tokenParts) < 2) {
-            return response()->json([
-                'message' => "Unauthenticated",
-                
-            ], 401);
-        }
-
-        $token = $tokenParts[1];
-
-        $user = \DB::table("users")
-            ->join("personal_access_tokens", "users.id", "=", "personal_access_tokens.tokenable_id")
-            ->where("personal_access_tokens.token", "=", hash("sha256", $token))
-            ->select("users.*")
-            ->get()->first();
+        $user = User::findByToken($request);
 
         if ($user == null){
             return response()->json([

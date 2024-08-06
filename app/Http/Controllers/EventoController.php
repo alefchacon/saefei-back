@@ -3,13 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\EventoResource;
-use App\Http\Resources\SolicitudEspacioCollection;
 use App\Models\Cronograma;
 use App\Models\Eventos_ProgramaEducativos;
 use App\Models\Difusion;
 use App\Models\Publicidad;
+use App\Models\Respuesta;
 use App\Models\User;
-use App\Models\SolicitudEspacio;
+use App\Models\Reservacion;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -140,16 +140,18 @@ class EventoController extends Controller
         return false;
     }
 
-    public function getEventosPorMes(Request $request)
+    public function getByMonth(Request $request)
     {
         $anio = $request->input('year');
         $mes = $request->input('month');
 
 
-        $events = Evento::whereYear("inicio", "=", $anio)
-                        ->whereMonth("inicio", "=", $mes)
-                        ->where("idEstado", EstadoEnum::aceptado)
-                        ->with(["solicitudesEspacios.espacio", "modalidad"]);
+        $events = Evento::
+                        join("respuestas", "eventos.idRespuesta", "=", "respuestas.id")
+                        ->whereYear("eventos.inicio", "=", $anio)
+                        ->whereMonth("eventos.inicio", "=", $mes)
+                        ->where("respuestas.idEstado", EstadoEnum::aceptado)
+                        ->with(["reservaciones.espacio", "modalidad"]);
 
 
         return new EventoCollection($events->paginate());
@@ -162,18 +164,14 @@ class EventoController extends Controller
      * @param  Evento  $evento
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Request $request, int $idEvento)
     {
+        $evento = Evento::with(['estado', 'tipo', 'modalidad', 'usuario', 'programasEducativos', 'reservaciones.espacio', 'evaluacion.evidencias'])->find($idEvento);
 
-        $evento = Evento::with(['estado', 'tipo', 'modalidad', 'usuario', 'programasEducativos', 'solicitudesEspacios.espacio', 'evaluacion.evidencias'])->find($id);
         if (!$evento) {
             return response()->json(['message' => 'No existe ese evento'], 404);
         }
 
-        /*
-        $evidencia = \DB::select("SELECT * FROM evidencias WHERE id = ?", [1]);
-        $base64Data = base64_encode($evidencia[0]->archivo);
-        return $base64Data;*/
         
         return new EventoResource($evento);
     }    
@@ -200,6 +198,13 @@ class EventoController extends Controller
             $event = Evento::create($nonNullData);
             $event->save();
             
+            Aviso::create([
+                "visto" => 0,
+                "idUsuario" => $request->idUsuario,
+                "idEvento" => $event->id
+            ]);
+            
+
             $idEvento = $event->id;
             $this->storeCronograma($request, $idEvento);
             $this->storePublicidad($request, $idEvento);
@@ -211,7 +216,7 @@ class EventoController extends Controller
             
             $reservaciones = json_decode($request->input("reservaciones"), true);
             foreach ($reservaciones as $reservacion) {
-                $reservationModel = SolicitudEspacio::findOrFail($reservacion["id"]);
+                $reservationModel = Reservacion::findOrFail($reservacion["id"]);
                 $reservationModel->idEstado = EstadoEnum::evaluado;
                 $reservationModel->idEvento = $event->id;
                 $reservationModel->save();
@@ -224,11 +229,6 @@ class EventoController extends Controller
                 Mailer::sendEmail(to: $coordinator, mail: MailFactory::GetEventNewMail($event, $organizer));
             }
             
-            Aviso::create([
-                "avisarStaff" => 1,
-                "idUsuario" => $request->idUsuario,
-                "idEvento" => $event->id
-            ]);
             
             $code = 201;
             \DB::commit
@@ -301,21 +301,25 @@ class EventoController extends Controller
      * @param  Evento  $evento
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request,Evento $evento)
+    public function update(Request $request, Evento $evento)
     {
         $status = 500;
         $message = "Algo falló";
         
         \DB::beginTransaction();
         try{
-            $nonNullData = array_filter($request->all(), function ($value) {
+            $nonNullData = array_filter($request->input("model"), function ($value) {
                 return !is_null($value);
             });
             $originalIdEstado = $evento->idEstado;
 
             $evento->update($nonNullData);
-            
-            $this->handleEventReply($evento, $originalIdEstado);
+
+            Aviso::notifyResponse(
+                $request->input("idAviso"), 
+                $evento, 
+                $originalIdEstado
+            );
             
             \DB::commit();
             
@@ -332,27 +336,6 @@ class EventoController extends Controller
             ], $status);
         }
     } 
-
-    private function handleEventReply(Evento $event, int $originalIdEstado){
-        $replyingToEventOrganizer = 
-            $originalIdEstado !== $event->idEstado;
-
-        if (!$replyingToEventOrganizer){
-            return;
-        }
-
-        $event->load('usuario');
-        $estado = EstadoEnum::tryFrom($event->idEstado);
-
-        MailFactory::sendEventReplyMail($event);
-        
-        Aviso::where("idEvento", "=", $event->id)->update([
-            "avisarUsuario" => 1,
-            "avisarStaff" => 0
-        ]);   
-        
-    }
-    
     
     private function changeEventStatus(Evento $event, EstadoEnum $newIdEstado) {
 

@@ -23,7 +23,7 @@ class DatabaseSeeder extends Seeder
             ModalidadSeeder::class,
             UserSeeder::class,
             EventoSeeder::class,
-            SolicitudEspacioSeeder::class,
+            ReservacionSeeder::class,
             ProgramaEducativoSeeder::class,
             AvisoSeeder::class,
         ]);

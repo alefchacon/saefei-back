@@ -55,16 +55,18 @@ return new class extends Migration
             /*OTROS COMENTARIOS O SOLICITUDES ESPECIALES*/
             $table->string("adicional", 1000)->nullable()->default(config('global.defaultString'));
 
-            $table->string("respuesta", 1000)->nullable()->default(config('global.defaultString'));
 
+            $table->string("observaciones", 1000)->nullable()->default(config('global.defaultString'));
+
+            
+            $table->unsignedBigInteger("idEstado");
             $table->unsignedBigInteger("idUsuario");
             $table->unsignedBigInteger("idModalidad");
-            $table->unsignedBigInteger("idEstado");
             $table->unsignedBigInteger("idTipo");
 
+            $table->foreign("idEstado")->references("id")->on("estados");
             $table->foreign("idUsuario")->references("id")->on("users");
             $table->foreign("idModalidad")->references("id")->on("modalidads");
-            $table->foreign("idEstado")->references("id")->on("estados");
             $table->foreign("idTipo")->references("id")->on("tipos");
             $table->timestamps(false);
         });
