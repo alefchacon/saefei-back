@@ -8,6 +8,8 @@ use App\Http\Resources\RespuestaCollection;
 use App\Http\Resources\RespuestaResource;
 use App\Models\Aviso;
 use App\Models\Cronograma;
+use App\Models\Enums\TipoAvisoEventEnum;
+use App\Models\Enums\TipoAvisoReservationEnum;
 use App\Models\Eventos_ProgramaEducativos;
 use App\Models\Difusion;
 use App\Models\Publicidad;
@@ -26,7 +28,7 @@ use App\Http\Resources\EventoCollection;
 use Exception;
 use App\Mail\Mailer;
 use App\Mail\Mail;
-use App\Mail\MailFactory;
+use App\Mail\MailService;
 use App\Models\Enums\EstadoEnum;
 use App\Models\Enums\RolEnum;
 
@@ -43,19 +45,23 @@ class AvisoController extends Controller
         $user = User::findByToken($request);
         
         if ($user->idRol === RolEnum::coordinador->value){
-            $noticesCollection = Aviso::where("idEvento", "<>", null)->with("evento")->orderBy("visto");
+            $noticesCollection = 
+                Aviso::where("idEvento", "<>", null)
+                    ->where("idTipoAviso", "=", TipoAvisoEventEnum::evento_nuevo)
+                    ->orWhere("idTipoAviso", "=", TipoAvisoEventEnum::evento_evaluado)
+                    ->with("evento")
+                    ->orderBy("visto");
         } 
 
         if ($user->idRol === RolEnum::administrador_espacios->value){
             $noticesCollection = 
                 Aviso::where("idReservacion", "<>", null)
+                    ->where("idTipoAviso", "=", TipoAvisoReservationEnum::reservacion_nueva)
                     ->with(["reservacion.usuario", 
                             "reservacion.espacio", 
                             "reservacion.estado"])
                     ->orderBy("visto");
         } 
-        
-                    
         
         if ($user->idRol === RolEnum::organizador->value){
             $noticesCollection = 
@@ -66,21 +72,45 @@ class AvisoController extends Controller
                     ->orderBy("visto");
         } 
         
-        $noticeAmount = $this->countNoticeAmount($noticesCollection, "vistoOrganizador");
-        $noticesCollection = new AvisoCollection($noticesCollection->paginate(50)->appends($request->query()));
-        
-        return response()->json([
-            "noticeAmount" => $noticeAmount,
-            "data" => $noticesCollection->resource,
-        ]);
-        
+        if ($request->query("soloCantidad")){
+            return response()->json([
+                "noticeAmount" => $this->countNoticeAmount(
+                    $noticesCollection, 
+                    $user->idRol),
+                ]);
+        }
+            
+        return new AvisoCollection($noticesCollection->paginate(5)->appends($request->query())); 
     }    
 
     
-    private function countNoticeAmount(Builder $notices, string $type = "vistoStaff"){
+    private function countNoticeAmount(Builder $notices, int $idRol){
+        $tipoAvisosToNotify = [];
+
+        if ($idRol === RolEnum::coordinador->value){
+            $tipoAvisosToNotify = [
+                TipoAvisoEventEnum::evento_nuevo->value,
+                TipoAvisoEventEnum::evento_evaluado->value
+            ];
+        } 
+
+        if ($idRol === RolEnum::administrador_espacios->value){
+            $tipoAvisosToNotify = [
+                TipoAvisoReservationEnum::reservacion_nueva->value,
+            ];
+        } 
         
-        return $notices->get()->filter(function ($notice) use ($type) {
-            return (($notice["visto"] === 0)); 
+        if ($idRol === RolEnum::organizador->value){
+            $tipoAvisosToNotify = [
+                TipoAvisoEventEnum::evento_aceptado->value,
+                TipoAvisoEventEnum::evento_rechazado->value,
+                TipoAvisoReservationEnum::reservacion_aceptada->value,
+                TipoAvisoReservationEnum::reservacion_rechazada->value
+            ];
+        } 
+
+        return $notices->get()->filter(function ($notice) use ($tipoAvisosToNotify) {
+            return ($notice["visto"] === 0 && in_array($notice["idTipoAviso"], $tipoAvisosToNotify)); 
         })->count();
     }
 

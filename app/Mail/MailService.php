@@ -11,7 +11,7 @@ use App\Models\Enums\EstadoEnum;
 use Illuminate\Database\Eloquent\Builder;
 
 
-class MailFactory{
+class MailService{
 
 
 
@@ -66,6 +66,35 @@ class MailFactory{
     );
 
     Mailer::sendEmail(to: $event->usuario, mail: $mail);
+  }
+  public static function sendEvaluationPendingMail() {
+    $events = Evento::getUnevaluatedEvents();
+
+    if ($events->count() === 0){
+      return;
+  }
+
+    foreach($events as $event){
+      $replacement = [
+        '{{url}}' => env('FRONTEND_URL') . "/eventos/" . $event->id,
+        '{{eventName}}' => $event->nombre,
+      ];
+      
+      $htmlBody = file_get_contents(__DIR__ . '/evaluationPending.html');
+      $htmlBody = mb_convert_encoding(
+        str_replace(array_keys($replacement), array_values($replacement), $htmlBody), 
+        'ISO-8859-1', 
+        'UTF-8'
+      );
+  
+  
+      $mail = new Mail(
+        mb_convert_encoding("Evalúe su evento", 'ISO-8859-1', 'UTF-8'),
+        $htmlBody
+      );
+  
+      Mailer::sendEmail(to: $event->usuario, mail: $mail);
+    }
 
   }
 
@@ -91,10 +120,21 @@ class MailFactory{
         '{{organizer}}' => $event->usuario->nombres . " " .  $event->usuario->apellidoPaterno . " " . $event->usuario->apellidoMaterno,
         '{{job}}' => $event->usuario->puesto,
         '{{linkText}}' => "Ver evento", 
+
         "{{ratingAttention}}" => self::getRatingString($event->evaluacion->calificacionAtencion),
+        "{{ratingAttentionReason}}" => $event->evaluacion->razonCalificacionAtencion,
+        "{{improvementsSupport}}" => $event->evaluacion->mejorasApoyo,
+
         "{{ratingSpace}}" => self::getRatingString($event->evaluacion->calificacionEspacio),
+        "{{problemsSpace}}" => $event->evaluacion->problemasEspacio,
+
         "{{ratingComputerCenter}}" => self::getRatingString($event->evaluacion->calificacionCentroComputo),
+        "{{ratingComputerCenterReason}}" => $event->evaluacion->razonCalificacionCentroComputo,
         "{{ratingResources}}" => self::getRatingString($event->evaluacion->calificacionRecursos),
+        "{{ratingResourcesReason}}" => $event->evaluacion->razonCalificacionRecursos,
+        "{{improvementsResources}}" => $event->evaluacion->mejorasRecursos,
+
+        "{{additional}}" => $event->evaluacion->adicional,
       ];
       
       $htmlBody = file_get_contents(__DIR__ . '/evaluationNew.html');

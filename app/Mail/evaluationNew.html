@@ -29,11 +29,6 @@
     margin: 0; 
     padding: 0 0 20px 0;">
   <div 
-    style=" 
-      padding: 10px;
-      margin: 15px 15px 50px 0 ;
-      background-color: rgb(236, 240, 243);
-      border-radius: 10px;" 
     class="event">
     <h3>{{eventName}}</h3>
     <p><b>por:</b> {{organizer}}, {{job}}</p>
@@ -42,23 +37,67 @@
       style="
         border-top: 3px solid #bbb;
         margin: 20px 10px;">
+    <h3>Coordinación de Eventos Académicos</h3>
+    <br>
     <p><b>¿Cómo calificaría la atención recibida por parte de la Coordinación de Eventos Académicos?
     </b></p>
     <h2 style="color: #18529d;">{{ratingAttention}}</h2>
     <br>
-    <p><b>¿Cómo calificaría el espacio donde se llevó acabo el evento, en términos de cumplir con sus expectativas y requisitos?
-    </b></p>
+    <p><b>Por favor, explique los factores que contribuyeron a su calificación anterior</b></p>
+    <p style="color: #18529d;">{{ratingAttentionReason}}</p>
+    <br>
+    <p><b>¿Hubo algún aspecto en el que el apoyo de la Coordinación de Eventos pudiera haber mejorado? (Describa brevemente)</b></p>
+    <p style="color: #18529d;">{{improvementsSupport}}</p>
+    <br>
+
+
+    <br>
+    <h3>Espacio</h3>
+    <br>
+    <p><b>¿Cómo calificaría el espacio donde se llevó acabo el evento, en términos de cumplir con sus expectativas y requisitos?</b></p>
     <h2 style="color: #18529d;">{{ratingSpace}}</h2>
     <br>
-    <p><b>¿Cómo calificaría la eficiencia del apoyo del Centro de Cómputo para la atención de su evento?
-    </b></p>
+
+    <p><b>¿Hubo algún problema relacionado con el espacio (por ejemplo, capacidad, comodidad, equipamiento, limpieza)? (Describa brevemente)</b></p>
+    <p style="color: #18529d;">{{problemsSpace}}</p>
+    <br>
+
+    <br>
+    <h3>Apoyo en el Centro de Cómputo</h3>
+    <br>
+
+    <p><b>¿Cómo calificaría la eficiencia del apoyo del Centro de Cómputo para la atención de su evento?</b></p>
     <h2 style="color: #18529d;">{{ratingComputerCenter}}</h2>
     <br>
-    <p><b>¿Cómo calificaría la adecuación de los recursos técnicos proporcionados para satisfacer las necesidades del evento?
-    </b></p>
+
+    <p><b>Por favor, explique los factores que contribuyeron a su calificación anterior:</b></p>
+    <p style="color: #18529d;">{{ratingComputerCenterReason}}</p>
+    <br>
+    
+    <p><b>¿Cómo calificaría la adecuación de los recursos técnicos proporcionados para satisfacer las necesidades del evento?</b></p>
     <h2 style="color: #18529d;">{{ratingResources}}</h2>
+    <br>
+    
+    <p><b>Por favor, explique los factores que contribuyeron a su calificación anterior:</b></p>
+    <p style="color: #18529d;">{{ratingResourcesReason}}</p>
+    <br>
+
+    <p><b>¿Hubo algún aspecto en el que el apoyo técnico pudiera haber mejorado? (Describa brevemente)</b></p>
+    <p style="color: #18529d;">{{improvementsResources}}</p>
+    <br>
+
+    <br>
+    <h3>Comentarios adicionales</h3>
+    <br>
+
+    <p><b>Por favor, comparta cualquier comentario que quiera agregar sobre la organización y ejecución del evento:</b></p>
+    <p style="color: #18529d;">{{additional}}</p>
+    <br>
 
   </div>
-  <a class="primary" href="{{url}}">Ver evaluación completa</a>
+  <br>
+  <br>
+  <br>
+  <a class="primary" href="{{url}}">Ver evento</a>
 </body>
 </html>

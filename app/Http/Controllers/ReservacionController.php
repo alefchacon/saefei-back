@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\ReservacionCollection;
 use App\Http\Resources\ReservacionResource;
-use App\Mail\MailFactory;
+use App\Mail\MailService;
+use App\Models\Enums\TipoAvisoEnum;
+use App\Models\Enums\TipoAvisoReservationEnum;
 use App\Models\Espacio;
 use App\Models\User;
 use App\Models\Reservacion;
@@ -74,20 +76,21 @@ class ReservacionController extends Controller
         $status = 500;
         $data = "";
 
-        $solicitud = new Reservacion();
+        $reservation = new Reservacion();
         try {
 
-            $solicitud->fill($request->all());
-            $solicitud->avisarAdministrador = 1;
-            $solicitud->save();
+            $reservation->fill($request->all());
+            $reservation->save();
             
             Aviso::create([
-                "avisarStaff" => 1,
-                "idUsuario" => $solicitud->idUsuario,
-                "idReservacion" => $solicitud->id
+                "visto" => 0,
+                "idUsuario" => null,
+                "idReservacion" => $reservation->id,
+                "idEstado" => EstadoEnum::en_revision,
+                "idTipoAviso" => TipoAvisoReservationEnum::reservacion_nueva
             ]);
 
-            $solicitud->with([
+            $reservation->with([
                 "usuario", 
                 "estado", 
                 "espacio", 
@@ -95,7 +98,7 @@ class ReservacionController extends Controller
             
             $message = 'Solicitud realizada. Espere confirmacion';
             $status = 201;
-            $data = new ReservacionResource($solicitud);
+            $data = new ReservacionResource($reservation);
 
         } catch (\Exception $ex){
             //No regresar excepciones: cambiar a mensaje personalizado y ambiguo.
@@ -134,7 +137,6 @@ class ReservacionController extends Controller
                 $originalIdEstado
             );
 
-            
             \DB::commit();
             
             $message = "Reservación actualizada";

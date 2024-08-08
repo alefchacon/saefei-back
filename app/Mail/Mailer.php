@@ -30,7 +30,10 @@ class Mailer {
     $instance = new self();
 
     $client = $instance->getMail();
-    $client->addAddress($to->email, $to->nombres . " " . $to->apellidoPaterno); 
+    $client->addAddress(
+      $to->email,
+      mb_convert_encoding($to->nombres . " " . $to->apellidoPaterno, 'ISO-8859-1', 'UTF-8'),
+    ); 
     // $mail->addReplyTo('info@example.com', 'Information');
     // $mail->addCC('cc@example.com');
     // $mail->addBCC('bcc@example.com');

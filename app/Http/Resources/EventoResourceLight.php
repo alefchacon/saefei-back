@@ -18,6 +18,8 @@ class EventoResourceLight extends JsonResource
             'id' => $this->id,
             'name' => $this->nombre,
             'createdAt' => $this->created_at,     
+            'notes' => $this->observaciones,     
+            'idEstado' => $this->idEstado,     
 
             'start' => $this->inicio,
             'end' => $this->fin,

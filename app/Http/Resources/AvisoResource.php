@@ -20,7 +20,8 @@ class AvisoResource extends JsonResource
             'idUsuario' => $this->idUsuario,
             'idEvento' => $this->idEvento,
             'idReservacion' => $this->idReservacion,
-            'idEstado' => $this->idEstado,
+            "type" => new CatalogoResource($this->tipoAviso),
+            "forOrganizer" => $this->idUsuario === null,
             
             'event' => new EventoResourceLight($this->whenLoaded("evento")),
             'reservation' => new ReservacionResource($this->whenLoaded("reservacion")),

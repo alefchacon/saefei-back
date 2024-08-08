@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
-use App\Mail\MailFactory;
+use App\Mail\MailService;
+use App\Models\Enums\TipoAvisoEventEnum;
+use App\Models\Enums\TipoAvisoReservationEnum;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -16,7 +18,8 @@ class Aviso extends Model
         "idEvento",
         "idReservacion",
         "idUsuario",
-        "idEstado"
+        "idEstado",
+        "idTipoAviso"
     ];
 
     public function reservacion(){
@@ -25,6 +28,10 @@ class Aviso extends Model
     public function evento(){
         return $this->belongsTo(Evento::class, 'idEvento', 'id');
     }
+    public function tipoAviso(){
+        return $this->belongsTo(TipoAviso::class, 'idTipoAviso', 'id');
+    }
+
 
     public static function notifyResponse(
         int $idAviso, 
@@ -39,18 +46,31 @@ class Aviso extends Model
             return;
         }
 
-        $notification->load('usuario');
-
         Aviso::where("id", "=", $idAviso)
-        ->update(["visto" => 1]);
+            ->update(["visto" => 1]);
+        
+        $isEvent =  $notification instanceof Evento;
+        $idTipoAviso = 0;
+        
+        $isEvent
+        ? $idTipoAviso = TipoAvisoEventEnum::tryFrom($notification->idEstado)
+        : $idTipoAviso = TipoAvisoReservationEnum::mapFrom($notification->idEstado);
         
         Aviso::create([
             "visto" => 0,
             "idUsuario" => $notification->usuario->id,
             "idEstado" => $notification->idEstado,
-            "idEvento" => $notification instanceof Evento ? $notification->id : null,
-            "idReservacion" => $notification instanceof Reservacion ? $notification->id : null,
+            "idEvento" => $isEvent ? $notification->id : null,
+            "idReservacion" => !$isEvent ? $notification->id : null,
+            "idTipoAviso" => $idTipoAviso
         ]);
+
+        //$notification->load('usuario');
         //MailFactory::sendEventReplyMail($notification);
     }
+
+
+    
+
+
 }
