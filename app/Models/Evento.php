@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Enums\EstadoEnum;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -98,5 +99,18 @@ class Evento extends Model
             'reservaciones.espacio', 
             'reservaciones.estado'
         ]);
+    }
+
+    /**
+     * Fetches any event that have yet to be evaluated:
+     * `evento.idEstado === EstadoEnum::aceptado && evento.fin < today`
+     * @return \Illuminate\Database\Eloquent\Builder[]|\Illuminate\Database\Eloquent\Collection
+     */
+    public static function getUnevaluatedEvents(){
+        return Evento
+            ::where("idEstado", EstadoEnum::aceptado)
+            ->whereDate("fin", "<", new \DateTime())
+            ->with(['evaluacion', 'usuario'])
+            ->get();
     }
 }

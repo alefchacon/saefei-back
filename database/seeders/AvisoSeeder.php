@@ -15,14 +15,19 @@ class AvisoSeeder extends Seeder
     {
         $ids = [1, 2, 3];
 
+        $idTipoAviso_Evento = [1,2,3,4];
+        $idTipoAviso_Reservacion = [5,6,7];
+
         foreach ($ids as $id) {
             Aviso::factory()->create([
                 'idEvento' => $id,
+                'idTipoAviso' => 1
             ]);
         }
         foreach ($ids as $id) {
             Aviso::factory()->create([
                 'idReservacion' => $id,
+                'idTipoAviso' => 5
             ]);
         }
     }

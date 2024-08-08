@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\EventoResource;
 use App\Models\Cronograma;
+use App\Models\Enums\TipoAvisoEventEnum;
 use App\Models\Eventos_ProgramaEducativos;
 use App\Models\Difusion;
 use App\Models\Publicidad;
@@ -20,7 +21,7 @@ use App\Http\Resources\EventoCollection;
 use Exception;
 use App\Mail\Mailer;
 use App\Mail\Mail;
-use App\Mail\MailFactory;
+use App\Mail\MailService;
 use App\Models\Enums\RolEnum;
 use App\Models\Aviso;
 
@@ -45,7 +46,7 @@ class EventoController extends Controller
         $orderByCoordinatorNotice = $request->query("porAvisosCoordinador");
         $orderByUserNotice = $request->query("porAvisosUsuario");
 
-        $eventos = Evento::where($queryItems)->with(['programasEducativos', 'usuario']);
+        $eventos = Evento::where($queryItems)->with(['programasEducativos', 'usuario', 'estado']);
         if ($eventName){
             $eventos = $this->getEventsByName($request, $eventos);
         }
@@ -67,9 +68,7 @@ class EventoController extends Controller
         if ($includeEvaluacion) {
             $eventos = $eventos->with("evaluacion");
         }
-        if ($includeEstado) {
-            $eventos = $eventos->with("estado");
-        }
+
 
         if ($startYearMonth){
 
@@ -147,10 +146,9 @@ class EventoController extends Controller
 
 
         $events = Evento::
-                        join("respuestas", "eventos.idRespuesta", "=", "respuestas.id")
-                        ->whereYear("eventos.inicio", "=", $anio)
+                        whereYear("eventos.inicio", "=", $anio)
                         ->whereMonth("eventos.inicio", "=", $mes)
-                        ->where("respuestas.idEstado", EstadoEnum::aceptado)
+                        ->where("eventos.idEstado", EstadoEnum::aceptado)
                         ->with(["reservaciones.espacio", "modalidad"]);
 
 
@@ -200,8 +198,10 @@ class EventoController extends Controller
             
             Aviso::create([
                 "visto" => 0,
-                "idUsuario" => $request->idUsuario,
-                "idEvento" => $event->id
+                "idUsuario" => null,
+                "idEvento" => $event->id,
+                "idEstado" => EstadoEnum::en_revision,
+                "idTipoAviso" => TipoAvisoEventEnum::evento_nuevo
             ]);
             
 
@@ -226,7 +226,7 @@ class EventoController extends Controller
             
             $coordinators = User::where("idRol", RolEnum::coordinador)->get();
             foreach($coordinators as $coordinator){
-                Mailer::sendEmail(to: $coordinator, mail: MailFactory::GetEventNewMail($event, $organizer));
+                Mailer::sendEmail(to: $coordinator, mail: MailService::GetEventNewMail($event, $organizer));
             }
             
             
@@ -345,11 +345,11 @@ class EventoController extends Controller
 
         switch ($newIdEstado){
             case EstadoEnum::aceptado:
-                $mail = MailFactory::GetEventAcceptedMail(event: $event);
+                $mail = MailService::GetEventAcceptedMail(event: $event);
                 $users = User::where("id", $event->idUsuario)->get();
                 break;
             case EstadoEnum::rechazado:
-                $mail = MailFactory::GetEventDeniedMail(event: $event);
+                $mail = MailService::GetEventDeniedMail(event: $event);
                 $users = User::where("id", $event->idUsuario)->get();
                 break;
             default: 

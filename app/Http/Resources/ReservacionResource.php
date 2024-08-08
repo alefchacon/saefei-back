@@ -17,7 +17,7 @@ class ReservacionResource extends JsonResource
         $startDateTime = new \DateTime($this->inicio);
         return [
             'id' => $this->id,
-            'response' => $this->respuesta,
+            'notes' => $this->respuesta,
             'start' => $this->inicio,
             'startTime' => $startDateTime->format('H:i'),
             'end' => $this->fin,

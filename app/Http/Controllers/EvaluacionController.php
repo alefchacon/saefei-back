@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\EvaluacionResource;
 use App\Http\Resources\EventoResource;
-use App\Mail\MailFactory;
+use App\Mail\MailService;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\Evaluacion;
@@ -65,7 +65,7 @@ class EvaluacionController extends Controller
             $event->save();
             $event->load(['evaluacion', 'usuario']);
 
-            MailFactory::sendEvaluationNewMail($event);
+            MailService::sendEvaluationNewMail($event);
 
             Aviso::where("idEvento", "=", $event->id)
                  ->update([

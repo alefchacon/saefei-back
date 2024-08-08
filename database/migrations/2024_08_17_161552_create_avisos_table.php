@@ -20,11 +20,13 @@ return new class extends Migration
             $table->unsignedBigInteger("idReservacion")->nullable();
             $table->unsignedBigInteger("idUsuario")->nullable();
             $table->unsignedBigInteger("idEstado");
+            $table->unsignedBigInteger("idTipoAviso");
             
             $table->foreign('idEvento')->references('id')->on('eventos')->cascadeOnDelete();
             $table->foreign('idReservacion')->references('id')->on('reservaciones')->cascadeOnDelete();
             $table->foreign('idUsuario')->references('id')->on('users')->cascadeOnDelete();
             $table->foreign('idEstado')->references('id')->on('estados')->cascadeOnDelete();
+            $table->foreign('idTipoAviso')->references('id')->on('tiposavisos')->cascadeOnDelete();
             
             $table->timestamps();
         });

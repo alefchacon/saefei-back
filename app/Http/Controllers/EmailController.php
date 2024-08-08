@@ -6,10 +6,11 @@ use App\Http\Resources\ArchivoResource;
 use App\Http\Resources\EventoResource;
 use App\Http\Resources\AvisoCollection;
 use App\Models\Aviso;
+use App\Models\Enums\EstadoEnum;
 use App\Models\User;
 use App\Models\Evento;
 use App\Models\Evaluacion;
-use App\Mail\MailFactory;
+use App\Mail\MailService;
 use App\Models\Enums\RolEnum;
 use App\Mail\Mailer;
 use App\Utils\DateParser;
@@ -29,16 +30,10 @@ class EmailController extends Controller
     public function index()
     {
         $coordinator = User::where("idRol", RolEnum::coordinador)->first();
-        //$event = Evento::findOrFail(1)->with(['evaluacion', 'usuario'])->first();
-        $event = Evaluacion::findOrFail(1);
-        $event->load(['evento']);
-        /*
-        Mailer::sendEmail(
-            to: $coordinator, 
-            mail: MailFactory::SendEvaluationNewMail(event: $event));
-*/
-
-
+        //MailService::sendEvaluationPendingMail();
+        
+        $event = Evento::where("id", "=", 4)->with(["evaluacion", "usuario"])->first();
+        MailService::SendEvaluationNewMail(event: $event);
 
         return response()->json($event);
     }  
