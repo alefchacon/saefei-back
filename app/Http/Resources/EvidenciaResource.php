@@ -17,7 +17,7 @@ class EvidenciaResource extends JsonResource
         return [
             'id' => $this->id,
             'file' => $this->archivo,
-            'type' => $this->type,
+            'type' => $this->tipo,
             'name' => $this->nombre,
             'idEvaluacion' => $this->idEvaluacion
         ];

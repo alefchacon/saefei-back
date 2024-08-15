@@ -17,4 +17,4 @@ Schedule::call(function () {
     $event = Evento::where("id", 4)->with(['evaluacion', 'usuario'])->first();
         
     MailService::SendEvaluationNewMail(event: $event);
-})->everyMinute();
+})->daily();
