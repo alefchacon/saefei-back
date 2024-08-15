@@ -43,10 +43,8 @@ class EventoController extends Controller
         $orderByCreatedAt = $request->query("porFechaEnvio");
         $eventName = $request->query("nombre");
         $startYearMonth = $request->query("inicio");
-        $orderByCoordinatorNotice = $request->query("porAvisosCoordinador");
-        $orderByUserNotice = $request->query("porAvisosUsuario");
 
-        $eventos = Evento::where($queryItems)->with(['programasEducativos', 'usuario', 'estado']);
+        $eventos = Evento::where($queryItems);
         if ($eventName){
             $eventos = $this->getEventsByName($request, $eventos);
         }
@@ -59,24 +57,15 @@ class EventoController extends Controller
         if ($orderByNombre){
             $eventos = $eventos->orderBy("nombre");
         }
-        if ($orderByCoordinatorNotice) {
-            $eventos = $eventos->orderByDesc("avisarCoordinador");
-        }
-        if ($orderByUserNotice) {
-            $eventos = $eventos->orderByDesc("avisarUsuario");
-        }
         if ($includeEvaluacion) {
             $eventos = $eventos->with("evaluacion");
         }
 
+        $eventos->with(['programasEducativos', 'usuario', 'estado']);
 
-        if ($startYearMonth){
+        $dontPaginate = $startYearMonth;
 
-            return new EventoCollection($eventos->paginate(1000)->appends($request->query())); 
-        }
-
-        return new EventoCollection($eventos->paginate(5)->appends($request->query())); 
-        //return $eventos->paginate(5)->appends($request->query()); 
+        return new EventoCollection($eventos->paginate($dontPaginate ? 900 : 5)->appends($request->query())); 
     }    
     
     public function getEventsByName(Request $request, Builder|Evento $eventos){
@@ -105,7 +94,12 @@ class EventoController extends Controller
     private function filterEventsByName($eventos, $searchString, $threshold = 3)
     {
         return $eventos->filter(function ($event) use ($searchString, $threshold) {
-            $mainString = $event->nombre;
+            $mainString = 
+                $event->nombre . 
+                $event->usuario->nombres . " " . 
+                $event->usuario->apellidoPaterno . " " .
+                $event->usuario->apellidoMaterno;
+
             $targetString = $searchString;
             $mainStringLength = strlen($mainString);
             $targetStringLength = strlen($targetString);
@@ -204,7 +198,6 @@ class EventoController extends Controller
                 "idTipoAviso" => TipoAvisoEventEnum::evento_nuevo
             ]);
             
-
             $idEvento = $event->id;
             $this->storeCronograma($request, $idEvento);
             $this->storePublicidad($request, $idEvento);
@@ -216,10 +209,11 @@ class EventoController extends Controller
             
             $reservaciones = json_decode($request->input("reservaciones"), true);
             foreach ($reservaciones as $reservacion) {
-                $reservationModel = Reservacion::findOrFail($reservacion["id"]);
-                $reservationModel->idEstado = EstadoEnum::evaluado;
-                $reservationModel->idEvento = $event->id;
-                $reservationModel->save();
+                Reservacion::findOrFail($reservacion["id"])
+                            ->update([
+                                "idEstado" => EstadoEnum::evaluado,
+                                "idEvento" => $event->id,
+                            ]);
             }
             
             $organizer = User::findOrFail($request->input("idUsuario"));
@@ -229,11 +223,10 @@ class EventoController extends Controller
                 Mailer::sendEmail(to: $coordinator, mail: MailService::GetEventNewMail($event, $organizer));
             }
             
-            
             $code = 201;
-            \DB::commit
-            
-            ();
+            \DB::commit();
+
+
         } catch (\Throwable $ex) {
             $message = $ex->getMessage();
             \DB::rollBack();

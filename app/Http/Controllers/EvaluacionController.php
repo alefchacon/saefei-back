@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Http\Resources\EvaluacionResource;
 use App\Http\Resources\EventoResource;
 use App\Mail\MailService;
+use App\Models\Enums\EstadoEnum;
+use App\Models\Enums\TipoAvisoEventEnum;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\Evaluacion;
@@ -65,19 +67,21 @@ class EvaluacionController extends Controller
             $event->save();
             $event->load(['evaluacion', 'usuario']);
 
-            MailService::sendEvaluationNewMail($event);
+            
+            Aviso::create([
+                "visto" => 0,
+                "idUsuario" => null,
+                "idEvento" => $event->id,
+                "idEstado" => EstadoEnum::evaluado,
+                "idTipoAviso" => TipoAvisoEventEnum::evento_evaluado
+            ]);
 
-            Aviso::where("idEvento", "=", $event->id)
-                 ->update([
-                    "avisarUsuario" => 0,
-                    "avisarStaff" => 1
-                 ]);
-
-
+            
             DB::commit();
-
-
-            $message = new EventoResource($event);
+            
+            
+            MailService::sendEvaluationNewMail($event);
+            $message = "¡Gracias por su retroalimentación!";
             $code = 201;
         }catch (\Exception $ex) {
             $message = $ex->getMessage();

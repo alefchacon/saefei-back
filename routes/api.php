@@ -38,6 +38,7 @@ Route::group(['/api'], function () {
     Route::post('eventos/mes', [EventoController::class, 'getByMonth']);
     Route::post('eventos/nombre', [EventoController::class, 'getEventosPorNombre']);
     Route::apiResource('evidencias', EvidenciaController::class);
+    Route::post('evidencias', [EvidenciaController::class, "getEvidencesFor"]);
     Route::apiResource('estados', EstadoController::class);
     Route::get('eventos/{id}', [EventoController::class, "show"]);
     

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\ArchivoCollection;
 use App\Http\Resources\EventoResource;
+use App\Http\Resources\EvidenciaCollection;
 use App\Http\Resources\EvidenciaResource;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -22,9 +23,16 @@ class EvidenciaController extends Controller
      *
      * @param  Request  $request
      */
-    public function index(Request $request)
+    public function getEvidencesFor(Request $request)
     {
+        $idEvaluaciones = $request->input("idEvaluaciones");
+        $response = array_flip($idEvaluaciones);
+        
+        foreach ($idEvaluaciones as $idEvaluacion){
+            $response[$idEvaluacion] = new EvidenciaCollection(Evidencia::where("idEvaluacion", "=", $idEvaluacion)->get());
+        }
 
+        return response()->json($response);
     }    
     
     
