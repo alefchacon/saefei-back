@@ -65,11 +65,7 @@ class User extends Authenticatable
     }
 
     public static function findByToken(Request $request){
-        if ($request->header("authorization") == null) {
-            return response()->json([
-                'message' => "Unauthenticated 1",
-            ], 401);
-        }
+
 
         //Laravel regresa el token como <token ID>|<token>, pero para autenticar el token sólo se debe
         //user el <token>, entonces se remueve el <token ID> y el |.
@@ -91,9 +87,6 @@ class User extends Authenticatable
             ->select(["users.*"])
             ->get()->first();
 
-        if (!$user){
-            return response()->json(["message"=> "No se encontró al usuaio"], 404);
-        }
 
         return $user;
     }

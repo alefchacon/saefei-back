@@ -53,6 +53,10 @@ class Evento extends Model
         return $this->belongsTo( User::class, 'idUsuario', 'id');
     }
 
+    public function evidencias(){
+        return $this->hasManyThrough(Evidencia::class, Evaluacion::class, "idEvento", "idEvaluacion", "id", "id");
+    }
+
     public function evaluacion() {
         return $this->hasOne( Evaluacion::class, 'idEvento', 'id');
     }

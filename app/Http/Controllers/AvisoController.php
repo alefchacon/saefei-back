@@ -43,6 +43,10 @@ class AvisoController extends Controller
     {
         $noticesCollection = [];
         $user = User::findByToken($request);
+
+        if (!$user){
+            return response()->json(["message" => "Token inválido"], 401);
+        }
         
         if ($user->idRol === RolEnum::coordinador->value){
             $noticesCollection = 

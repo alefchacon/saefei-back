@@ -45,13 +45,11 @@ class EventoResource extends JsonResource
             'publicity' => new ArchivoCollection($this->whenLoaded('publicidades')),
             "idEstado" => $this->idEstado,
             "idUsuario" => $this->idUsuario,
-            'idEvaluacion' => $this->evaluacion?->id,
 
 
             'start' => $this->inicio,
             'end' => $this->fin,
 
-            'hasEvaluation' => $this->evaluacion !== null,
             'evaluation' => new EvaluacionResource($this->whenLoaded('evaluacion')),
             'reservations' => new ReservacionCollection($this->whenLoaded('reservaciones')),
             'user' => new UserResource($this->whenLoaded('usuario')),
@@ -59,7 +57,7 @@ class EventoResource extends JsonResource
             'status' => new CatalogoResource($this->whenLoaded('estado')),
             'mode' => new CatalogoResource($this->whenLoaded('modalidad')),     
             'programs' => new CatalogoCollection($this->whenLoaded("programasEducativos")),
-
+            'evidences' => new ArchivoCollection($this->whenLoaded("evidencias"))
         
         ];
     }
