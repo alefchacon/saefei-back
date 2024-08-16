@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\EventoLightResource;
 use App\Http\Resources\EventoResource;
 use App\Models\Cronograma;
 use App\Models\Enums\TipoAvisoEventEnum;
@@ -38,11 +39,13 @@ class EventoController extends Controller
         $queryItems = $filter->transform($request);
         
         $includeEvaluacion = $request->query("evaluacion");
+        $includeEvidences = $request->query("evidencias");
         $includeEstado = $request->query("estado");
         $orderByNombre = $request->query("porAlfabetico");
         $orderByCreatedAt = $request->query("porFechaEnvio");
         $eventName = $request->query("nombre");
         $startYearMonth = $request->query("inicio");
+        $returnAll = $request->query("todo");
 
         $eventos = Evento::where($queryItems);
         if ($eventName){
@@ -52,7 +55,7 @@ class EventoController extends Controller
             $eventos = $eventos->where(\DB::raw("DATE_FORMAT(inicio, '%Y-%m')"), "=", $startYearMonth);
         }
         if ($orderByCreatedAt){
-            $eventos = $eventos->orderBy("created_at");
+            $eventos = $eventos->orderByDesc("created_at");
         }
         if ($orderByNombre){
             $eventos = $eventos->orderBy("nombre");
@@ -60,12 +63,19 @@ class EventoController extends Controller
         if ($includeEvaluacion) {
             $eventos = $eventos->with("evaluacion");
         }
+        if ($includeEvidences) {
+            $eventos = $eventos->with("evidencias");
+        }
 
-        $eventos->with(['programasEducativos', 'usuario', 'estado']);
+        $eventos->with(['programasEducativos', 'usuario']);
 
-        $dontPaginate = $startYearMonth;
 
-        return new EventoCollection($eventos->paginate($dontPaginate ? 900 : 5)->appends($request->query())); 
+        if ($returnAll){
+            return new EventoCollection($eventos->get()); 
+        } else {
+            return EventoLightResource::collection($eventos->paginate(5)->appends($request->query())); 
+
+        }
     }    
     
     public function getEventsByName(Request $request, Builder|Evento $eventos){
