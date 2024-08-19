@@ -1,6 +1,6 @@
 <?php
 
-use App\Mail\MailService;
+use App\Mail\MailProvider;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
@@ -16,5 +16,5 @@ Artisan::command('inspire', function () {
 Schedule::call(function () {
     $event = Evento::where("id", 4)->with(['evaluacion', 'usuario'])->first();
         
-    MailService::SendEvaluationNewMail(event: $event);
+    MailProvider::SendEvaluationNewMail(event: $event);
 })->daily();

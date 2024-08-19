@@ -23,6 +23,13 @@ class AuthController extends Controller
 
         $user = User::where('email', $request->email)->with('rol')->first();
 
+        if (!$user) {
+            return response()->json([
+                'message' => "No se encontró una cuenta con esas credenciales",
+            ], 
+                403
+            );
+        }
         
         // #IMPORTANTE Esta línea forza el login: quitar para despliegue
         $validationResult =  [
@@ -60,17 +67,15 @@ class AuthController extends Controller
      * Cierra sesión mediante el bearer token. La solicitud no necesita cuerpo, 
      * sólo el header Authorization con su respectivo bearer token activo.
      */
-    public function logout()
+    public function logout(Request $request)
     {
-        $user = auth()->user();
+        $user = User::findByToken($request);
 
         if (!$user) {
             return response()->json(['message' => 'El usuario no estaba autenticado'], 401);
         }
 
-        $user->currentAccessToken()->delete();
-
-        $user->tokens()->delete();
+        \DB::delete('DELETE FROM personal_access_tokens WHERE tokenable_id = :id', ['id' => $user->id]);
 
         return response()->json(['message' => 'La sesión ha concluido.']);
     }

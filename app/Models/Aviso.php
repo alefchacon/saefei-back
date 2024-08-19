@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Mail\MailService;
+use App\Mail\MailProvider;
 use App\Models\Enums\TipoAvisoEventEnum;
 use App\Models\Enums\TipoAvisoReservationEnum;
 use Illuminate\Database\Eloquent\Factories\HasFactory;

@@ -10,9 +10,9 @@ use App\Models\Enums\EstadoEnum;
 use App\Models\User;
 use App\Models\Evento;
 use App\Models\Evaluacion;
-use App\Mail\MailService;
+use App\Mail\MailProvider;
 use App\Models\Enums\RolEnum;
-use App\Mail\Mailer;
+use App\Mail\MailService;
 use App\Utils\DateParser;
 
 use Illuminate\Http\Request;
@@ -33,7 +33,7 @@ class EmailController extends Controller
         //MailService::sendEvaluationPendingMail();
         
         $event = Evento::where("id", "=", 4)->with(["evaluacion", "usuario"])->first();
-        MailService::SendEvaluationNewMail(event: $event);
+        MailProvider::SendEvaluationNewMail(event: $event);
 
         return response()->json($event);
     }  

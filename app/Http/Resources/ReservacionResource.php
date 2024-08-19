@@ -23,6 +23,7 @@ class ReservacionResource extends JsonResource
             'end' => $this->fin,
             'idEstado' => $this->idEstado,
 
+            'wasAccepted' => $this->idEstado === 2 || $this->idEstado === 3,
             'user' => new UserResource($this->whenLoaded('usuario')),
             'space' => new EspacioResource($this->whenLoaded('espacio')),
             'status' => new CatalogoResource($this->whenLoaded('estado')),
