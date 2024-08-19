@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\ReservacionCollection;
 use App\Http\Resources\ReservacionResource;
+use App\Mail\MailProvider;
 use App\Mail\MailService;
+use App\Models\Enums\RolEnum;
 use App\Models\Enums\TipoAvisoEnum;
 use App\Models\Enums\TipoAvisoReservationEnum;
 use App\Models\Espacio;
@@ -96,11 +98,23 @@ class ReservacionController extends Controller
                 "espacio", 
             ])->get();
             
+            $mail = MailProvider::getReservationMail(
+                $reservation, 
+                TipoAvisoReservationEnum::reservacion_nueva
+            );
+            $admins = User::where("idRol", RolEnum::administrador_espacios)->get();
+            foreach($admins as $admin){
+                MailService::sendEmail(
+                    to: $admin, 
+                    mail: $mail
+                );
+            }
+
             $message = 'Solicitud realizada. Espere confirmacion';
             $status = 201;
             $data = new ReservacionResource($reservation);
 
-        } catch (\Exception $ex){
+        } catch (\Throwable $ex){
             //No regresar excepciones: cambiar a mensaje personalizado y ambiguo.
             $message = $ex->getMessage();
         } finally {
@@ -131,11 +145,14 @@ class ReservacionController extends Controller
             $originalIdEstado = $reservation->idEstado;
             $reservation->update($nonNullData);
 
+            
             Aviso::notifyResponse(
                 $request->input("idAviso"), 
                 $reservation, 
                 $originalIdEstado
             );
+
+            self::handleReservationMail($reservation, $originalIdEstado);
 
             \DB::commit();
             
@@ -154,7 +171,10 @@ class ReservacionController extends Controller
         }
     }
 
-    private function handleReservationReply(Reservacion $reservation, int $originalIdEstado){
+    private static function handleReservationMail(
+        Reservacion $reservation, 
+        int $originalIdEstado
+    ){
         $replyingToEventOrganizer = 
             $originalIdEstado !== $reservation->idEstado;
 
@@ -162,13 +182,18 @@ class ReservacionController extends Controller
             return;
         }
 
-        $reservation->load('usuario');
+        $type = TipoAvisoReservationEnum::mapFrom($reservation->idEstado);
+        
+        $mail = MailProvider::getReservationMail(
+            $reservation, 
+            $type
+        );
 
-        //MailFactory::sendEventReplyMail($reservation);
-        
-        Aviso::where("idReservacion", "=", $reservation->id)
-            ->update(["visto" => 1]);  
-        
+        $reservation->load('usuario');
+        MailService::sendEmail(
+            to: $reservation->usuario,
+            mail: $mail 
+        );
     }
 
     public function markAsUserRead(Request $request)

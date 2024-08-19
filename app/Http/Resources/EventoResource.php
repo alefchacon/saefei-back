@@ -41,6 +41,8 @@ class EventoResource extends JsonResource
             'presidium' => $this->presidium,
             'decoration' => $this->decoracion,
 
+            'wasAccepted' => $this->idEstado === 2 || $this->idEstado === 3,
+
             'cronogram' => new ArchivoResource($this->whenLoaded('cronograma')),
             'publicity' => new ArchivoCollection($this->whenLoaded('publicidades')),
             "idEstado" => $this->idEstado,

@@ -64,22 +64,19 @@ class User extends Authenticatable
         return $this->hasMany( Reservacion::class, 'idUsuario', 'id');
     }
 
+    public static function getTokenFrom(string $header){
+        $tokenParts = explode("|", $header);
+        if (count($tokenParts) < 2) {
+            return null;
+        }
+        $id = $tokenParts[0];
+        $token = $tokenParts[1];
+        return $token;
+    }
+
     public static function findByToken(Request $request){
 
-
-        //Laravel regresa el token como <token ID>|<token>, pero para autenticar el token sólo se debe
-        //user el <token>, entonces se remueve el <token ID> y el |.
-                
-                        
-        $tokenParts = explode("|", $request->header("authorization"));
-        if (count($tokenParts) < 2) {
-            return response()->json([
-                'message' => "Unauthenticated",
-                
-            ], 401);
-        }
-
-        $token = $tokenParts[1];
+        $token = self::getTokenFrom($request->header("authorization"));
 
         $user = \DB::table("users")
             ->join("personal_access_tokens", "users.id", "=", "personal_access_tokens.tokenable_id")

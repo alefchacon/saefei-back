@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\EvaluacionResource;
 use App\Http\Resources\EventoResource;
-use App\Mail\MailService;
+use App\Mail\MailProvider;
 use App\Models\Enums\EstadoEnum;
 use App\Models\Enums\TipoAvisoEventEnum;
 use Illuminate\Http\Request;
@@ -80,7 +80,7 @@ class EvaluacionController extends Controller
             DB::commit();
             
             
-            MailService::sendEvaluationNewMail($event);
+            MailProvider::sendEvaluationNewMail($event);
             $message = "¡Gracias por su retroalimentación!";
             $code = 201;
         }catch (\Exception $ex) {

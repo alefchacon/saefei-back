@@ -20,6 +20,7 @@ use App\Http\Controllers\RolController;
 use App\Http\Controllers\EvidenciaController;
 use App\Http\Controllers\AvisoController;
 use App\Http\Controllers\EmailController;
+use App\Http\Middleware\AuthCustom;
 use App\Models\Difusion;
 use App\Models\Espacio;
 use App\Models\Estado;
@@ -49,7 +50,7 @@ Route::group(['/api'], function () {
     
     Route::apiResource('roles', RolController::class);
     Route::post('login', [AuthController::class, 'login']);
-    Route::post('logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
+    Route::post('logout', [AuthController::class, 'logout']);
     
     Route::apiResource('difusiones', DifusionController::class);
     Route::apiResource('invitados', InvitadoController::class);
@@ -70,13 +71,13 @@ Route::group(['/api'], function () {
     Route::apiResource('horarios', HorarioController::class);
 
     Route::apiResource('eventos', EventoController::class);
-    Route::apiResource('avisos', AvisoController::class);
-    Route::put('avisos', [AvisoController::class, "update"]);
+    Route::apiResource('avisos', AvisoController::class)->middleware(AuthCustom::class);
+    Route::put('avisos', [AvisoController::class, "update"])->middleware(AuthCustom::class);
     //Route::post('avisos/marcarLeidasUsuario', [AvisoController::class, "markAsUserRead"]);
 
     Route::apiResource('cronogramas', CronogramaController::class);
     Route::apiResource('publicidad', PublicidadController::class);
-    Route::apiResource('email', EmailController::class);
+    Route::apiResource('email', EmailController::class)->middleware(AuthCustom::class);
     });
 
     

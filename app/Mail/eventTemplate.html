@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+<style>
+
+  h3{
+    margin: 0
+  }
+  p{
+    margin: 0
+  }
+  .primary{
+    text-decoration: none;
+    color: white !important;
+    background-color: #18529d;
+    padding: 10px 20px;
+    border-radius: 5px;
+  }
+
+  td, th{
+    padding: 10px;
+    border-bottom: 1px solid #e4e7ec;
+    text-align: left;
+  }
+  
+  tr:nth-child(odd){
+    background-color: #e4e7ec;
+  }
+
+  .max-width{
+    max-width: 10px;
+  }
+
+</style>
+</head>
+
+
+<body 
+  style="
+    margin: 0; 
+    padding: 0 0 20px 0;">
+  <div 
+    style=" 
+      padding: 10px 0 50px 0;" 
+    class="event">
+
+    <h3>{{header}}</h3>
+    <!-- CONDITIONAL_CONTENT -->
+
+    <br>
+
+    <table>
+
+      <tr>
+        <td><b>Nombre </b></td>
+        <td>{{eventName}}</td>
+      </tr>
+      <tr>
+        <td><b>Descripcion </b></td>
+        <td>{{description}}</td>
+      </tr>
+      <tr>
+        <td><b>Organizador </b></td>
+        <td>{{organizer}}</td>
+      </tr>
+      <tr>
+        <td><b>Puesto</b></td>
+        <td>{{job}}</td>
+      </tr>
+      <tr>
+        <td><b>E-mail</b></td>
+        <td>{{email}}</td>
+      </tr>
+      <tr>
+        <td><b>Pagina</b></td>
+        <td>{{page}}</td>
+      </tr>
+      <tr>
+        <td><b>Tipo de evento</b></td>
+        <td>{{type}}</td>
+      </tr>
+      <tr>
+        <td><b>Audiencias</b></td>
+        <td>{{audiences}}</td>
+      </tr>
+      <tr>
+        <td><b>Ambito</b></td>
+        <td>{{scope}}</td>
+      </tr>
+      <tr>
+        <td><b>Eje del Programa de Trabajo</b></td>
+        <td>{{axis}}</td>
+      </tr>
+      <tr>
+        <td><b>Tematicas</b></td>
+        <td>{{themes}}</td>
+      </tr>
+      <tr>
+        <td><b>Inicia</b></td>
+        <td>{{start}}</td>
+      </tr>
+      <tr>
+        <td><b>Termina </b></td>
+        <td>{{end}}</td>
+      </tr>
+      <tr>
+        <td><b>Numero de participantes </b></td>
+        <td>{{numParticipants}}</td>
+      </tr>
+      <tr>
+        <td><b>Requerimientos tecnicos del CC</b></td>
+        <td>{{requirementsComputerCenter}}</td>
+      </tr>
+      <tr>
+        <td><b>Necesita transmision en vivo</b></td>
+        <td>{{needsLivestream}}</td>
+      </tr>
+      <tr>
+        <td><b>Presidium</b></td>
+        <td>{{presidium}}</td>
+      </tr>
+      <tr>
+        <td><b>Decoracion </b></td>
+        <td>{{decoration}}</td>
+      </tr>
+      <tr>
+        <td><b>Numero de participantes externos</b></td>
+        <td>{{numParticipantsExternal}}</td>
+      </tr>
+      <tr>
+        <td class="max-width"><b>Necesita estacionamiento para el publico externo</b></td>
+        <td>{{needsParking}}</td>
+      </tr>
+      <tr>
+        <td><b>Necesita ingreso el fin de semana</b></td>
+        <td>{{needsWeekend}}</td>
+      </tr>
+      <tr>
+        <td><b>Medios de difusion</b></td>
+        <td>{{media}}</td>
+      </tr>
+      <tr>
+        <td><b>Requiere constancias</b></td>
+        <td>{{needsRecords}}</td>
+      </tr>
+
+    </table>
+
+
+  </div>
+
+</body>
+</html>

@@ -20,9 +20,9 @@ use App\Models\Enums\EstadoEnum;
 use App\Filters\EventoFilter;
 use App\Http\Resources\EventoCollection;
 use Exception;
-use App\Mail\Mailer;
-use App\Mail\Mail;
 use App\Mail\MailService;
+use App\Mail\Mail;
+use App\Mail\MailProvider;
 use App\Models\Enums\RolEnum;
 use App\Models\Aviso;
 
@@ -199,19 +199,11 @@ class EventoController extends Controller
 
             $event = Evento::create($nonNullData);
             $event->save();
-            
-            Aviso::create([
-                "visto" => 0,
-                "idUsuario" => null,
-                "idEvento" => $event->id,
-                "idEstado" => EstadoEnum::en_revision,
-                "idTipoAviso" => TipoAvisoEventEnum::evento_nuevo
-            ]);
-            
+
             $idEvento = $event->id;
             $this->storeCronograma($request, $idEvento);
             $this->storePublicidad($request, $idEvento);
-            
+        
             $programas = json_decode($request->input("programas"), true);
             foreach ($programas as $programa){
                 \DB::insert("INSERT INTO eventos_programaeducativos (idEvento, idProgramaEducativo) VALUES (?, ?)", [$event->id, $programa["id"]]);
@@ -226,19 +218,35 @@ class EventoController extends Controller
                             ]);
             }
             
-            $organizer = User::findOrFail($request->input("idUsuario"));
+            $event->load("usuario");
             
+            $mail = MailProvider::getEventMail(
+                event: $event,
+                type: TipoAvisoEventEnum::evento_nuevo
+            );
+
             $coordinators = User::where("idRol", RolEnum::coordinador)->get();
             foreach($coordinators as $coordinator){
-                Mailer::sendEmail(to: $coordinator, mail: MailService::GetEventNewMail($event, $organizer));
+                MailService::sendEmail(
+                    to: $coordinator, 
+                    mail: $mail
+                );
             }
             
+            Aviso::create([
+                "visto" => 0,
+                "idUsuario" => null,
+                "idEvento" => $event->id,
+                "idEstado" => EstadoEnum::en_revision,
+                "idTipoAviso" => TipoAvisoEventEnum::evento_nuevo
+            ]);
+
             $code = 201;
             \DB::commit();
 
 
         } catch (\Throwable $ex) {
-            $message = $ex->getMessage();
+            $message = $ex->__tostring();
             \DB::rollBack();
         }finally{
             
@@ -301,26 +309,37 @@ class EventoController extends Controller
      * Update a existing resource in storage.
      *
      * @param  Request  $request
-     * @param  Evento  $evento
+     * @param  Evento  $event
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Evento $evento)
+    public function update(Request $request, Evento $event)
     {
         $status = 500;
         $message = "Algo falló";
         
         \DB::beginTransaction();
+
+        //return response()->json(["sadf" => $request->input("model")["id"]]);
+
         try{
             $nonNullData = array_filter($request->input("model"), function ($value) {
                 return !is_null($value);
             });
-            $originalIdEstado = $evento->idEstado;
+            
+            $event = Evento::findOrFail($request->input("model")["id"]);
 
-            $evento->update($nonNullData);
+            $originalIdEstado = $event->idEstado;
+
+            $event->update($nonNullData);
+
+            self::handleEventMail(
+                event: $event,
+                originalIdEstado: $originalIdEstado
+            );
 
             Aviso::notifyResponse(
                 $request->input("idAviso"), 
-                $evento, 
+                $event, 
                 $originalIdEstado
             );
             
@@ -335,35 +354,34 @@ class EventoController extends Controller
         }finally {
             return response()->json([
                 'message' => $message,
-                'data' => $evento,
+                'data' => $event,
             ], $status);
         }
     } 
     
-    private function changeEventStatus(Evento $event, EstadoEnum $newIdEstado) {
+    private static function handleEventMail(
+        Evento $event, 
+        int $originalIdEstado
+    ){
+        $replyingToEventOrganizer = 
+            $originalIdEstado !== $event->idEstado;
 
-        $users = [];
-        $mail = new Mail();
-        
-
-        switch ($newIdEstado){
-            case EstadoEnum::aceptado:
-                $mail = MailService::GetEventAcceptedMail(event: $event);
-                $users = User::where("id", $event->idUsuario)->get();
-                break;
-            case EstadoEnum::rechazado:
-                $mail = MailService::GetEventDeniedMail(event: $event);
-                $users = User::where("id", $event->idUsuario)->get();
-                break;
-            default: 
-                $users = User::where("idRol", RolEnum::coordinador)->get();
+        if (!$replyingToEventOrganizer){
+            return;
         }
 
-
-        foreach($users as $user){
-            Mailer::sendEmail(to: $user, mail: $mail);
-        } 
+        $type = TipoAvisoEventEnum::tryFrom($event->idEstado);
         
+        $mail = MailProvider::getEventMail(
+            event: $event, 
+            type: $type
+        );
+
+        $event->load('usuario');
+        MailService::sendEmail(
+            to: $event->usuario,
+            mail: $mail 
+        );
     }
 
 }

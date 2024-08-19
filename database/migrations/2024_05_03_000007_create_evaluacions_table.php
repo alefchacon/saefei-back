@@ -16,17 +16,17 @@ return new class extends Migration
             $table->id()->primary()->unsigned()->unique();
 
             $table->integer("calificacionAtencion");
-            $table->string("razonCalificacionAtencion");
+            $table->string("razonCalificacionAtencion", 1000);
             $table->integer("calificacionComunicacion");
-            $table->string("mejorasApoyo")->nullable()->default("Sin comentarios.");
+            $table->string("mejorasApoyo", 1000)->nullable()->default("Sin comentarios.");
             $table->integer("calificacionEspacio");
-            $table->string("problemasEspacio")->nullable()->default("Sin comentarios.");
+            $table->string("problemasEspacio", 1000)->nullable()->default("Sin comentarios.");
             $table->integer("calificacionCentroComputo");
-            $table->string("razonCalificacionCentroComputo");
+            $table->string("razonCalificacionCentroComputo", 1000);
             $table->integer("calificacionRecursos");
-            $table->string("razonCalificacionRecursos");
-            $table->string("mejorasRecursos")->nullable()->default("Sin comentarios.");
-            $table->string("adicional")->nullable()->default("Sin comentarios.");
+            $table->string("razonCalificacionRecursos", 1000);
+            $table->string("mejorasRecursos", 1000)->nullable()->default("Sin comentarios.");
+            $table->string("adicional", 1000)->nullable()->default("Sin comentarios.");
 
             $table->integer("idEvento");
 
