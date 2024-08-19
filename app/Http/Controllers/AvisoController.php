@@ -2,34 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Resources\EventoResource;
 use App\Http\Resources\AvisoCollection;
-use App\Http\Resources\RespuestaCollection;
-use App\Http\Resources\RespuestaResource;
 use App\Models\Aviso;
-use App\Models\Cronograma;
 use App\Models\Enums\TipoAvisoEventEnum;
 use App\Models\Enums\TipoAvisoReservationEnum;
-use App\Models\Eventos_ProgramaEducativos;
-use App\Models\Difusion;
-use App\Models\Publicidad;
-use App\Models\Respuesta;
 use App\Models\User;
-use App\Models\Reservacion;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Models\Evento;
-use App\Models\Modalidade;
-use App\Models\Estado;
-use App\Models\Tipo;
-use App\Filters\EventoFilter;
-use App\Http\Resources\EventoCollection;
 use Exception;
-use App\Mail\Mailer;
-use App\Mail\Mail;
-use App\Mail\MailService;
-use App\Models\Enums\EstadoEnum;
 use App\Models\Enums\RolEnum;
 
 class AvisoController extends Controller
@@ -53,8 +34,7 @@ class AvisoController extends Controller
                 Aviso::where("idEvento", "<>", null)
                     ->where("idTipoAviso", "=", TipoAvisoEventEnum::evento_nuevo)
                     ->orWhere("idTipoAviso", "=", TipoAvisoEventEnum::evento_evaluado)
-                    ->with("evento")
-                    ->orderBy("visto");
+                    ->with("evento");
         } 
 
         if ($user->idRol === RolEnum::administrador_espacios->value){
@@ -63,8 +43,7 @@ class AvisoController extends Controller
                     ->where("idTipoAviso", "=", TipoAvisoReservationEnum::reservacion_nueva)
                     ->with(["reservacion.usuario", 
                             "reservacion.espacio", 
-                            "reservacion.estado"])
-                    ->orderBy("visto");
+                            "reservacion.estado"]);
         } 
         
         if ($user->idRol === RolEnum::organizador->value){
@@ -72,9 +51,12 @@ class AvisoController extends Controller
                 Aviso::where("idUsuario", "=", $user->id)
                     ->with(["evento", "reservacion.usuario", 
                             "reservacion.espacio", 
-                            "reservacion.estado"])
-                    ->orderBy("visto");
+                            "reservacion.estado"]);
         } 
+        
+        $noticesCollection = $noticesCollection
+            ->orderBy("visto")
+            ->orderByDesc("updated_at");
         
         if ($request->query("soloCantidad")){
             return response()->json([
@@ -132,8 +114,12 @@ class AvisoController extends Controller
                 return !is_null($value);
             });
 
-            Aviso::findOrFail($request->input("id"))
-                ->update($nonNullData);
+            $notice = Aviso::findOrFail($request->input("id"));
+            $originalRead = $notice->visto;
+
+            $notice->update($nonNullData);
+
+            $updated = $originalRead !== $notice->visto;
                 
             \DB::commit();
             
@@ -148,6 +134,7 @@ class AvisoController extends Controller
             //MailFactory::sendEventReplyMail($event);
             return response()->json([
                 'message' => $message,
+                'updated' => $updated
             ], $status);
         }
     } 
