@@ -11,9 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('plataformas', function (Blueprint $table) {
-            $table->id();
-            $table->string("nombre");
+        Schema::create('tiposavisos', function (Blueprint $table) {
+            $table->id()->primary()->unsigned()->unique();
+
+            $table->string("nombre", 50);
             $table->timestamps();
         });
     }
@@ -23,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('plataformas');
+        Schema::dropIfExists('tiposavisos');
     }
 };

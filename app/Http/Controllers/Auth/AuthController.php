@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Controllers\Auth;
 
+use App\Http\Resources\UserResource;
 use Illuminate\Console\Command;
 use Illuminate\Http\Request;
 use App\Models\User;
@@ -8,6 +9,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Auth\LDAPValidator;
+use Carbon\Carbon;
+use Config;
 
 class AuthController extends Controller
 {
@@ -20,46 +23,61 @@ class AuthController extends Controller
 
         $user = User::where('email', $request->email)->with('rol')->first();
 
-        $validationResult = LDAPValidator::validate($request);
+        if (!$user) {
+            return response()->json([
+                'message' => "No se encontró una cuenta con esas credenciales",
+            ], 
+                403
+            );
+        }
+        
+        // #IMPORTANTE Esta línea forza el login: quitar para despliegue
+        $validationResult =  [
+            "status" => 200,
+            "message" => "ESTE LOG IN FUE FALSIFICADO. Si ves este mensaje, eres dev y desactivaste la validación LDAP :D",
+        ];
 
-        /*
-        if (!$user || !Hash::check($request->password, $user->password)) {
-            return response()->json(['message' => 'Las credenciales son incorrectas.'], 401);
-        }*/
+        // #IMPORTANTE descomentar esta para hacer el login bien:
+        //$validationResult = LDAPValidator::validate($request);
 
         if (!$user || $validationResult['status'] != 200) {
-            return response()->json(
-                ['message' => $validationResult['message']], 
+            return response()->json([
+                'message' => $validationResult['message'],
+            ], 
                 $validationResult['status']
             );
         }
 
+        $token = $user->createToken('access_token', abilities: [$user->rol->nombre], expiresAt: now()->addMinutes(config('sanctum.expiration')))->plainTextToken;
+
+        
         $response = [
             'message' => $validationResult['message'],
-            'token' => $user->createToken('authToken', abilities: [$user->rol->nombre]),
-            'user' => $user
+            'user' => new UserResource($user),
+            'token' => $token,
         ];
 
-        return response()->json($response, $validationResult['status']);
+        return response()
+            ->json($response, $validationResult['status']);
     }
 
 
 
-    // Method to handle user logout
+    /**
+     * Cierra sesión mediante el bearer token. La solicitud no necesita cuerpo, 
+     * sólo el header Authorization con su respectivo bearer token activo.
+     */
     public function logout(Request $request)
     {
-        $user = auth()->user();
+        $user = User::findByToken($request);
 
         if (!$user) {
-            return response()->json(['message' => 'No authenticated user'], 401);
+            return response()->json(['message' => 'El usuario no estaba autenticado'], 401);
         }
 
-        $user->currentAccessToken()->delete();
+        \DB::delete('DELETE FROM personal_access_tokens WHERE tokenable_id = :id', ['id' => $user->id]);
 
-        // Optionally, revoke all tokens...
-        // $user->tokens()->delete();
-
-        return response()->json(['message' => 'Successfully logged out']);
+        return response()->json(['message' => 'La sesión ha concluido.']);
     }
 
     public function debugOutput()

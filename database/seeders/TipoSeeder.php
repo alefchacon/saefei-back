@@ -13,7 +13,7 @@ class TipoSeeder extends Seeder
      */
     public function run(): void
     {
-        $names = ['Académico', 'Deportivo', 'Cultural', 'Mixto'];
+        $names = ['Académico', 'Deportivo', 'Cultural', 'Híbrido/Mixto'];
 
         foreach ($names as $name) {
             Tipo::factory()->create([

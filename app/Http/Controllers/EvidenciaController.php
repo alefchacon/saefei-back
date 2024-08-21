@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\ArchivoCollection;
 use App\Http\Resources\EventoResource;
+use App\Http\Resources\EvidenciaCollection;
 use App\Http\Resources\EvidenciaResource;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -21,9 +23,16 @@ class EvidenciaController extends Controller
      *
      * @param  Request  $request
      */
-    public function index(Request $request)
+    public function getEvidencesFor(Request $request)
     {
+        $idEvaluaciones = $request->input("idEvaluaciones");
+        $response = array_flip($idEvaluaciones);
+        
+        foreach ($idEvaluaciones as $idEvaluacion){
+            $response[$idEvaluacion] = new EvidenciaCollection(Evidencia::where("idEvaluacion", "=", $idEvaluacion)->get());
+        }
 
+        return response()->json($response);
     }    
     
     
@@ -34,10 +43,10 @@ class EvidenciaController extends Controller
      * @param  Evento  $evento
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show($idEvaluacion)
     {
-
-
+        $evidencia = Evidencia::where("idEvaluacion", "=", $idEvaluacion)->get();
+        return new ArchivoCollection($evidencia);
     }    
 
 
@@ -49,64 +58,40 @@ class EvidenciaController extends Controller
      */
     public function store(Request $request)
     {
-        $document = new Evidencia;
-        $code = 500;
         try{
             
+            if (!$request->hasFile('archivos')) {
+                return response()->json(['error' => 'Debe subir al menos un archivo como evidencia.'], 400);
+            }
             
-            if ($request->hasFile('Evidencia.archivo')) {
-                $evidence = $request->input('Evidencia');
-                $file = $request->file('Evidencia.archivo');
-                if ($file->isValid()) {
-                    $blob = file_get_contents($file->getRealPath());
-                    $idEvaluacion = $evidence['idEvaluacion'] ?? null;
-                    
-                    $document->archivo = $blob;
-                    $document->tipo = $file->getMimeType();
-                    $document->nombre = $file->getClientOriginalName();
-                    $document->idEvaluacion = $idEvaluacion;
-                    $document->save();
-        
+            $files = $request->file('archivos');
+
+            foreach ($files as $file){
+                if (!$file->isValid()) {
+                    return response()->json(['error' => 'El archivo ' . $file->getClientOriginalName() . 'no es válido.'], 400);
                 }
             }
-            $message = 'Evaluación registrada: ';
-            $code = 201;
+
+            foreach ($files as $file){
+
+                $blob = file_get_contents($file->getRealPath());
+                $idEvaluacion = $request->input('idEvaluacion');
+                
+                $document = new Evidencia;
+                $document->archivo = $blob;
+                $document->tipo = $file->getMimeType();
+                $document->nombre = $file->getClientOriginalName();
+                $document->idEvaluacion = $idEvaluacion;
+                $document->save();
+            }
+
+            return response()->json(['message' => 'Evidencia registrada'], 201);
+
+            
         }catch (Exception $ex) {
             $message = $ex->getMessage();
-        }finally{
-            
-            return response()->json([
-                'message' => $message], $code);
-        };
-    } /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  Request  $request
-     * @param  Evento  $evento
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Request $request, $id)
-    {
-    }    /**
-     * Update a existing resource in storage.
-     *
-     * @param  Request  $request
-     * @param  Evento  $evento
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request,Evento $evento)
-    {
+        }
+    } 
 
-    }    /**
-     * Delete a  resource from  storage.
-     *
-     * @param  Request  $request
-     * @param  Evento  $evento
-     * @return \Illuminate\Http\Response
-     * @throws \Exception
-     */
-    public function destroy(Request $request, Evento $evento)
-    {
 
-    }
 }

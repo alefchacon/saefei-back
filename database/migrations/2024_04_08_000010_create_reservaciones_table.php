@@ -11,9 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('solicitud_espacios', function (Blueprint $table) {
+        Schema::create('reservaciones', function (Blueprint $table) {
             $table->id()->primary()->unsigned()->unique();
-            $table->string('respuesta')->nullable();
+            $table->string('respuesta', 1000)->nullable();
             $table->dateTime('inicio');
             $table->dateTime('fin');
 
@@ -34,6 +34,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('solicitud_espacios');
+        Schema::dropIfExists('reservaciones');
     }
 };

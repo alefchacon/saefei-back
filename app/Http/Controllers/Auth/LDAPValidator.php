@@ -37,14 +37,7 @@ class LDAPValidator {
             503 => "No se pudo conectar con los servidores de la Universidad Veracruzana",
         ];
 
-        /*
-        return [
-            "status" => $validationStatus,
-            "message" => $messages[$validationStatus],
-        ];
-        */
 
-        $validationStatus = 200;
         return [
             "status" => $validationStatus,
             "message" => $messages[$validationStatus],

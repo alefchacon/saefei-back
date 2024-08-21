@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('eventos_programasedu', function (Blueprint $table) {
+        Schema::create('eventos_programaeducativos', function (Blueprint $table) {
             $table->unsignedBigInteger('idEvento');
             $table->unsignedBigInteger('idProgramaEducativo');
             $table->timestamps();
@@ -26,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('eventos_programasedu');
+        Schema::dropIfExists('eventos_programaseducativos');
     }
 };

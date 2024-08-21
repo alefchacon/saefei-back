@@ -11,15 +11,20 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('eventos_difusion', function (Blueprint $table) {
+        Schema::create('cronogramas', function (Blueprint $table) {
+            
+            $table->id()->primary()->unsigned()->unique();
+            $table->timestamps();
+            $table->string("nombre");
+            $table->string("tipo");
+
             $table->unsignedBigInteger('idEvento');
-            $table->unsignedBigInteger('idDifusion');
 
             $table->foreign('idEvento')->references('id')->on('eventos');
-            $table->foreign('idDifusion')->references('id')->on('difusions');
-            
-            $table->timestamps();
+
         });
+        DB::statement("ALTER TABLE cronogramas ADD archivo MEDIUMBLOB");
+
     }
 
     /**
@@ -27,6 +32,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('eventos_difusion');
+        Schema::dropIfExists('evidencias');
     }
 };

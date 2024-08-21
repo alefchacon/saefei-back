@@ -4,10 +4,10 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use App\Models\SolicitudEspacio;
+use App\Models\Reservacion;
 require 'vendor/autoload.php';
 
-class SolicitudEspacioSeeder extends Seeder
+class ReservacionSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -26,11 +26,11 @@ class SolicitudEspacioSeeder extends Seeder
 
         // $dates = [$date1, $date2, $date3, $date4];
 
-        // foreach ($dates as $date) {
-        //     SolicitudEspacio::factory()->create([
-        //         'inicio' => $date,
-        //         'fin' => $date,
-        //     ]);
-        // }
+        foreach ($dates as $date) {
+            Reservacion::factory()->hasRespuesta()->create([
+                'inicio' => $date,
+                'fin' => $date,
+            ]);
+        }
     }
 }

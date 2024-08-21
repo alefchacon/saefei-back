@@ -10,6 +10,9 @@ class EventoFilter extends Apifilter {
     protected $safeParms = [
         'idEstado' => ['eq'], 
         'idUsuario' => ['eq'],
+        'inicio' => ['eq'],
+        'avisarCoordinador' => ['eq'],
+        'avisarUsuario' => ['eq'],
     ];
 
     protected $operatorMap = [

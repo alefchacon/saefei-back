@@ -6,12 +6,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Http\Request;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class User extends Authenticatable
 {
     use HasFactory, Notifiable, HasApiTokens;
+    protected $table = 'users';
 
     /**
      * The attributes that are mass assignable.
@@ -58,8 +60,32 @@ class User extends Authenticatable
     public function eventos() {
         return $this->hasMany( Evento::class, 'idUsuario', 'id');
     }
-    public function solicitudesEspacios() {
-        return $this->hasMany( SolicitudEspacio::class, 'idUsuario', 'id');
+    public function reservaciones() {
+        return $this->hasMany( Reservacion::class, 'idUsuario', 'id');
+    }
+
+    public static function getTokenFrom(string $header){
+        $tokenParts = explode("|", $header);
+        if (count($tokenParts) < 2) {
+            return null;
+        }
+        $id = $tokenParts[0];
+        $token = $tokenParts[1];
+        return $token;
+    }
+
+    public static function findByToken(Request $request){
+
+        $token = self::getTokenFrom($request->header("authorization"));
+
+        $user = \DB::table("users")
+            ->join("personal_access_tokens", "users.id", "=", "personal_access_tokens.tokenable_id")
+            ->where("personal_access_tokens.token", "=", hash("sha256", $token))
+            ->select(["users.*"])
+            ->get()->first();
+
+
+        return $user;
     }
 
 }

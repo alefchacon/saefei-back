@@ -11,15 +11,20 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('publicidads', function (Blueprint $table) {
-            $table->id();
-            $table->string('archivo');
+        Schema::create('publicidades', function (Blueprint $table) {
+            
+            $table->id()->primary()->unsigned()->unique();
+            $table->timestamps();
+            $table->string("nombre");
+            $table->string("tipo");
+
             $table->unsignedBigInteger('idEvento');
 
             $table->foreign('idEvento')->references('id')->on('eventos');
 
-            $table->timestamps();
         });
+        DB::statement("ALTER TABLE publicidades ADD archivo MEDIUMBLOB");
+
     }
 
     /**
@@ -27,6 +32,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('publicidads');
+        Schema::dropIfExists('evidencias');
     }
 };

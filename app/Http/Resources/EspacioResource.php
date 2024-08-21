@@ -14,7 +14,7 @@ class EspacioResource extends JsonResource
      */
     public function toArray(Request $request): array
     {   
-        $reservations = new SolicitudEspacioCollection($this->whenLoaded('solicitudesEspacios'));
+        $reservations = new ReservacionCollection($this->whenLoaded('reservaciones'));
         return [
             'id' => $this->id,
             'name' => $this->nombre,

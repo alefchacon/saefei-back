@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+<style>
+
+  p{
+    margin: 0
+  }
+  .primary{
+    text-decoration: none;
+    color: white !important;
+    background-color: #18529d;
+    padding: 10px 20px;
+    border-radius: 5px;
+  }
+
+  td, th{
+    padding: 10px;
+    border-bottom: 1px solid #e4e7ec;
+    text-align: left;
+  }
+  
+
+  .min-width{
+    min-width: 150px;
+  }
+
+</style>
+</head>
+
+
+<body 
+  style="
+    margin: 0; 
+    padding: 0 0 20px 0;">
+  <div 
+    style=" 
+      padding: 10px 0 50px 0;" 
+    class="event">
+
+    <h3>{{header}}</h3>
+    <!-- CONDITIONAL_CONTENT -->
+    
+    
+    <br>
+
+    <table>
+
+      <tr>
+        <td class="min-width"><b>Espacio a reservar </b></td>
+        <td>{{spaceName}}</td>
+      </tr>
+      <tr>
+        <td><b>Inicia</b></td>
+        <td>{{start}}</td>
+      </tr>
+      <tr>
+        <td><b>Termina</b></td>
+        <td>{{end}}</td>
+      </tr>
+    </table>
+
+    <br>
+    <h3>Solicita:</h3>
+    <table>
+      <tr>
+        <td class="min-width"><b>Responsable</b></td>
+        <td>{{organizer}}</td>
+      </tr>
+      <tr>
+        <td><b>Puesto</b></td>
+        <td>{{job}}</td>
+      </tr>
+      <tr>
+        <td><b>E-mail</b></td>
+        <td>{{email}}</td>
+      </tr>
+    </table>
+
+
+  </div>
+</body>
+</html>

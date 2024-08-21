@@ -13,7 +13,12 @@ class ModalidadSeeder extends Seeder
      */
     public function run(): void
     {
-        Modalidad::factory()->count(10)->create();
+        $names = ['Presencial', 'Virtual', 'Híbrida/Mixta'];
+        foreach ($names as $name) {
+            Modalidad::factory()->create([
+                'nombre' => $name,
+            ]);
+        }
         
     }
 }

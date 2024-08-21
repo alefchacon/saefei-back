@@ -3,10 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\EvaluacionResource;
+use App\Http\Resources\EventoResource;
+use App\Mail\MailProvider;
+use App\Models\Enums\EstadoEnum;
+use App\Models\Enums\TipoAvisoEventEnum;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\Evaluacion;
 use App\Models\Evidencia;
+use App\Models\Aviso;
 use App\Models\Evento;
 use App\Http\Resources\EvaluacionCollection;
 use Illuminate\Database\QueryException;
@@ -38,26 +43,15 @@ class EvaluacionController extends Controller
      * @param  Evaluacion  $evaluacion
      * @return \Illuminate\Http\Response
      */
-    public function show(Request $request, Evaluacion $evaluacion)
+    public function show($idEvento)
     {
-        return view('pages.evaluaciones.show', [
-                'record' =>$evaluacion,
-        ]);
-
-    }    /**
-     * Show the form for creating a new resource.
-     *
-     * @param  Request  $request
-     */
-    public function create(Request $request)
-    {
-        return new EvaluacionResource(Evaluacion::create($request->all()));
-    }    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  Request  $request
-     * @return \Illuminate\Http\Response
-     */
+        $evaluacion = Evaluacion::where("idEvento", "=", $idEvento)->first();
+        if (!$evaluacion){
+            return response()->json(["message" => "No se encontró la evaluación"], 404);
+        }
+        return new EvaluacionResource($evaluacion);
+    }    
+    
     public function store(Request $request)
     {0;
 
@@ -66,13 +60,28 @@ class EvaluacionController extends Controller
         $evaluation = new Evaluacion;
         try{
             $evaluation = Evaluacion::create($request->all());
+            $this->storeEvidence($request, $evaluation->id);
+
             $event = Evento::find($evaluation->idEvento);
             $event->idEstado = 3;
             $event->save();
+            $event->load(['evaluacion', 'usuario']);
+
+            
+            Aviso::create([
+                "visto" => 0,
+                "idUsuario" => null,
+                "idEvento" => $event->id,
+                "idEstado" => EstadoEnum::evaluado,
+                "idTipoAviso" => TipoAvisoEventEnum::evento_evaluado
+            ]);
+
+            
             DB::commit();
-
-
-            $message = 'Evaluación registrada';
+            
+            
+            MailProvider::sendEvaluationNewMail($event);
+            $message = "¡Gracias por su retroalimentación!";
             $code = 201;
         }catch (\Exception $ex) {
             $message = $ex->getMessage();
@@ -81,25 +90,37 @@ class EvaluacionController extends Controller
             
             return response()->json([
                 'message' => $message,
-                'data' => new EvaluacionResource($evaluation)], $code);
+                'data' => $request->hasFile('evidencias')], $code);
         } 
-    } /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  Request  $request
-     * @param  Evaluacion  $evaluacion
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Request $request, Evaluacion $evaluacion)
-    {
-		$eventos = Evento::all(['id']);
+    } 
 
-        return view('pages.evaluaciones.edit', [
-            'model' => $evaluacion,
-			"eventos" => $eventos,
+    private function storeEvidence(Request $request, int $idEvaluacion){
+        if (!$request->hasFile('evidencias')) {
+            return "a";
+        }
 
-            ]);
-    }    /**
+        $evidencias = $request->file("evidencias");
+
+        foreach ($evidencias as $evidencia){
+            if (!$evidencia->isValid()) {
+                return response()->json(['error' => 'El archivo ' . $evidencia->getClientOriginalName() . 'no es válido.'], 400);
+            }
+        }
+
+        foreach ($evidencias as $evidenciaArchivo){
+            $blob = file_get_contents($evidenciaArchivo->getRealPath());
+            
+            $evidencia = new Evidencia();
+            $evidencia->archivo = $blob;
+            $evidencia->tipo = $evidenciaArchivo->getMimeType();
+            $evidencia->nombre = $evidenciaArchivo->getClientOriginalName();
+            $evidencia->idEvaluacion = $idEvaluacion;
+            $evidencia->save();
+        }
+    }
+    
+    
+    /**
      * Update a existing resource in storage.
      *
      * @param  Request  $request
@@ -118,24 +139,7 @@ class EvaluacionController extends Controller
                 session()->flash('app_error', 'Something is wrong while updating Evaluacion');
             }
         return redirect()->back();
-    }    /**
-     * Delete a  resource from  storage.
-     *
-     * @param  Request  $request
-     * @param  Evaluacion  $evaluacion
-     * @return \Illuminate\Http\Response
-     * @throws \Exception
-     */
-    public function destroy(Request $request, Evaluacion $evaluacion)
-    {
-        if ($evaluacion->delete()) {
-                session()->flash('app_message', 'Evaluacion successfully deleted');
-            } else {
-                session()->flash('app_error', 'Error occurred while deleting Evaluacion');
-            }
-
-        return redirect()->back();
-    }
+    }    
 
     public function uploadEvidence(Request $request){
         DB::beginTransaction();

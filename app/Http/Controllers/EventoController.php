@@ -2,18 +2,29 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\EventoLightResource;
 use App\Http\Resources\EventoResource;
+use App\Models\Cronograma;
+use App\Models\Enums\TipoAvisoEventEnum;
+use App\Models\Eventos_ProgramaEducativos;
+use App\Models\Difusion;
+use App\Models\Publicidad;
+use App\Models\Respuesta;
+use App\Models\User;
+use App\Models\Reservacion;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\Evento;
-use App\Models\Usuario;
-use App\Models\Modalidade;
-use App\Models\Estado;
-use App\Models\Tipo;
+use App\Models\Enums\EstadoEnum;
 use App\Filters\EventoFilter;
 use App\Http\Resources\EventoCollection;
 use Exception;
-
+use App\Mail\MailService;
+use App\Mail\Mail;
+use App\Mail\MailProvider;
+use App\Models\Enums\RolEnum;
+use App\Models\Aviso;
 
 class EventoController extends Controller
 {
@@ -28,34 +39,124 @@ class EventoController extends Controller
         $queryItems = $filter->transform($request);
 
         $includeEvaluacion = $request->query("evaluacion");
+        $includeEvidences = $request->query("evidencias");
         $includeEstado = $request->query("estado");
-
+        $orderByNombre = $request->query("porAlfabetico");
+        $orderByCreatedAt = $request->query("porFechaEnvio");
+        $eventName = $request->query("nombre");
+        $startYearMonth = $request->query("inicio");
+        $returnAll = $request->query("todo");
 
         $eventos = Evento::where($queryItems);
-
-
-
+        if ($eventName){
+            $eventos = $this->getEventsByName($request, $eventos);
+        }
+        if ($startYearMonth){
+            $eventos = $eventos->where(\DB::raw("DATE_FORMAT(inicio, '%Y-%m')"), "=", $startYearMonth);
+        }
+        if ($orderByCreatedAt){
+            $eventos = $eventos->orderByDesc("created_at");
+        }
+        if ($orderByNombre){
+            $eventos = $eventos->orderBy("nombre");
+        }
         if ($includeEvaluacion) {
             $eventos = $eventos->with("evaluacion");
         }
-        if ($includeEstado) {
-            $eventos = $eventos->with("estado");
+        if ($includeEvidences) {
+            $eventos = $eventos->with("evidencias");
         }
 
+        $eventos->with(['programasEducativos', 'usuario']);
 
-        return new EventoCollection($eventos->paginate()->appends($request->query()));
+
+        if ($returnAll){
+            return new EventoCollection($eventos->get()); 
+        } else {
+            return EventoLightResource::collection($eventos->paginate(5)->appends($request->query())); 
+
+        }
+    }    
+    
+    public function getEventsByName(Request $request, Builder|Evento $eventos){
+        if ($request->has('nombre')) {
+
+            /*
+                Los eventos se filtran utilizando el método Model Collection->filter()
+            */
+            $searchString = $request->query('nombre');
+            $modelEvents = $eventos->get();
+            $filteredEvents = $this->filterEventsByName($modelEvents, $searchString);
+
+            /*
+                Este tipo de colecciones NO se puede paginar, entonces se debe convertir
+                a un tipo que sí permita la paginación: Builder Collection.
+            */
+            $ids = $filteredEvents->pluck("id")->toArray();
+            $builderEvents = Evento::whereIn("id", $ids);
+            return $builderEvents;
+        } else {
+            return Evento::query()->toBase();
+        }
     }
 
-    public function getEventosPorMes(Request $request)
+    
+    private function filterEventsByName($eventos, $searchString, $threshold = 3)
+    {
+        return $eventos->filter(function ($event) use ($searchString, $threshold) {
+            $mainString = 
+                $event->nombre . 
+                $event->usuario->nombres . " " . 
+                $event->usuario->apellidoPaterno . " " .
+                $event->usuario->apellidoMaterno;
+
+            $targetString = $searchString;
+            $mainStringLength = strlen($mainString);
+            $targetStringLength = strlen($targetString);
+        
+            for ($i = 0; $i <= $mainStringLength - $targetStringLength; $i++) {
+                $substring = substr($mainString, $i, $targetStringLength);
+                $levDistance = levenshtein($substring, $targetString);
+        
+                if ($levDistance <= $threshold) {
+                    return true;
+                }
+            }
+        
+            return false;
+        });
+    }
+
+    function containsSimilarSubstring($mainString, $targetString, $threshold = 2) {
+        $mainStringLength = strlen($mainString);
+        $targetStringLength = strlen($targetString);
+    
+        for ($i = 0; $i <= $mainStringLength - $targetStringLength; $i++) {
+            $substring = substr($mainString, $i, $targetStringLength);
+            $levDistance = levenshtein($substring, $targetString);
+    
+            if ($levDistance <= $threshold) {
+                return true;
+            }
+        }
+    
+        return false;
+    }
+
+    public function getByMonth(Request $request)
     {
         $anio = $request->input('year');
         $mes = $request->input('month');
 
 
-        $events = Evento::encontrarPor($anio, $mes);
+        $events = Evento::
+                        whereYear("eventos.inicio", "=", $anio)
+                        ->whereMonth("eventos.inicio", "=", $mes)
+                        ->where("eventos.idEstado", EstadoEnum::aceptado)
+                        ->with(["reservaciones.espacio", "modalidad"]);
 
 
-        return new EventoCollection($events);
+        return new EventoCollection($events->paginate());
     }
 
     /**
@@ -65,40 +166,20 @@ class EventoController extends Controller
      * @param  Evento  $evento
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Request $request, int $idEvento)
     {
-        $evento = Evento::with(['estado', 'evaluacion', 'tipo', 'modalidad', 'usuario'])->find($id);
+        $evento = Evento::with(['estado', 'tipo', 'modalidad', 'usuario', 'programasEducativos', 'reservaciones.espacio', 'evaluacion.evidencias'])->find($idEvento);
+
         if (!$evento) {
             return response()->json(['message' => 'No existe ese evento'], 404);
         }
 
+        
         return new EventoResource($evento);
-    }
 
+    }    
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @param  Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function create(Request $request)
-    {
-        $usuario = Usuario::all(['id']);
-        $modalidades = Modalidade::all(['id']);
-        $estados = Estado::all(['id']);
-        $tipos = Tipo::all(['id']);
-
-        return view('pages.eventos.create', [
-            'model' => new Evento,
-            "usuario" => $usuario,
-            "modalidades" => $modalidades,
-            "estados" => $estados,
-            "tipos" => $tipos,
-
-        ]);
-    }
-    /**
+   /**
      * Store a newly created resource in storage.
      *
      * @param  Request  $request
@@ -106,102 +187,150 @@ class EventoController extends Controller
      */
     public function store(Request $request)
     {
+        $code = 500;
+        $message = 'Evaluación registrada';
+        \DB::beginTransaction();
+        $event = new Evento;
 
-        $model = new Evento;
-        $model->nombreOrganizador = $request->nombreOrganizador;
-        $model->puesto = $request->email;
-        $model->email = $request->email;
-        $model->nombre = $request->nombre;
-        $model->descripcion = $request->descripcion;
-        $model->numParticipantes = $request->numParticipantes;
-        $model->requisitosCentroComputo = $request->requisitosCentroComputo;
-        $model->numParticipantesExternos = $request->numParticipantesExternos;
-        $model->requiereEstacionamiento = $request->requiereEstacionamiento;
-        $model->requiereFinDeSemana = $request->requiereFinDeSemana;
-        $model->requiereMaestroDeObra = $request->requiereMaestroDeObra;
-        $model->requiereNotificarPrensaUV = $request->requiereNotificarPrensaUV;
-        $model->adicional = $request->adicional;
-        $model->inicio = $request->inicio;
-        $model->fin = $request->fin;
-        $model->idUsuario = $request->idUsuario;
-        $model->idModalidad = $request->idModalidad;
-        $model->idEstado = $request->idEstado;
-        $model->idTipo = $request->idTipo;
-        $model->idPrograma = $request->idPrograma;
-        $model->idPlataforma = $request->idPlataforma;
+        try{
 
-        try {
-            $file = $request->file('cronograma');
-            if ($file->isValid()) {
-                $blob = file_get_contents($file->getRealPath());
-                $model->cronograma = $blob;
+            $nonNullData = array_filter($request->all(), function ($value) {
+                return !is_null($value);
+            });
+
+            $event = Evento::create($nonNullData);
+            $event->save();
+
+            $idEvento = $event->id;
+            $this->storeCronograma($request, $idEvento);
+            $this->storePublicidad($request, $idEvento);
+        
+            $programas = json_decode($request->input("programas"), true);
+            foreach ($programas as $programa){
+                \DB::insert("INSERT INTO eventos_programaeducativos (idEvento, idProgramaEducativo) VALUES (?, ?)", [$event->id, $programa["id"]]);
             }
-            $message = 'Evento registrado. ';
-           
-            // $model->save();
+            
+            $reservaciones = json_decode($request->input("reservaciones"), true);
+            foreach ($reservaciones as $reservacion) {
+                Reservacion::findOrFail($reservacion["id"])
+                            ->update([
+                                "idEstado" => EstadoEnum::evaluado,
+                                "idEvento" => $event->id,
+                            ]);
+            }
+            
+            $event->load("usuario");
+            
+            $mail = MailProvider::getEventMail(
+                event: $event,
+                type: TipoAvisoEventEnum::evento_nuevo
+            );
 
-        } catch (Exception $ex) {
-            $message = $ex->getMessage();
-        };
+            $coordinators = User::where("idRol", RolEnum::coordinador)->get();
+            foreach($coordinators as $coordinator){
+                MailService::sendEmail(
+                    to: $coordinator, 
+                    mail: $mail
+                );
+            }
+            
+            Aviso::create([
+                "visto" => 0,
+                "idUsuario" => null,
+                "idEvento" => $event->id,
+                "idEstado" => EstadoEnum::en_revision,
+                "idTipoAviso" => TipoAvisoEventEnum::evento_nuevo
+            ]);
 
-        if ($model->save()) {
+            $code = 201;
+            \DB::commit();
+
+
+        } catch (\Throwable $ex) {
+            $message = $ex->__tostring();
+            \DB::rollBack();
+        }finally{
+            
             return response()->json([
-                'message' => $message], 200);     
-        }
-    }
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  Request  $request
-     * @param  Evento  $evento
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Request $request, $id)
-    {
-        $status = 500;
-        $message = "Algo falló";
-        try {
-            $model = Evento::with("estado")->findOrFail($request->id);
-            $model->update($request->all());
+                'message' => $message,
+                'data' => $request->input("difusion")], $code);
+            } 
+            
+            //return response()->json($request);
+        } 
 
-            $status = 200;
-        } catch (Exception $ex) {
-            $message = $ex->getMessage();
-        } finally {
-            return response()->json([
-                'message' => 'Evaluation updated successfully',
-                'data' => new EventoResource($model),
-            ], $status);
+    private function storeCronograma(Request $request, int $idEvento){
+        if (!$request->hasFile('cronograma')) {
+            return;
         }
+
+        $cronograma = $request->file("cronograma");
+
+        if (!$cronograma->isValid()) {
+            return response()->json(['error' => 'El archivo ' . $cronograma->getClientOriginalName() . 'no es válido.'], 400);
+        }
+
+        $blob = file_get_contents($cronograma->getRealPath());
+        
+        $document = new Cronograma;
+        $document->archivo = $blob;
+        $document->tipo = $cronograma->getMimeType();
+        $document->nombre = $cronograma->getClientOriginalName();
+        $document->idEvento = $idEvento;
+        $document->save();
     }
-    /**
+    
+    private function storePublicidad(Request $request, int $idEvento){
+        if (!$request->hasFile('publicidad')) {
+            return "a";
+        }
+
+        $publicidades = $request->file("publicidad");
+
+        foreach ($publicidades as $publicidad){
+            if (!$publicidad->isValid()) {
+                return response()->json(['error' => 'El archivo ' . $publicidad->getClientOriginalName() . 'no es válido.'], 400);
+            }
+        }
+
+        foreach ($publicidades as $publicidadArchivo){
+            $blob = file_get_contents($publicidadArchivo->getRealPath());
+            
+            $publicidad = new Publicidad();
+            $publicidad->archivo = $blob;
+            $publicidad->tipo = $publicidadArchivo->getMimeType();
+            $publicidad->nombre = $publicidadArchivo->getClientOriginalName();
+            $publicidad->idEvento = $idEvento;
+            $publicidad->save();
+        }
+
+    }    /**
      * Update a existing resource in storage.
      *
      * @param  Request  $request
-     * @param  Evento  $evento
+     * @param  Evento  $event
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Evento $evento)
+    public function update(Request $request,Evento $evento)
     {
         $status = 500;
         $message = "Algo falló";
-        try {
+        try{
             $model = Evento::findOrFail($evento->id);
             $model->update($request->all());
             $model->load("estado");
             $message = "Evento actualizado";
+            
             $status = 200;
-        } catch (Exception $ex) {
+        } catch (Exception $ex){
             $message = $ex->getMessage();
         } finally {
             return response()->json([
                 'message' => $message,
-                'data' => new EventoResource($model),
-                'payload' => $evento->toArray()
+                'data' => $event,
             ], $status);
         }
-    }
-    /**
+    }    /**
      * Delete a  resource from  storage.
      *
      * @param  Request  $request
@@ -212,11 +341,12 @@ class EventoController extends Controller
     public function destroy(Request $request, Evento $evento)
     {
         if ($evento->delete()) {
-            session()->flash('app_message', 'Evento successfully deleted');
-        } else {
-            session()->flash('app_error', 'Error occurred while deleting Evento');
-        }
+                session()->flash('app_message', 'Evento successfully deleted');
+            } else {
+                session()->flash('app_error', 'Error occurred while deleting Evento');
+            }
 
         return redirect()->back();
     }
+
 }
