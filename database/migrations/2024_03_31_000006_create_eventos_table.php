@@ -63,14 +63,17 @@ return new class extends Migration
             $table->unsignedBigInteger("idUsuario");
             $table->unsignedBigInteger("idModalidad");
             $table->unsignedBigInteger("idTipo");
+            $table->unsignedBigInteger("idPrograma");
+            $table->unsignedBigInteger('idPlataforma');
 
             $table->foreign("idEstado")->references("id")->on("estados");
             $table->foreign("idUsuario")->references("id")->on("users");
             $table->foreign("idModalidad")->references("id")->on("modalidads");
             $table->foreign("idTipo")->references("id")->on("tipos");
+            $table->foreign('idPrograma')->references("id")->on("programa_educativos");
+            $table->foreign("idPlataforma")->references("id")->on("plataformas");
             $table->timestamps(false);
         });
-
     }
 
     /**

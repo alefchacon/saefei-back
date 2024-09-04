@@ -12,6 +12,9 @@ class Evento extends Model
     protected $table = 'eventos';
     //public $timestamps = false;
     protected $fillable = [
+        "nombreOrganizador",
+        "puesto",
+        "email",
         "nombre",
         "descripcion",
         "pagina",
@@ -45,6 +48,8 @@ class Evento extends Model
 
         "idUsuario",
         "idModalidad",
+        "idPrograma",
+        "idPlataforma",
         "idEstado",
         "idTipo",
     ];

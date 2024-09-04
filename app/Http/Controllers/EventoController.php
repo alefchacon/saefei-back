@@ -28,7 +28,7 @@ use App\Models\Aviso;
 
 class EventoController extends Controller
 {
-       /**
+    /**
      * Display a listing of the resource.
      *
      * @param  Request  $request
@@ -37,7 +37,7 @@ class EventoController extends Controller
     {
         $filter = new EventoFilter();
         $queryItems = $filter->transform($request);
-        
+
         $includeEvaluacion = $request->query("evaluacion");
         $includeEvidences = $request->query("evidencias");
         $includeEstado = $request->query("estado");
@@ -158,7 +158,7 @@ class EventoController extends Controller
 
         return new EventoCollection($events->paginate());
     }
-    
+
     /**
      * Display the specified resource.
      *
@@ -176,6 +176,7 @@ class EventoController extends Controller
 
         
         return new EventoResource($evento);
+
     }    
 
    /**
@@ -302,86 +303,50 @@ class EventoController extends Controller
             $publicidad->idEvento = $idEvento;
             $publicidad->save();
         }
-    }
-    
-    
-    /**
+
+    }    /**
      * Update a existing resource in storage.
      *
      * @param  Request  $request
      * @param  Evento  $event
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Evento $event)
+    public function update(Request $request,Evento $evento)
     {
         $status = 500;
         $message = "Algo falló";
-        
-        \DB::beginTransaction();
-
-        //return response()->json(["sadf" => $request->input("model")["id"]]);
-
         try{
-            $nonNullData = array_filter($request->input("model"), function ($value) {
-                return !is_null($value);
-            });
-            
-            $event = Evento::findOrFail($request->input("model")["id"]);
-
-            $originalIdEstado = $event->idEstado;
-
-            $event->update($nonNullData);
-
-            self::handleEventMail(
-                event: $event,
-                originalIdEstado: $originalIdEstado
-            );
-
-            Aviso::notifyResponse(
-                $request->input("idAviso"), 
-                $event, 
-                $originalIdEstado
-            );
-            
-            \DB::commit();
-            
+            $model = Evento::findOrFail($evento->id);
+            $model->update($request->all());
+            $model->load("estado");
             $message = "Evento actualizado";
             
             $status = 200;
-        } catch (\Throwable $ex){
-            \DB::rollBack();
+        } catch (Exception $ex){
             $message = $ex->getMessage();
-        }finally {
+        } finally {
             return response()->json([
                 'message' => $message,
                 'data' => $event,
             ], $status);
         }
-    } 
-    
-    private static function handleEventMail(
-        Evento $event, 
-        int $originalIdEstado
-    ){
-        $replyingToEventOrganizer = 
-            $originalIdEstado !== $event->idEstado;
+    }    /**
+     * Delete a  resource from  storage.
+     *
+     * @param  Request  $request
+     * @param  Evento  $evento
+     * @return \Illuminate\Http\Response
+     * @throws \Exception
+     */
+    public function destroy(Request $request, Evento $evento)
+    {
+        if ($evento->delete()) {
+                session()->flash('app_message', 'Evento successfully deleted');
+            } else {
+                session()->flash('app_error', 'Error occurred while deleting Evento');
+            }
 
-        if (!$replyingToEventOrganizer){
-            return;
-        }
-
-        $type = TipoAvisoEventEnum::tryFrom($event->idEstado);
-        
-        $mail = MailProvider::getEventMail(
-            event: $event, 
-            type: $type
-        );
-
-        $event->load('usuario');
-        MailService::sendEmail(
-            to: $event->usuario,
-            mail: $mail 
-        );
+        return redirect()->back();
     }
 
 }
