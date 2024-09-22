@@ -14,17 +14,17 @@ class ReservacionSeeder extends Seeder
      */
     public function run(): void
     {
-        // $date1 = new \DateTime();
-        // $date2 = clone $date1;
-        // $date2->modify('+3 days');
+        $date1 = new \DateTime();
+        $date2 = clone $date1;
+        $date2->modify('+3 days');
         
-        // $date3 = clone $date1;
-        // $date3->modify('+6 days');
+        $date3 = clone $date1;
+        $date3->modify('+6 days');
         
-        // $date4 = clone $date1;
-        // $date4->modify('+9 days');
+        $date4 = clone $date1;
+        $date4->modify('+9 days');
 
-        // $dates = [$date1, $date2, $date3, $date4];
+        $dates = [$date1, $date2, $date3, $date4];
 
         foreach ($dates as $date) {
             Reservacion::factory()->hasRespuesta()->create([

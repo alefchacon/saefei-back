@@ -21,7 +21,8 @@ class EspacioFactory extends Factory
         return [
             "nombre" => $this->faker->word(),            
             "descripcion" => $this->faker->word(),
-            "estado" => $this->faker->randomElement(["disponible", "solicitado", "reservado"]),      
+            "estado" => $this->faker->randomElement(["disponible", "solicitado", "reservado"]),
+                        
         ];
     }
 }
