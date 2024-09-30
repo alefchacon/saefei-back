@@ -13,9 +13,11 @@ return new class extends Migration
     {
         Schema::create('reservaciones', function (Blueprint $table) {
             $table->id()->primary()->unsigned()->unique();
+            $table->string('motivo', 1000);
+            $table->date('fecha');
+            $table->time('inicio');
+            $table->time('fin');
             $table->string('respuesta', 1000)->nullable();
-            $table->dateTime('inicio');
-            $table->dateTime('fin');
 
             $table->unsignedBigInteger('idUsuario');
             $table->unsignedBigInteger('idEspacio');

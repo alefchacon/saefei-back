@@ -24,6 +24,8 @@ class ReservacionFactory extends Factory
         $end = $start->modify('+1 hour');
         return [
             "respuesta" => $this->faker->word(),
+            "motivo" => $this->faker->word(),
+            "fecha" => $start,
             "inicio" => $start,
             "fin" => $end,
             "idUsuario" => 1,  

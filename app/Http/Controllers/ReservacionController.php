@@ -43,7 +43,7 @@ class ReservacionController extends Controller
             $solicitudes = $solicitudes->orderByDesc("avisarUsuario");
         }
 
-        return new ReservacionCollection($solicitudes->paginate(5)->appends($request->query()));
+        return new ReservacionCollection($solicitudes->get());
     }
     public function getAvailableReservations(Request $request)
     {
@@ -110,7 +110,7 @@ class ReservacionController extends Controller
                 );
             }
 
-            $message = 'Solicitud realizada. Espere confirmacion';
+            $message = 'Solicitud enviada';
             $status = 201;
             $data = new ReservacionResource($reservation);
 

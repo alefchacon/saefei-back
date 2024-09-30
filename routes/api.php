@@ -20,6 +20,7 @@ use App\Http\Controllers\RolController;
 use App\Http\Controllers\EvidenciaController;
 use App\Http\Controllers\AvisoController;
 use App\Http\Controllers\EmailController;
+use App\Http\Controllers\ArchivoController;
 use App\Http\Middleware\AuthCustom;
 use App\Models\Difusion;
 use App\Models\Espacio;
@@ -64,8 +65,9 @@ Route::group(['/api'], function () {
     Route::post('espacios/reservaciones', [EspacioController::class, 'getEspaciosLibres']);
     Route::put('espacios/reservaciones', [EspacioController::class, 'getEspaciosLibres']);
     
-    Route::apiResource('solicitud', ReservacionController::class);
-    Route::post('solicitud/disponibles', [ReservacionController::class, 'getAvailableReservations']);
+    Route::apiResource('reservaciones', ReservacionController::class);
+
+    Route::post('reservaciones/disponibles', [ReservacionController::class, 'getAvailableReservations']);
     Route::post('solicitud/marcarLeidasUsuario', [ReservacionController::class, 'markAsUserRead']);
     //Route::put('solicitud', [SolicitudEspacioController::class, 'update']);
     Route::apiResource('horarios', HorarioController::class);
@@ -78,7 +80,13 @@ Route::group(['/api'], function () {
     Route::apiResource('cronogramas', CronogramaController::class);
     Route::apiResource('publicidad', PublicidadController::class);
     Route::apiResource('email', EmailController::class)->middleware(AuthCustom::class);
-    });
+
+
+    Route::post('/archivos', [ArchivoController::class, 'upload']);
+    Route::get('/file/{filename}', [ArchivoController::class, 'download']);
+
+
+});
 
     
     

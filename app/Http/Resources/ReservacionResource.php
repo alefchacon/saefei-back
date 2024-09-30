@@ -18,8 +18,8 @@ class ReservacionResource extends JsonResource
         return [
             'id' => $this->id,
             'notes' => $this->respuesta,
+            'date' => $this->fecha,
             'start' => $this->inicio,
-            'startTime' => $startDateTime->format('H:i'),
             'end' => $this->fin,
             'idEstado' => $this->idEstado,
 

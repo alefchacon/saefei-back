@@ -12,6 +12,8 @@ class Reservacion extends Model
     public $timestamps = false;
 
     protected $fillable = [
+        'fecha',
+        'motivo',
         'inicio',
         'fin',
         'idUsuario',
