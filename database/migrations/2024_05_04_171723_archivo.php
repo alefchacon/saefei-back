@@ -16,6 +16,7 @@ return new class extends Migration
             $table->id()->primary()->unsigned()->unique();
             $table->timestamps();
             $table->string("nombre");
+            $table->string("ruta");
 
             $table->unsignedBigInteger('idEvento');
             $table->unsignedBigInteger('idTipoArchivo');

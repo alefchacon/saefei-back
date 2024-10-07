@@ -7,4 +7,5 @@ enum EstadoEnum: int{
   case aceptado = 2;
   case evaluado = 3;
   case rechazado = 4;
+  case enProceso = 5;
 }

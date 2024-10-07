@@ -40,6 +40,7 @@ class EventoResource extends JsonResource
             'media' => $this->medios,
             'presidium' => $this->presidium,
             'decoration' => $this->decoracion,
+            'speakers' => $this->ponientes,
 
             'wasAccepted' => $this->idEstado === 2 || $this->idEstado === 3,
 

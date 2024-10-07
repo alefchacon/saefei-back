@@ -9,6 +9,7 @@ use App\Models\Enums\TipoAvisoEventEnum;
 use App\Models\Eventos_ProgramaEducativos;
 use App\Models\Difusion;
 use App\Models\Publicidad;
+use App\Models\Archivo;
 use App\Models\Respuesta;
 use App\Models\User;
 use App\Models\Reservacion;
@@ -24,7 +25,9 @@ use App\Mail\MailService;
 use App\Mail\Mail;
 use App\Mail\MailProvider;
 use App\Models\Enums\RolEnum;
+use App\Models\Enums\TiposArchivosEnum;
 use App\Models\Aviso;
+
 
 class EventoController extends Controller
 {
@@ -188,9 +191,13 @@ class EventoController extends Controller
     {
         $code = 500;
         $message = 'Evaluación registrada';
+
+        
+
         \DB::beginTransaction();
         $event = new Evento;
 
+        $test = "";
         try{
 
             $nonNullData = array_filter($request->all(), function ($value) {
@@ -201,17 +208,25 @@ class EventoController extends Controller
             $event->save();
 
             $idEvento = $event->id;
-            $this->storeCronograma($request, $idEvento);
-            $this->storePublicidad($request, $idEvento);
+            $this->storeArchivo(
+                $request, 
+                $idEvento, 
+                TiposArchivosEnum::PUBLICIDAD
+            );
+            $test = $this->storeArchivo(
+                $request, 
+                $idEvento, 
+                TiposArchivosEnum::CRONOGRAMA
+            );
         
             $programas = json_decode($request->input("programas"), true);
             foreach ($programas as $programa){
-                \DB::insert("INSERT INTO eventos_programaeducativos (idEvento, idProgramaEducativo) VALUES (?, ?)", [$event->id, $programa["id"]]);
+                \DB::insert("INSERT INTO eventos_programaeducativos (idEvento, idProgramaEducativo) VALUES (?, ?)", [$event->id, $programa]);
             }
             
             $reservaciones = json_decode($request->input("reservaciones"), true);
             foreach ($reservaciones as $reservacion) {
-                Reservacion::findOrFail($reservacion["id"])
+                Reservacion::findOrFail($reservacion)
                             ->update([
                                 "idEstado" => EstadoEnum::evaluado,
                                 "idEvento" => $event->id,
@@ -252,56 +267,35 @@ class EventoController extends Controller
             
             return response()->json([
                 'message' => $message,
-                'data' => $request->input("difusion")], $code);
+                'data' => $test], $code);
             } 
             
             //return response()->json($request);
         } 
 
-    private function storeCronograma(Request $request, int $idEvento){
-        if (!$request->hasFile('cronograma')) {
-            return;
-        }
+    private function storeArchivo(Request $request, int $idEvento, TiposArchivosEnum $tipoArchivo){
+        if (!$request->hasFile($tipoArchivo->getKey())) {
+            return "no files found!";
+        }            
+        $archivos = $request->file($tipoArchivo->getKey());
 
-        $cronograma = $request->file("cronograma");
-
-        if (!$cronograma->isValid()) {
-            return response()->json(['error' => 'El archivo ' . $cronograma->getClientOriginalName() . 'no es válido.'], 400);
-        }
-
-        $blob = file_get_contents($cronograma->getRealPath());
-        
-        $document = new Cronograma;
-        $document->archivo = $blob;
-        $document->tipo = $cronograma->getMimeType();
-        $document->nombre = $cronograma->getClientOriginalName();
-        $document->idEvento = $idEvento;
-        $document->save();
-    }
-    
-    private function storePublicidad(Request $request, int $idEvento){
-        if (!$request->hasFile('publicidad')) {
-            return "a";
-        }
-
-        $publicidades = $request->file("publicidad");
-
-        foreach ($publicidades as $publicidad){
-            if (!$publicidad->isValid()) {
-                return response()->json(['error' => 'El archivo ' . $publicidad->getClientOriginalName() . 'no es válido.'], 400);
+        foreach ($archivos as $archivo){
+            if (!$archivo->isValid()) {
+                return response()->json(['error' => 'El archivo ' . $archivo->getClientOriginalName() . 'no es válido.'], 400);
             }
         }
 
-        foreach ($publicidades as $publicidadArchivo){
-            $blob = file_get_contents($publicidadArchivo->getRealPath());
-            
-            $publicidad = new Publicidad();
-            $publicidad->archivo = $blob;
-            $publicidad->tipo = $publicidadArchivo->getMimeType();
-            $publicidad->nombre = $publicidadArchivo->getClientOriginalName();
-            $publicidad->idEvento = $idEvento;
-            $publicidad->save();
+        $tipoArchivo->getKey();
+        foreach ($archivos as $archivo) {
+            $path = $archivo->store("uploads", 'public');
+            $archivoModel = new Archivo();
+            $archivoModel->ruta = basename($path);
+            $archivoModel->nombre = $archivo->getClientOriginalName();
+            $archivoModel->idEvento = $idEvento;
+            $archivoModel->idTipoArchivo = $tipoArchivo->value;
+            $archivoModel->save();
         }
+        
     }
     
     

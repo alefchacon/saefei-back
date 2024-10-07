@@ -18,39 +18,39 @@ return new class extends Migration
 
             /*DETALLES DEL ORGANIZADOR*/
             /*DETALLES DEL EVENTO*/
-            $table->string("nombre", 1000);
-            $table->string("descripcion", 1000);
+            $table->string("nombre", 1000)->nullable();
+            $table->string("descripcion", 1000)->nullable();
             $table->string("pagina")->nullable()->default("uv.mx/fei");
-            $table->string("ambito", 1000);
-            $table->string("audiencias", 1000);
-            $table->string("eje", 1000);
-            $table->string("tematicas", 1000);
+            $table->string("ambito", 1000)->nullable();
+            $table->string("audiencias", 1000)->nullable();
+            $table->string("eje", 1000)->nullable();
+            $table->string("tematicas", 1000)->nullable();
             
             /*DETALLES LOGÍSTICOS*/
-            $table->date("inicio");
-            $table->date("fin");
-            $table->integer("numParticipantes")->default(0);
+            $table->date("inicio")->nullable();
+            $table->date("fin")->nullable();
+            $table->integer("numParticipantes")->default(0)->nullable();
             
             /*ESPACIOS FISICOS*/
             /*ESPACIOS VIRTUAL*/
             /*ESPACIOS FISICO Y VIRTUAL*/
-            $table->string("plataformas", 1000)->nullable()->default(config('global.defaultString'));
+            $table->string("plataformas", 1000)->nullable()->default(config('global.defaultString'))->nullable();
 
             /*RECURSOS ADICIONALES*/
             $table->string("requisitosCentroComputo", 1000)->nullable()->default(config('global.defaultString'));
-            $table->boolean("requiereTransmisionEnVivo")->default(false);
+            $table->boolean("requiereTransmisionEnVivo")->default(false)->nullable();
             $table->string("presidium", 1000)->nullable()->default(config('global.defaultString'));
             $table->string("decoracion", 1000)->nullable()->default(config('global.defaultString'));
             $table->integer("numParticipantesExternos")->nullable()->default(0);
-            $table->boolean("requiereEstacionamiento")->default(false);
-            $table->boolean("requiereFinDeSemana")->default(false);
+            $table->boolean("requiereEstacionamiento")->nullable()->default(false);
+            $table->boolean("requiereFinDeSemana")->nullable()->default(false);
             
             /*DIFUSION DEL EVENTO*/
-            $table->string("medios", 1000);
+            $table->string("medios", 1000)->nullable();
             
             /*CONSTANCIAS*/
-            $table->boolean("requiereConstancias")->default(false);
-            $table->string("ponientes", 1000)->default(false);
+            $table->boolean("requiereConstancias")->nullable()->default(false);
+            $table->string("ponientes", 1000)->nullable()->default(false);
             
             /*OTROS COMENTARIOS O SOLICITUDES ESPECIALES*/
             $table->string("adicional", 1000)->nullable()->default(config('global.defaultString'));
@@ -61,8 +61,8 @@ return new class extends Migration
             
             $table->unsignedBigInteger("idEstado");
             $table->unsignedBigInteger("idUsuario");
-            $table->unsignedBigInteger("idModalidad");
-            $table->unsignedBigInteger("idTipo");
+            $table->unsignedBigInteger("idModalidad")->nullable();
+            $table->unsignedBigInteger("idTipo")->nullable();
 
             $table->foreign("idEstado")->references("id")->on("estados");
             $table->foreign("idUsuario")->references("id")->on("users");

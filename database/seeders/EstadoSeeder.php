@@ -13,7 +13,7 @@ class EstadoSeeder extends Seeder
      */
     public function run(): void
     {
-        $names = ['Nuevo', 'Aceptado', 'Evaluado', 'Rechazado'];
+        $names = ['Nuevo', 'Aceptado', 'Utilizado', 'Rechazado', 'En proceso'];
 
         foreach ($names as $name) {
             Estado::factory()->create([

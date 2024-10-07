@@ -30,7 +30,7 @@ class ArchivoController extends Controller
             return response()->json(['message' =>"El tipo de archivo seleccionado no existe" ], 401);
         }
 
-        return response()->json(['path' =>TiposArchivosEnum::tryFrom($idTipoArchivo) ], 201);
+        return response()->json(['path' =>basename($path) ], 201);
     }
 
 
