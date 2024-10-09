@@ -14,7 +14,6 @@ class ReservacionResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        $startDateTime = new \DateTime($this->inicio);
         return [
             'id' => $this->id,
             'notes' => $this->respuesta,
@@ -22,11 +21,22 @@ class ReservacionResource extends JsonResource
             'start' => $this->inicio,
             'end' => $this->fin,
             'idEstado' => $this->idEstado,
-
+            
             'wasAccepted' => $this->idEstado === 2 || $this->idEstado === 3,
             'user' => new UserResource($this->whenLoaded('usuario')),
             'space' => new EspacioResource($this->whenLoaded('espacio')),
             'status' => new CatalogoResource($this->whenLoaded('estado')),
+            'activities' => new ActividadCollection($this->whenLoaded(
+                'actividades', function () {
+                    return $this->actividades->sortBy('hora');
+                }
+            )),
+            'startEvent' => $this->whenLoaded('actividades', function () {            
+                return $this->actividades->sortBy('hora')->first()->hora;
+            }),
+            'endEvent' => $this->whenLoaded('actividades', function () {            
+                return $this->actividades->sortBy('hora')->last()->hora;
+            }),
 
         ];
     }

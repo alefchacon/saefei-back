@@ -27,6 +27,7 @@ use App\Mail\MailProvider;
 use App\Models\Enums\RolEnum;
 use App\Models\Enums\TiposArchivosEnum;
 use App\Models\Aviso;
+use App\Models\Actividad;
 
 
 class EventoController extends Controller
@@ -70,7 +71,7 @@ class EventoController extends Controller
             $eventos = $eventos->with("evidencias");
         }
 
-        $eventos->with(['programasEducativos', 'usuario']);
+        $eventos->with(['programasEducativos', 'usuario', 'reservaciones.actividades']);
 
 
         if ($returnAll){
@@ -171,7 +172,17 @@ class EventoController extends Controller
      */
     public function show(Request $request, int $idEvento)
     {
-        $evento = Evento::with(['estado', 'tipo', 'modalidad', 'usuario', 'programasEducativos', 'reservaciones.espacio', 'evaluacion.evidencias'])->find($idEvento);
+        $evento = Evento::with([
+            'estado', 
+            'tipo', 
+            'modalidad', 
+            'usuario', 
+            'programasEducativos', 
+            'reservaciones.espacio', 
+            'reservaciones.actividades', 
+            'evaluacion.evidencias',
+            'archivos',
+        ])->find($idEvento);
 
         if (!$evento) {
             return response()->json(['message' => 'No existe ese evento'], 404);
@@ -198,6 +209,8 @@ class EventoController extends Controller
         $event = new Evento;
 
         $test = "";
+        $actividadesCorrespondientes = [];
+        $reservacionIds = [];
         try{
 
             $nonNullData = array_filter($request->all(), function ($value) {
@@ -224,14 +237,32 @@ class EventoController extends Controller
                 \DB::insert("INSERT INTO eventos_programaeducativos (idEvento, idProgramaEducativo) VALUES (?, ?)", [$event->id, $programa]);
             }
             
-            $reservaciones = json_decode($request->input("reservaciones"), true);
+            $reservacionIds = json_decode($request->input("reservaciones"), true);
+
+            /*
             foreach ($reservaciones as $reservacion) {
                 Reservacion::findOrFail($reservacion)
                             ->update([
                                 "idEstado" => EstadoEnum::evaluado,
                                 "idEvento" => $event->id,
                             ]);
+            }*/
+
+            $actividadesJson = $request->input("actividades");
+            $actividades = json_decode($actividadesJson, true);
+            
+            foreach($reservacionIds as $reservacionId){
+                $actividadesCorrespondientes = array_filter(
+                    $actividades, 
+                    function($actividad) use ($reservacionId) {
+                        return $actividad['idReservacion'] === $reservacionId;
+                    }
+                );
+                foreach ($actividadesCorrespondientes as $actividad){
+                    Actividad::create($actividad);
+                }
             }
+            
             
             $event->load("usuario");
             
@@ -267,11 +298,17 @@ class EventoController extends Controller
             
             return response()->json([
                 'message' => $message,
-                'data' => $test], $code);
-            } 
+                'data' => $actividadesCorrespondientes
+            ], $code);
+        } 
             
             //return response()->json($request);
-        } 
+    } 
+
+    function find($array, $callback) {
+        $filtered = array_filter($array, $callback);
+        return !empty($filtered) ? array_values($filtered)[0] : null;
+    }
 
     private function storeArchivo(Request $request, int $idEvento, TiposArchivosEnum $tipoArchivo){
         if (!$request->hasFile($tipoArchivo->getKey())) {

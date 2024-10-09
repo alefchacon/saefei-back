@@ -14,4 +14,11 @@ class Archivo extends Model
         "idEvento",
         "idTipoArchivo"
     ];
+
+    public function evento(){
+        return $this->belongsTo(Evento::class, 'idEvento', 'id');
+    }
+    public function tipoArchivo(){
+        return $this->belongsTo(TipoArchivo::class, 'idTipoArchivo', 'id');
+    }
 }

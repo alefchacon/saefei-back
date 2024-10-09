@@ -27,7 +27,7 @@ class ReservacionSeeder extends Seeder
         $dates = [$date1, $date2, $date3, $date4];
 
         foreach ($dates as $date) {
-            Reservacion::factory()->hasRespuesta()->create([
+            Reservacion::factory()->hasRespuesta()->hasActividades(5)->create([
                 'fecha' => $date,
                 'inicio' => $date,
                 'fin' => $date,

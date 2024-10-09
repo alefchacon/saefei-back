@@ -14,4 +14,8 @@ class TipoArchivo extends Model
     protected $fillable = [
         "nombre",
     ];
+
+    public function archivos(){
+        return $this->hasMany(Archivo::class, 'idTipoArchivo', 'id');
+    }
 }

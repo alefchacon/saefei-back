@@ -93,6 +93,10 @@ class Evento extends Model
         return $this->belongsTo(Respuesta::class, 'idRespuesta', 'id');
     }
 
+    public function archivos(){
+        return $this->hasMany(Archivo::class, 'idEvento', 'id');
+    }
+
     public static function encontrarPor($anio, $mes){
         return self::whereHas('reservaciones', function ($query) use ($anio, $mes) {
             $query->whereYear('inicio', '=', $anio)

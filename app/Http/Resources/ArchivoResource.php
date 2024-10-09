@@ -17,11 +17,9 @@ class ArchivoResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->nombre,
-            'type' => $this->tipo,
+            'file' => $this->ruta,
             'idEvento' => $this->idEvento,
-            'idEvaluacion' => $this->idEvaluacion,
-            'file' => $this->archivo,
-
+            'type' => $this->tipoArchivo->nombre
         ];
     }
 }

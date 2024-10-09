@@ -47,4 +47,7 @@ class Reservacion extends Model
         return $this->belongsTo(Respuesta::class, 'idRespuesta', 'id');
     }
 
+    public function actividades(){
+        return $this->hasMany(Actividad::class, 'idReservacion', 'id');
+    }
 }

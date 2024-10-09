@@ -44,7 +44,6 @@ class EventoResource extends JsonResource
 
             'wasAccepted' => $this->idEstado === 2 || $this->idEstado === 3,
 
-            'cronogram' => new ArchivoResource($this->whenLoaded('cronograma')),
             'publicity' => new ArchivoCollection($this->whenLoaded('publicidades')),
             "idEstado" => $this->idEstado,
             "idUsuario" => $this->idUsuario,
@@ -60,7 +59,10 @@ class EventoResource extends JsonResource
             'status' => new CatalogoResource($this->whenLoaded('estado')),
             'mode' => new CatalogoResource($this->whenLoaded('modalidad')),     
             'programs' => new CatalogoCollection($this->whenLoaded("programasEducativos")),
-            'evidences' => new ArchivoCollection($this->whenLoaded("evidencias"))
+            'evidences' => new ArchivoCollection($this->whenLoaded("evidencias")),
+            'chronogram' => new ArchivoResource($this->whenLoaded('archivos', function () {            
+                return $this->archivos->where('idTipoArchivo', 1)->first();
+            })),
         
         ];
     }
