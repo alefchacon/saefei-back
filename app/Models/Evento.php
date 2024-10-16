@@ -57,6 +57,7 @@ class Evento extends Model
         return $this->hasManyThrough(Evidencia::class, Evaluacion::class, "idEvento", "idEvaluacion", "id", "id");
     }
 
+
     public function evaluacion() {
         return $this->hasOne( Evaluacion::class, 'idEvento', 'id');
     }
@@ -97,16 +98,18 @@ class Evento extends Model
         return $this->hasMany(Archivo::class, 'idEvento', 'id');
     }
 
-    public static function encontrarPor($anio, $mes){
-        return self::whereHas('reservaciones', function ($query) use ($anio, $mes) {
-            $query->whereYear('inicio', '=', $anio)
-                  ->whereMonth('inicio', '=', $mes);
-        })
-        ->with([ 
-            'reservaciones.usuario', 
-            'reservaciones.espacio', 
-            'reservaciones.estado'
-        ]);
+    public static function scopeEncontrarPor($query, $startYearMonth,){
+        return $query->select('eventos.*')
+        ->joinSub(
+            Reservacion::select('idEvento')
+                ->selectRaw('MIN(DATE_FORMAT(fecha, "%Y-%m-01")) as first_reservation_month')
+                ->groupBy('idEvento'),
+            'first_reservations',
+            function ($join) {
+                $join->on('eventos.id', '=', 'first_reservations.idEvento');
+            }
+        )
+        ->whereRaw('DATE_FORMAT(first_reservations.first_reservation_month, "%Y-%m") = ?', [$startYearMonth]);
     }
 
     /**

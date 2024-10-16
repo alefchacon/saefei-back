@@ -14,10 +14,10 @@ class ProgramaEducativoSeeder extends Seeder
     public function run(): void
     {
         $names = [
-            'Estadística - Ingeniería en Ciencia de Datos', 
-            'Tecnologías Computacionales - Ingeniería en Sistemas y Tecnologías de la Información', 
-            'Ingeniería de Software',
-            'Redes y Servicios de Cómputo - Ingeniería en Ciberseguridad e Infraestructura de Cómputo',
+            'Licenciatura en Ingeniería en Ciencia de Datos', 
+            'Licenciatura en Ingeniería en Sistemas y Tecnologías de la Información', 
+            'Licenciatura en Ingeniería de Software',
+            'Licenciatura en Ingeniería en Ciberseguridad e Infraestructura de Cómputo',
             'Especialización en Métodos Estadísticos',
             'Maestría en Gestión de Calidad',
             'Maestría en Sistemas Interactivos Centrados en el Usuario',

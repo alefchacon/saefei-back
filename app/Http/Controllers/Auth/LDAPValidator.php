@@ -39,7 +39,7 @@ class LDAPValidator {
 
 
         return [
-            "status" => $validationStatus,
+            "status" => $ldapConnection,
             "message" => $messages[$validationStatus],
         ];
 

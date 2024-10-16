@@ -31,12 +31,9 @@ class ReservacionResource extends JsonResource
                     return $this->actividades->sortBy('hora');
                 }
             )),
-            'startEvent' => $this->whenLoaded('actividades', function () {            
-                return $this->actividades->sortBy('hora')->first()->hora;
-            }),
-            'endEvent' => $this->whenLoaded('actividades', function () {            
-                return $this->actividades->sortBy('hora')->last()->hora;
-            }),
+            'startEvent' => $this->actividades->sortBy('hora')->first()->hora,
+
+            'endEvent' => $this->actividades->sortBy('hora')->last()->hora,
 
         ];
     }

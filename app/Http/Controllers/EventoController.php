@@ -45,10 +45,9 @@ class EventoController extends Controller
         $includeEvaluacion = $request->query("evaluacion");
         $includeEvidences = $request->query("evidencias");
         $includeEstado = $request->query("estado");
-        $orderByNombre = $request->query("porAlfabetico");
-        $orderByCreatedAt = $request->query("porFechaEnvio");
-        $eventName = $request->query("nombre");
-        $startYearMonth = $request->query("inicio");
+        $orderBy = $request->query("orden");
+        $eventName = $request->query("q");
+        $startYearMonth = $request->query("fecha");
         $returnAll = $request->query("todo");
 
         $eventos = Evento::where($queryItems);
@@ -56,12 +55,12 @@ class EventoController extends Controller
             $eventos = $this->getEventsByName($request, $eventos);
         }
         if ($startYearMonth){
-            $eventos = $eventos->where(\DB::raw("DATE_FORMAT(inicio, '%Y-%m')"), "=", $startYearMonth);
+            $eventos = Evento::encontrarPor($startYearMonth);
         }
-        if ($orderByCreatedAt){
+        if ($orderBy == "fecha"){
             $eventos = $eventos->orderByDesc("created_at");
         }
-        if ($orderByNombre){
+        if ($orderBy == "alfabetico"){
             $eventos = $eventos->orderBy("nombre");
         }
         if ($includeEvaluacion) {
@@ -71,24 +70,24 @@ class EventoController extends Controller
             $eventos = $eventos->with("evidencias");
         }
 
-        $eventos->with(['programasEducativos', 'usuario', 'reservaciones.actividades']);
+        $eventos->with(['programasEducativos', 'usuario', 'reservaciones.actividades', 'reservaciones.espacio']);
 
 
         if ($returnAll){
             return new EventoCollection($eventos->get()); 
         } else {
-            return EventoLightResource::collection($eventos->paginate(5)->appends($request->query())); 
+            return EventoLightResource::collection($eventos->paginate(10)->appends($request->query())); 
 
         }
     }    
     
     public function getEventsByName(Request $request, Builder|Evento $eventos){
-        if ($request->has('nombre')) {
+        if ($request->has('q')) {
 
             /*
                 Los eventos se filtran utilizando el método Model Collection->filter()
             */
-            $searchString = $request->query('nombre');
+            $searchString = $request->query('q');
             $modelEvents = $eventos->get();
             $filteredEvents = $this->filterEventsByName($modelEvents, $searchString);
 
@@ -336,15 +335,7 @@ class EventoController extends Controller
     }
     
     
-    /**
-     * Update a existing resource in storage.
-     *
-     * @param  Request  $request
-     * @param  Evento  $event
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, Evento $event)
-    {
+    public function update(Request $request, Evento $event){
         $status = 500;
         $message = "Algo falló";
         
@@ -353,26 +344,13 @@ class EventoController extends Controller
         //return response()->json(["sadf" => $request->input("model")["id"]]);
 
         try{
-            $nonNullData = array_filter($request->input("model"), function ($value) {
+            $nonNullData = array_filter($request->all(), function ($value) {
                 return !is_null($value);
             });
             
-            $event = Evento::findOrFail($request->input("model")["id"]);
-
-            $originalIdEstado = $event->idEstado;
+            $event = Evento::findOrFail($request->all()["id"]);
 
             $event->update($nonNullData);
-
-            self::handleEventMail(
-                event: $event,
-                originalIdEstado: $originalIdEstado
-            );
-
-            Aviso::notifyResponse(
-                $request->input("idAviso"), 
-                $event, 
-                $originalIdEstado
-            );
             
             \DB::commit();
             
@@ -385,7 +363,7 @@ class EventoController extends Controller
         }finally {
             return response()->json([
                 'message' => $message,
-                'data' => $event,
+                'data' => new EventoResource($event),
             ], $status);
         }
     } 

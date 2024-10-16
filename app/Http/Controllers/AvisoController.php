@@ -34,7 +34,7 @@ class AvisoController extends Controller
                 Aviso::where("idEvento", "<>", null)
                     ->where("idTipoAviso", "=", TipoAvisoEventEnum::evento_nuevo)
                     ->orWhere("idTipoAviso", "=", TipoAvisoEventEnum::evento_evaluado)
-                    ->with("evento");
+                    ->with(["evento.reservaciones.espacio", "evento.programasEducativos"]);
         } 
 
         if ($user->idRol === RolEnum::administrador_espacios->value){

@@ -8,6 +8,7 @@ use App\Http\Controllers\EvaluacionController;
 use App\Http\Controllers\EventoController;
 use App\Http\Controllers\HorarioController;
 use App\Http\Controllers\InvitadoController;
+use App\Http\Controllers\LDAPController;
 use App\Http\Controllers\ModalidadController;
 use App\Http\Controllers\PlataformaController;
 use App\Http\Controllers\ProgramaEducativoController;
@@ -83,6 +84,7 @@ Route::group(['/api'], function () {
 
 
     Route::post('/archivos', [ArchivoController::class, 'upload']);
+    Route::post('/ldap', [LDAPController::class, 'test']);
     Route::get('/file/{filename}', [ArchivoController::class, 'download']);
 
 

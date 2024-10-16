@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Models\ProgramaEducativo;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -23,7 +24,8 @@ class EventoLightResource extends JsonResource
 
             'start' => $this->inicio,
             'end' => $this->fin,
-
+            'programs' => new CatalogoCollection($this->whenLoaded("programasEducativos")),
+            'reservations' => new ReservacionCollection($this->whenLoaded("reservaciones")),
             'user' => new UserResource($this->usuario),
             'status' => new CatalogoResource($this->estado),
             'mode' => new CatalogoResource($this->whenLoaded('modalidad')),    

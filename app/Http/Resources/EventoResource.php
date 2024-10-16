@@ -36,7 +36,7 @@ class EventoResource extends JsonResource
             "needsComputerCenterSupport" => $this->requiereApoyoCentroComputo,
             'additional' => $this->adicional,
             'createdAt' => $this->created_at,     
-            'notes' => $this->observaciones,     
+            'reply' => $this->observaciones,     
             'media' => $this->medios,
             'presidium' => $this->presidium,
             'decoration' => $this->decoracion,
@@ -44,7 +44,6 @@ class EventoResource extends JsonResource
 
             'wasAccepted' => $this->idEstado === 2 || $this->idEstado === 3,
 
-            'publicity' => new ArchivoCollection($this->whenLoaded('publicidades')),
             "idEstado" => $this->idEstado,
             "idUsuario" => $this->idUsuario,
 
@@ -62,6 +61,9 @@ class EventoResource extends JsonResource
             'evidences' => new ArchivoCollection($this->whenLoaded("evidencias")),
             'chronogram' => new ArchivoResource($this->whenLoaded('archivos', function () {            
                 return $this->archivos->where('idTipoArchivo', 1)->first();
+            })),
+            'publicity' => new ArchivoCollection($this->whenLoaded('archivos', function () {            
+                return $this->archivos->where('idTipoArchivo', 3);
             })),
         
         ];
