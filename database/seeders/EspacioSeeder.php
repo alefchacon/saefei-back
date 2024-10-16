@@ -13,20 +13,31 @@ class EspacioSeeder extends Seeder
      */
     public function run(): void
     {
-        $names = [
-            'Auditorio', 
-            'Audiovisual', 
-            'Salón de Cristal', 
-            'Baño',
-            'Otro lugar',
-        ];
+        Espacio::create([
+            'nombre' => 'Auditorio',
+            'capacidad' => 120,
+            'idRol' => 3
+        ]);
+        Espacio::create([
+            'nombre' => 'Audiovisual',
+            'capacidad' => 80,
+            'idRol' => 3
+        ]);
+        Espacio::create([
+            'nombre' => 'Salón de Cristal',
+            'capacidad' => 150,
+            'idRol' => 4
+        ]);
+        Espacio::create([
+            'nombre' => 'Sala de maestros',
+            'capacidad' => 30,
+            'idRol' => 3
+        ]);
+        Espacio::create([
+            'nombre' => 'Teatro al aire libre',
+            'capacidad' => 90,
+            'idRol' => 4
+        ]);
 
-        foreach ($names as $name) {
-            Espacio::factory()->create([
-                'nombre' => $name,
-            ]);
-        }
-
-        Espacio::factory()->count(50)->create();
     }
 }

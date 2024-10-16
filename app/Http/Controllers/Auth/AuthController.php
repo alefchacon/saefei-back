@@ -21,7 +21,7 @@ class AuthController extends Controller
             'email' => 'required|email',
         ]);
 
-        $user = User::where('email', $request->email)->with('rol')->first();
+        $user = User::where('email', $request->email)->with('roles')->first();
 
         if (!$user) {
             return response()->json([
@@ -48,7 +48,7 @@ class AuthController extends Controller
             );
         }
 
-        $token = $user->createToken('access_token', abilities: [$user->rol->nombre], expiresAt: now()->addMinutes(config('sanctum.expiration')))->plainTextToken;
+        $token = $user->createToken('access_token', abilities: [$user->roles], expiresAt: now()->addMinutes(config('sanctum.expiration')))->plainTextToken;
 
         
         $response = [

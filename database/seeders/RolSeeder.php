@@ -10,7 +10,7 @@ class RolSeeder extends Seeder
 {
     public function run(): void
     {
-        $names = ['Organizador', 'Administrador de Espacios', 'Técnico Académico', 'Responsable', 'Coordinador'];
+        $names = ['ORGANIZADOR', 'COORDINADOR', 'ADMIN_A', 'ADMIN_B'];
         foreach ($names as $name) {
             Rol::factory()->create([
                 'nombre' => $name,

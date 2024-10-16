@@ -12,8 +12,8 @@ class Espacio extends Model
 
     protected $fillable = [
         "nombre",
-        "descripcion",
-        "estado"
+        "capacidad",
+        "idRol"
     ];
 
     public function reservaciones(){
