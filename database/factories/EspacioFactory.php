@@ -20,8 +20,8 @@ class EspacioFactory extends Factory
     {
         return [
             "nombre" => $this->faker->word(),            
-            "descripcion" => $this->faker->word(),
-            "estado" => $this->faker->randomElement(["disponible", "solicitado", "reservado"]),
+            "capacidad" => $this->faker->numberBetween(1, 2),
+            "idRol" => 3,
                         
         ];
     }

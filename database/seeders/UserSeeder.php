@@ -21,7 +21,6 @@ class UserSeeder extends Seeder
             'email' => 'vitocfdz@gmail.com',
             'apellidoMaterno' => 'Fernandez',
             'puesto' => 'best boy',
-            'idRol' => 5,
         ]);
         User::create([
             'nombres' => 'Karla',
@@ -29,7 +28,6 @@ class UserSeeder extends Seeder
             'email' => 'maledict@protonmail.com',
             'apellidoMaterno' => 'Zamora',
             'puesto' => 'best girl',
-            'idRol' => 1,
         ]);
         User::create([
             'nombres' => 'Esteban',
@@ -37,7 +35,6 @@ class UserSeeder extends Seeder
             'email' => 'maledict@proton.me',
             'apellidoMaterno' => 'Gonzáles',
             'puesto' => 'my man',
-            'idRol' => 2,
         ]);
     }
 }

@@ -26,7 +26,6 @@ class User extends Authenticatable
         'apellidoMaterno',
         'email',
         'puesto',
-        'idRol'
         //'password',
     ];
 
@@ -53,10 +52,6 @@ class User extends Authenticatable
         ];
     }
 
-    public function rol() {
-        return $this->belongsTo(Rol::class, 'idRol', 'id');
-    }
-
     public function eventos() {
         return $this->hasMany( Evento::class, 'idUsuario', 'id');
     }
@@ -64,6 +59,15 @@ class User extends Authenticatable
         return $this->hasMany( Reservacion::class, 'idUsuario', 'id');
     }
 
+    public function roles(){
+        return $this->belongsToMany(Rol::class, "users_roles", "idUsuario", "idRol");
+    }
+        
+/*
+    public function roles(){
+        return $this->belongsToMany(Rol::class, 'users_roles');
+    }
+*/
     public static function getTokenFrom(string $header){
         $tokenParts = explode("|", $header);
         if (count($tokenParts) < 2) {
