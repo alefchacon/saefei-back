@@ -14,10 +14,10 @@ class TipoAvisoSeeder extends Seeder
     public function run(): void
     {
         $names = [
-            'Nueva notificación de evento', 
+            'Nuevo evento', 
             'Evento aceptado', 
+            'Evento editado', 
             'Evento evaluado', 
-            'Evento rechazado', 
             'Nueva solicitud de reservación', 
             'Reservación aceptada', 
             'Reservación rechazada'];

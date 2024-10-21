@@ -225,7 +225,7 @@ class EventoController extends Controller
                 $idEvento, 
                 TiposArchivosEnum::PUBLICIDAD
             );
-            $test = $this->storeArchivo(
+            $this->storeArchivo(
                 $request, 
                 $idEvento, 
                 TiposArchivosEnum::CRONOGRAMA
@@ -269,6 +269,8 @@ class EventoController extends Controller
                 event: $event,
                 type: TipoAvisoEventEnum::evento_nuevo
             );
+
+            
 
             $coordinators = User::where("idRol", RolEnum::coordinador)->get();
             foreach($coordinators as $coordinator){

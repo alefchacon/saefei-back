@@ -87,8 +87,8 @@ class Evento extends Model
         return $this->belongsToMany(ProgramaEducativo::class, "eventos_programaeducativos", "idEvento", "idProgramaEducativo");
     }
 
-    public function aviso(){
-        return $this->hasOne(Aviso::class, 'idEvento', 'id');
+    public function avisos(){
+        return $this->hasMany(Aviso::class, 'idEvento', 'id');
     }
     public function respuesta(){
         return $this->belongsTo(Respuesta::class, 'idRespuesta', 'id');
@@ -98,7 +98,7 @@ class Evento extends Model
         return $this->hasMany(Archivo::class, 'idEvento', 'id');
     }
 
-    public static function scopeEncontrarPor($query, $startYearMonth,){
+    public static function scopeFindBy($query, $startYearMonth,){
         return $query->select('eventos.*')
         ->joinSub(
             Reservacion::select('idEvento')

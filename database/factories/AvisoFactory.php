@@ -22,6 +22,7 @@ class AvisoFactory extends Factory
             "visto" => 0,
             "idEvento" => null,
             "idReservacion" => null,
+            "idTipoAviso" => 1,
             "idEstado" => $this->faker->randomElement([1,2,3,4]),
             "idUsuario" => 3
         ];

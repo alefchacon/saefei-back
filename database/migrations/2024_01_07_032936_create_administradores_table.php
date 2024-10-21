@@ -11,15 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('espacios', function (Blueprint $table) {
-            $table->id();
-            $table->string('nombre');
-            $table->smallInteger(column: 'capacidad');
-            $table->unsignedBigInteger('idAdministrador');
-
-            $table->foreign("idAdministrador")->references("id")->on("administradores");
-
+        Schema::create('administradores', function (Blueprint $table) {
+            $table->id()->primary()->unsigned()->unique();
+            $table->string("nombre");
             $table->timestamps(false);
+            $table->unsignedBigInteger("idUsuario");
+
+            $table->foreign("idUsuario")->references("id")->on("users");
         });
     }
 
@@ -28,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('espacios');
+        Schema::dropIfExists('administradores');
     }
 };

@@ -16,27 +16,27 @@ class EspacioSeeder extends Seeder
         Espacio::create([
             'nombre' => 'Auditorio',
             'capacidad' => 120,
-            'idRol' => 3
+            'idAdministrador' => 1
         ]);
         Espacio::create([
             'nombre' => 'Audiovisual',
             'capacidad' => 80,
-            'idRol' => 3
+            'idAdministrador' => 1
         ]);
         Espacio::create([
             'nombre' => 'Salón de Cristal',
             'capacidad' => 150,
-            'idRol' => 4
+            'idAdministrador' => 2
         ]);
         Espacio::create([
             'nombre' => 'Sala de maestros',
             'capacidad' => 30,
-            'idRol' => 3
+            'idAdministrador' => 1
         ]);
         Espacio::create([
             'nombre' => 'Teatro al aire libre',
             'capacidad' => 90,
-            'idRol' => 4
+            'idAdministrador' => 2
         ]);
 
     }

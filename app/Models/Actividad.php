@@ -21,4 +21,8 @@ class Actividad extends Model
         return $this->belongsTo(Reservacion::class, 'idReservacion', 'id');
     }
 
+    public static function createActivitiesFor(array $reservacionIds){
+        
+    }
+
 }

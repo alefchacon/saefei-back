@@ -25,6 +25,7 @@ class DatabaseSeeder extends Seeder
             ModalidadSeeder::class,
             //UserSeeder::class,
             UserRolSeeder::class,
+            AdministradorSeeder::class,
             EventoSeeder::class,
             EspacioSeeder::class,
             ReservacionSeeder::class,

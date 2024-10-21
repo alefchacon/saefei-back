@@ -22,14 +22,36 @@ class AvisoController extends Controller
      */
     public function index(Request $request)
     {
-        $noticesCollection = [];
         $user = User::findByToken($request);
 
         if (!$user){
             return response()->json(["message" => "Token inválido"], 401);
         }
+
+        $response = [];
+
+        $response["eventNotices"] = 
+            new AvisoCollection(Aviso::getEventNoticesFor(idUsuario: $user->id)->get());
+        $response["reservationNotices"] = 
+            new AvisoCollection(Aviso::getReservationNoticesFor(idUsuario: $user->id)->get());
         
-        if ($user->idRol === RolEnum::coordinador->value){
+
+        if ($user->isCoordinator()){
+            $response["coordinatorNotices"] = 
+                new AvisoCollection(Aviso::getCoordinatorNotices()->get());
+        }
+
+        if ($user->isAdministrator()){
+            $response["administratorNotices"] = 
+                new AvisoCollection(Aviso::getAdministratorNoticesFor(idUsuario: $user->id)->get());
+        }
+        
+
+
+
+        return response()->json(["data" => $response], 200);
+        /*
+        if ($user->getRoleIds()-> === RolEnum::coordinador->value){
             $noticesCollection = 
                 Aviso::where("idEvento", "<>", null)
                     ->where("idTipoAviso", "=", TipoAvisoEventEnum::evento_nuevo)
@@ -67,6 +89,7 @@ class AvisoController extends Controller
         }
             
         return new AvisoCollection($noticesCollection->paginate(5)->appends($request->query())); 
+        */
     }    
 
     

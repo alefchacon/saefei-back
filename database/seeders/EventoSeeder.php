@@ -14,22 +14,22 @@ class EventoSeeder extends Seeder
     public function run(): void
     {
         //Evento::factory()->count(10)->create();
-        Evento::factory()->create([
+        Evento::factory()->hasAvisos(1)->create([
             'nombre' => "Seminario de Investigación de Ingeniería de Software",
             "tematicas" => "Biodiversidad e integridad ecosistémica;Disciplinar;Estilos de vida y patrones de consumo",
             "audiencias" => "Académicos;Personal Administrativo;Estudiantes;Público en general",
             'idUsuario' => 1,
         ]);
-        Evento::factory()->create([
+        Evento::factory()->hasAvisos(1)->create([
             'nombre' => "Seminario de otra cosa idk",
             'idUsuario' => 1,
         ]);
-        Evento::factory()->create([
+        Evento::factory()->hasAvisos(1)->create([
             'nombre' => "Coloquio de Sistemas Centrados en el Usuario",
             'idUsuario' => 2,
         ]);
-        Evento::factory()->count(5)->hasEvaluacion(1)->hasRespuesta()->create();
-        Evento::factory()->count(20)->hasEvaluacion(0)->create();
+        Evento::factory()->count(5)->hasAvisos(1)->hasEvaluacion(1)->create();
+        Evento::factory()->count(20)->hasAvisos(1)->hasEvaluacion(0)->create();
 
     }
 }

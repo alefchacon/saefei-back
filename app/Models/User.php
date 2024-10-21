@@ -9,6 +9,8 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Http\Request;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use App\Models\Enums\RolEnum;
+
 
 class User extends Authenticatable
 {
@@ -81,15 +83,33 @@ class User extends Authenticatable
     public static function findByToken(Request $request){
 
         $token = self::getTokenFrom($request->header("authorization"));
-
-        $user = \DB::table("users")
-            ->join("personal_access_tokens", "users.id", "=", "personal_access_tokens.tokenable_id")
-            ->where("personal_access_tokens.token", "=", hash("sha256", $token))
-            ->select(["users.*"])
-            ->get()->first();
+        $user = User::whereHas('tokens', function ($query) use ($token) {
+            $query->where('token', hash('sha256', $token));
+        })
+        ->with('roles')
+        ->first();
 
 
         return $user;
     }
 
+    public function isCoordinator(){
+        return in_array(
+            needle: RolEnum::coordinador->value, 
+            haystack: $this->getRoleIds(), 
+            strict: false
+        );
+    }
+    public function isAdministrator(){
+        return in_array(
+            needle: RolEnum::administrador->value, 
+            haystack: $this->getRoleIds(), 
+            strict: false
+        );
+    }
+
+
+    public function getRoleIds(){
+        return $this->roles->pluck('id')->toArray();
+    }
 }
