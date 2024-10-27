@@ -64,6 +64,10 @@ class User extends Authenticatable
     public function roles(){
         return $this->belongsToMany(Rol::class, "users_roles", "idUsuario", "idRol");
     }
+
+    public function administradores(){
+        return $this->belongsToMany(Administrador::class, 'users_administradores', "idUsuario", "idAdministrador");
+    }
         
 /*
     public function roles(){
@@ -106,6 +110,25 @@ class User extends Authenticatable
             haystack: $this->getRoleIds(), 
             strict: false
         );
+    }
+    public function isAdministrator2(){
+        return $this->administradores()->get()->count() > 0;
+    }
+    public function isAdministratorOf(int $idEspacio){
+
+        if (!$this->isAdministrator()){
+            return false;
+        }
+
+        $espacio = Espacio::find($idEspacio);
+
+        foreach($this->administradores()->get() as $admin){
+            if ($admin->id === $espacio->idAdministrador){
+                return true;
+            }
+        }
+
+        return false;
     }
 
 

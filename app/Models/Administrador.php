@@ -12,10 +12,14 @@ class Administrador extends Model
 
     protected $fillable = [
         "nombre",
-        "idUsuario",
     ];
 
-    public function usuario(){
-        return $this->hasOne(User::class, 'idUsuario', 'id');
+    public function users()
+    {
+        return $this->belongsToMany(User::class, 'users_administradores', "idAdministrador", "idUsuario");
+    }
+
+    public function espacios(){
+        return $this->hasMany(Espacio::class, 'idAdministrador', 'id');
     }
 }

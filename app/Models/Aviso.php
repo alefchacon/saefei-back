@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Mail\MailProvider;
+use App\Mail\MailService;
+use App\Models\Enums\EstadoEnum;
 use App\Models\Enums\TipoAvisoEventEnum;
 use App\Models\Enums\TipoAvisoReservationEnum;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -36,10 +38,12 @@ class Aviso extends Model
     
     public static function getCoordinatorNotices(){
         return Aviso
-            ::where("idTipoAviso", "=", TipoAvisoEventEnum::evento_nuevo)
-            ->orWhere("idTipoAviso", "=", TipoAvisoEventEnum::evento_evaluado)
+            ::where(function($query) {
+                $query->where("idTipoAviso", TipoAvisoEventEnum::evento_nuevo)
+                    ->orWhere("idTipoAviso", TipoAvisoEventEnum::evento_evaluado);
+            })
             ->where("idEvento", "<>", null)
-            ->where("visto", 0);
+            ->where("visto", "=", 0);
     } 
 
     public function scopeGetEventNoticesFor($query, $idUsuario){
@@ -63,10 +67,11 @@ class Aviso extends Model
 
     public function scopeGetAdministratorNoticesFor($query, $idUsuario){
 
-        $administrator = Administrador::where("idUsuario", $idUsuario)->first();
-        if (!$administrator){
-            throw new AccessDeniedException("El usuario con id {$idUsuario} no es administrador");
-        }
+        $administratorIds =  User
+            ::find($idUsuario)
+            ->administradores()
+            ->pluck("id")
+            ->toArray();
 
         return $query
             ->select("avisos.*")
@@ -75,32 +80,49 @@ class Aviso extends Model
             ->where("idTipoAviso", TipoAvisoReservationEnum::reservacion_nueva)
             ->join("reservaciones", "avisos.idReservacion", "=", "reservaciones.id")
             ->join("espacios", "reservaciones.idEspacio", "=", "espacios.id")
-            ->where("espacios.idAdministrador", "=", $administrator->id);
+            ->whereIn("espacios.idAdministrador", $administratorIds);
+        }
+
+    public static function notifyNewReservation(Reservacion $reservation){
+        Aviso::create([
+            "visto" => 0,
+            "idUsuario" => null,
+            "idReservacion" => $reservation->id,
+            "idEstado" => EstadoEnum::en_revision,
+            "idTipoAviso" => TipoAvisoReservationEnum::reservacion_nueva
+        ]);
+        $mail = MailProvider::getReservationMail(
+            $reservation, 
+            TipoAvisoReservationEnum::reservacion_nueva
+        );
+        $adminsOfSelectedSpace = Administrador
+            ::with("users")
+            ->find($reservation->espacio->idAdministrador);
+
+        foreach($adminsOfSelectedSpace->users as $admin)
+        {
+            MailService::sendEmail(
+                to: $admin, 
+                mail: $mail
+            );
+        }
     }
 
 
     public static function notifyResponse(
-        int $idAviso, 
         Evento|Reservacion $notification, 
-        int $originalIdEstado
+        TipoAvisoEventEnum|TipoAvisoReservationEnum $replyType
     ){
+        $isEvent = $notification instanceof Evento;
 
-        $replyingToEventOrganizer = 
-            $originalIdEstado !== $notification->idEstado;
+        $notificationTable = $isEvent ? "Evento" : "Reservacion";
+        $tipoAviso = $isEvent ? TipoAvisoEventEnum::evento_nuevo : TipoAvisoReservationEnum::reservacion_nueva;
 
-        if (!$replyingToEventOrganizer){
-            return;
-        }
-
-        Aviso::where("id", "=", $idAviso)
+        Aviso
+            ::where("id{$notificationTable}", "=", $notification->id)
+            ->where("idTipoAviso", "=", $tipoAviso->value)
             ->update(["visto" => 1]);
         
-        $isEvent =  $notification instanceof Evento;
-        $idTipoAviso = 0;
-        
-        $isEvent
-        ? $idTipoAviso = TipoAvisoEventEnum::tryFrom($notification->idEstado)
-        : $idTipoAviso = TipoAvisoReservationEnum::mapFrom($notification->idEstado);
         
         Aviso::create([
             "visto" => 0,
@@ -108,11 +130,8 @@ class Aviso extends Model
             "idEstado" => $notification->idEstado,
             "idEvento" => $isEvent ? $notification->id : null,
             "idReservacion" => !$isEvent ? $notification->id : null,
-            "idTipoAviso" => $idTipoAviso
+            "idTipoAviso" => $replyType->value
         ]);
-
-        //$notification->load('usuario');
-        //MailFactory::sendEventReplyMail($notification);
     }
 
 

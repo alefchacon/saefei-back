@@ -6,6 +6,8 @@ use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\Aviso;
 use App\Models\Administrador;
+use Illuminate\Support\Facades\DB;
+
 
 class AdministradorSeeder extends Seeder
 {
@@ -14,15 +16,18 @@ class AdministradorSeeder extends Seeder
      */
     public function run(): void
     {
-        $admins = [["nombre" => "ADMINISTRADOR A", "idUsuario" => 2], ["nombre" => "ADMINISTRADOR B", "idUsuario" => 1]];
+        $admins = ["ADMINISTRADOR A","ADMINISTRADOR B"];
 
 
         foreach ($admins as $admin) {
             Administrador::create([
-                'nombre' => $admin["nombre"],
-                'idUsuario' => $admin["idUsuario"],
-                
+                'nombre' => $admin
             ]);
         }
+
+        DB::insert('INSERT INTO users_administradores (idUsuario, idAdministrador) VALUES (?, ?)', [3, 1]);
+        DB::insert('INSERT INTO users_administradores (idUsuario, idAdministrador) VALUES (?, ?)', [4, 1]);
+        DB::insert('INSERT INTO users_administradores (idUsuario, idAdministrador) VALUES (?, ?)', [1, 2]);
+
     }
 }

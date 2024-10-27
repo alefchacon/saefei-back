@@ -6,6 +6,7 @@ use App\Http\Resources\ReservacionCollection;
 use App\Http\Resources\ReservacionResource;
 use App\Mail\MailProvider;
 use App\Mail\MailService;
+use App\Models\Administrador;
 use App\Models\Enums\RolEnum;
 use App\Models\Enums\TipoAvisoEnum;
 use App\Models\Enums\TipoAvisoReservationEnum;
@@ -80,48 +81,43 @@ class ReservacionController extends Controller
 
         $reservation = new Reservacion();
         try {
-
             $reservation->fill($request->all());
-            $reservation->save();
-            
-            Aviso::create([
-                "visto" => 0,
-                "idUsuario" => null,
-                "idReservacion" => $reservation->id,
-                "idEstado" => EstadoEnum::en_revision,
-                "idTipoAviso" => TipoAvisoReservationEnum::reservacion_nueva
-            ]);
-
             $reservation->with([
                 "usuario", 
-                "estado", 
-                "espacio", 
             ])->get();
-            
-            $mail = MailProvider::getReservationMail(
-                $reservation, 
-                TipoAvisoReservationEnum::reservacion_nueva
-            );
-            $admins = User::where("idRol", RolEnum::administrador_espacios)->get();
-            foreach($admins as $admin){
-                MailService::sendEmail(
-                    to: $admin, 
-                    mail: $mail
+
+            $reservationMadeByAdministrator = 
+                $reservation->usuario->isAdministratorOf(
+                    $reservation->idEspacio
                 );
+
+            if ($reservationMadeByAdministrator)
+            {
+                $message = 'La reservación se ha registrado correctamente.';
+                $reservation->idEstado = EstadoEnum::aceptado;
+            }
+            else             
+            {
+                $message = 'Solicitud enviada';
+                Aviso::notifyNewReservation($reservation);
             }
 
-            $message = 'Solicitud enviada';
+            
+            $reservation->save();
+
             $status = 201;
             $data = new ReservacionResource($reservation);
 
         } catch (\Throwable $ex){
-            //No regresar excepciones: cambiar a mensaje personalizado y ambiguo.
+            //No regresar excepciones: cambiar a mensaje personalizado y noambiguo.
+            \DB::rollBack();
             $message = $ex->getMessage();
         } finally {
             
             return response()->json([
+                'byAdmin' => $reservationMadeByAdministrator,
                 'message' => $message,
-                'data' => $data,
+                'data' => $reservation,
             ], $status);
         }
     }
@@ -138,14 +134,14 @@ class ReservacionController extends Controller
         \DB::beginTransaction();
 
         try{
-            $nonNullData = array_filter($request->input("model"), function ($value) {
+            $nonNullData = array_filter($request->all(), function ($value) {
                 return !is_null($value);
             });
             $reservation = Reservacion::findOrFail($nonNullData["id"]);
             $originalIdEstado = $reservation->idEstado;
             $reservation->update($nonNullData);
 
-            
+            /*
             Aviso::notifyResponse(
                 $request->input("idAviso"), 
                 $reservation, 
@@ -153,7 +149,7 @@ class ReservacionController extends Controller
             );
 
             self::handleReservationMail($reservation, $originalIdEstado);
-
+*/
             \DB::commit();
             
             $message = "Reservación actualizada";
@@ -162,6 +158,49 @@ class ReservacionController extends Controller
 
             \DB::rollBack();
 
+            $message = $ex->getMessage();
+        }finally {
+            return response()->json([
+                'message' => $message,
+                'data' => $reservation,
+            ], $status);
+        }
+    }
+
+    public function acceptReservation(Request $request, Reservacion $reservation){
+        $status = 500;
+        $message = "Algo falló";
+
+        \DB::beginTransaction();
+
+        try{
+            $reservation->accept();
+            \DB::commit();
+            $message = "Reservación aceptada";
+            $status = 200;
+        } catch (\Throwable $ex){
+            \DB::rollBack();
+            $message = $ex->getMessage();
+        }finally {
+            return response()->json([
+                'message' => $message,
+                'data' => $reservation,
+            ], $status);
+        }
+    }
+    public function rejectReservation(Request $request, Reservacion $reservation){
+        $status = 500;
+        $message = "Algo falló";
+
+        \DB::beginTransaction();
+
+        try{
+            $reservation->reject($request->input("reply"));
+            \DB::commit();
+            $message = "Reservación rechazada";
+            $status = 200;
+        } catch (\Throwable $ex){
+            \DB::rollBack();
             $message = $ex->getMessage();
         }finally {
             return response()->json([
@@ -194,41 +233,6 @@ class ReservacionController extends Controller
             to: $reservation->usuario,
             mail: $mail 
         );
-    }
-
-    public function markAsUserRead(Request $request)
-    {
-        $status = 500;
-        $message = "Algo falló";
-
-        $reservations = $request->input("reservations");
-        $updatedReservations = [];
-        \DB::beginTransaction();
-
-        try{
-
-            foreach ($reservations as $reservation) {
-                $model = Reservacion::findOrFail($reservation["id"]);
-                $model->update(["avisarUsuario" => 0]);
-                
-                array_push($updatedReservations, $model);
-            } 
-            
-            \DB::commit();
-            
-            $message = "Reservaciones actualizadas";
-            $status = 200;
-        } catch (\Exception $ex){
-
-            \DB::rollBack();
-
-            $message = $ex->getMessage();
-        }finally {
-            return response()->json([
-                'message' => $message,
-                'data' => $updatedReservations,
-            ], $status);
-        }
     }
 
 }

@@ -31,65 +31,22 @@ class AvisoController extends Controller
         $response = [];
 
         $response["eventNotices"] = 
-            new AvisoCollection(Aviso::getEventNoticesFor(idUsuario: $user->id)->get());
+            new AvisoCollection(Aviso::getEventNoticesFor(idUsuario: $user->id)->with("evento")->get());
         $response["reservationNotices"] = 
             new AvisoCollection(Aviso::getReservationNoticesFor(idUsuario: $user->id)->get());
         
 
         if ($user->isCoordinator()){
             $response["coordinatorNotices"] = 
-                new AvisoCollection(Aviso::getCoordinatorNotices()->get());
+                new AvisoCollection(Aviso::getCoordinatorNotices()->with("evento")->get());
         }
 
         if ($user->isAdministrator()){
             $response["administratorNotices"] = 
-                new AvisoCollection(Aviso::getAdministratorNoticesFor(idUsuario: $user->id)->get());
+                new AvisoCollection(Aviso::getAdministratorNoticesFor(idUsuario: $user->id)->with(["reservacion", "reservacion.espacio", "reservacion.usuario"])->get());
         }
         
-
-
-
         return response()->json(["data" => $response], 200);
-        /*
-        if ($user->getRoleIds()-> === RolEnum::coordinador->value){
-            $noticesCollection = 
-                Aviso::where("idEvento", "<>", null)
-                    ->where("idTipoAviso", "=", TipoAvisoEventEnum::evento_nuevo)
-                    ->orWhere("idTipoAviso", "=", TipoAvisoEventEnum::evento_evaluado)
-                    ->with(["evento.reservaciones.espacio", "evento.programasEducativos"]);
-        } 
-
-        if ($user->idRol === RolEnum::administrador_espacios->value){
-            $noticesCollection = 
-                Aviso::where("idReservacion", "<>", null)
-                    ->where("idTipoAviso", "=", TipoAvisoReservationEnum::reservacion_nueva)
-                    ->with(["reservacion.usuario", 
-                            "reservacion.espacio", 
-                            "reservacion.estado"]);
-        } 
-        
-        if ($user->idRol === RolEnum::organizador->value){
-            $noticesCollection = 
-                Aviso::where("idUsuario", "=", $user->id)
-                    ->with(["evento", "reservacion.usuario", 
-                            "reservacion.espacio", 
-                            "reservacion.estado"]);
-        } 
-        
-        $noticesCollection = $noticesCollection
-            ->orderBy("visto")
-            ->orderByDesc("updated_at");
-        
-        if ($request->query("soloCantidad")){
-            return response()->json([
-                "noticeAmount" => $this->countNoticeAmount(
-                    $noticesCollection, 
-                    $user->idRol),
-                ]);
-        }
-            
-        return new AvisoCollection($noticesCollection->paginate(5)->appends($request->query())); 
-        */
     }    
 
     
@@ -137,12 +94,11 @@ class AvisoController extends Controller
                 return !is_null($value);
             });
 
-            $notice = Aviso::findOrFail($request->input("id"));
-            $originalRead = $notice->visto;
+            $originalRead = $aviso->visto;
 
-            $notice->update($nonNullData);
+            $aviso->update($nonNullData);
 
-            $updated = $originalRead !== $notice->visto;
+            $updated = $originalRead !== $aviso->visto;
                 
             \DB::commit();
             
@@ -157,7 +113,7 @@ class AvisoController extends Controller
             //MailFactory::sendEventReplyMail($event);
             return response()->json([
                 'message' => $message,
-                'updated' => $updated
+                'updated' => $aviso
             ], $status);
         }
     } 

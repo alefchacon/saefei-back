@@ -15,9 +15,6 @@ return new class extends Migration
             $table->id()->primary()->unsigned()->unique();
             $table->string("nombre");
             $table->timestamps(false);
-            $table->unsignedBigInteger("idUsuario");
-
-            $table->foreign("idUsuario")->references("id")->on("users");
         });
     }
 

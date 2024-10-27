@@ -67,11 +67,10 @@ Route::group(['/api'], function () {
     Route::put('espacios/reservaciones', [EspacioController::class, 'getEspaciosLibres']);
     
     Route::apiResource('reservaciones', ReservacionController::class);
+    Route::put('reservaciones/aceptar/{reservation}', [ReservacionController::class, 'acceptReservation']);
+    Route::put('reservaciones/rechazar/{reservation}', [ReservacionController::class, 'rejectReservation']);
 
     Route::post('reservaciones/disponibles', [ReservacionController::class, 'getAvailableReservations']);
-    Route::post('solicitud/marcarLeidasUsuario', [ReservacionController::class, 'markAsUserRead']);
-    //Route::put('solicitud', [SolicitudEspacioController::class, 'update']);
-    Route::apiResource('horarios', HorarioController::class);
 
     Route::apiResource('eventos', EventoController::class);
     Route::apiResource('avisos', AvisoController::class)->middleware(AuthCustom::class);
@@ -85,6 +84,7 @@ Route::group(['/api'], function () {
 
     Route::post('/archivos', [ArchivoController::class, 'upload']);
     Route::post('/ldap', [LDAPController::class, 'test']);
+    Route::post('/isAdmin', [LDAPController::class, 'testAdmin']);
     Route::get('/file/{filename}', [ArchivoController::class, 'download']);
 
 

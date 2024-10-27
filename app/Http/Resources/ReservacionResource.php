@@ -20,6 +20,7 @@ class ReservacionResource extends JsonResource
             'date' => $this->fecha,
             'start' => $this->inicio,
             'end' => $this->fin,
+            'motive' => $this->motivo,
             'idEstado' => $this->idEstado,
             
             'wasAccepted' => $this->idEstado === 2 || $this->idEstado === 3,
@@ -31,9 +32,13 @@ class ReservacionResource extends JsonResource
                     return $this->actividades->sortBy('hora');
                 }
             )),
-            'startEvent' => $this->actividades->sortBy('hora')->first()->hora,
+            'startEvent' => $this->actividades->isNotEmpty() 
+                ? $this->actividades->sortBy('hora')->first()->hora 
+                : null,
 
-            'endEvent' => $this->actividades->sortBy('hora')->last()->hora,
+            'endEvent' => $this->actividades->isNotEmpty() 
+                ? $this->actividades->sortBy('hora')->last()->hora 
+                : null,
 
         ];
     }

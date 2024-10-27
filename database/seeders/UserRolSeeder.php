@@ -47,6 +47,14 @@ class UserRolSeeder extends Seeder
                 'puesto' => 'my man',
                 'roles' => ['ADMINISTRADOR']
             ],
+            [
+                'nombres' => 'Otra persona',
+                'apellidoPaterno' => 'ASDF',
+                'email' => 'zs20015745@estudiantes.uv.mx',
+                'apellidoMaterno' => 'asdf',
+                'puesto' => 'dummy!',
+                'roles' => ['ADMINISTRADOR']
+            ],
         ];
 
         foreach ($users as $userData) {

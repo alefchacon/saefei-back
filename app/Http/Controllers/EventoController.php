@@ -55,7 +55,7 @@ class EventoController extends Controller
             $eventos = $this->getEventsByName($request, $eventos);
         }
         if ($startYearMonth){
-            $eventos = Evento::encontrarPor($startYearMonth);
+            $eventos = Evento::findBy($startYearMonth);
         }
         if ($orderBy == "fecha"){
             $eventos = $eventos->orderByDesc("created_at");
@@ -179,7 +179,6 @@ class EventoController extends Controller
             'programasEducativos', 
             'reservaciones.espacio', 
             'reservaciones.actividades', 
-            'evaluacion.evidencias',
             'archivos',
         ])->find($idEvento);
 
@@ -270,7 +269,7 @@ class EventoController extends Controller
                 type: TipoAvisoEventEnum::evento_nuevo
             );
 
-            
+
 
             $coordinators = User::where("idRol", RolEnum::coordinador)->get();
             foreach($coordinators as $coordinator){
