@@ -55,7 +55,6 @@ Route::group(['/api'], function () {
     Route::post('logout', [AuthController::class, 'logout']);
     
     Route::apiResource('difusiones', DifusionController::class);
-    Route::apiResource('invitados', InvitadoController::class);
     Route::apiResource('modalidades', ModalidadController::class);
     Route::apiResource('plataformas', PlataformaController::class);
     Route::apiResource('programaseducativos', ProgramaEducativoController::class);
@@ -72,7 +71,8 @@ Route::group(['/api'], function () {
 
     Route::post('reservaciones/disponibles', [ReservacionController::class, 'getAvailableReservations']);
 
-    Route::apiResource('eventos', EventoController::class);
+    Route::apiResource( 'eventos', EventoController::class);
+
     Route::apiResource('avisos', AvisoController::class)->middleware(AuthCustom::class);
     Route::put('avisos', [AvisoController::class, "update"])->middleware(AuthCustom::class);
     //Route::post('avisos/marcarLeidasUsuario', [AvisoController::class, "markAsUserRead"]);

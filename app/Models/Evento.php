@@ -14,34 +14,29 @@ class Evento extends Model
     protected $fillable = [
         "nombre",
         "descripcion",
-        "pagina",
-        "ambito",
+        "numParticipantes",
         "audiencias",
+        "ambito",
         "eje",
         "tematicas",
+        "pagina",
 
-        "inicio",
-        "fin",
-        "numParticipantes",
+        "medios",
 
-        "plataformas",
+        "constancias",
+
+        "decoracion",
 
         "requisitosCentroComputo",
         "requiereTransmisionEnVivo",
-        "presidium",
-        "decoracion",
+        
         "numParticipantesExternos",
         "requiereEstacionamiento",
         "requiereFinDeSemana",
         
-        "medios",
-
-        "requiereConstancias",
-        "ponientes",
-        
         "adicional",
 
-        "observaciones",
+        "respuesta",
 
         "idUsuario",
         "idModalidad",

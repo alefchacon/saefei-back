@@ -281,9 +281,7 @@ class EventoController extends Controller
             
             Aviso::create([
                 "visto" => 0,
-                "idUsuario" => null,
                 "idEvento" => $event->id,
-                "idEstado" => EstadoEnum::en_revision,
                 "idTipoAviso" => TipoAvisoEventEnum::evento_nuevo
             ]);
 
@@ -335,23 +333,25 @@ class EventoController extends Controller
         
     }
     
-    
-    public function update(Request $request, Evento $event){
+    /**
+     * The name of the Evento parameter MUST be "$evento", else it won't work.
+     * @param \Illuminate\Http\Request $request
+     * @param \App\Models\Evento $evento
+     * @return mixed|\Illuminate\Http\JsonResponse
+     */
+    public function update(Request $request, Evento $evento){
         $status = 500;
         $message = "Algo falló";
         
         \DB::beginTransaction();
-
-        //return response()->json(["sadf" => $request->input("model")["id"]]);
 
         try{
             $nonNullData = array_filter($request->all(), function ($value) {
                 return !is_null($value);
             });
             
-            $event = Evento::findOrFail($request->all()["id"]);
 
-            $event->update($nonNullData);
+            $evento->update($nonNullData);
             
             \DB::commit();
             
@@ -364,7 +364,7 @@ class EventoController extends Controller
         }finally {
             return response()->json([
                 'message' => $message,
-                'data' => new EventoResource($event),
+                'data' => new EventoResource($evento),
             ], $status);
         }
     } 

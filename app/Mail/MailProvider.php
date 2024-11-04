@@ -86,6 +86,7 @@ class MailProvider{
       '{{header}}' => $header,
       '{{url}}' => env('FRONTEND_URL') . "/eventos/" . $reservation->id,
       '{{spaceName}}' => $reservation->espacio->nombre,
+      '{{date}}' => $reservation->fecha,
       '{{start}}' => $reservation->inicio,
       '{{end}}' => $reservation->fin,
 

@@ -82,6 +82,9 @@ class ReservacionController extends Controller
         $reservation = new Reservacion();
         try {
             $reservation->fill($request->all());
+            
+            $reservation->save();
+
             $reservation->with([
                 "usuario", 
             ])->get();
@@ -90,11 +93,11 @@ class ReservacionController extends Controller
                 $reservation->usuario->isAdministratorOf(
                     $reservation->idEspacio
                 );
-
+                
             if ($reservationMadeByAdministrator)
             {
                 $message = 'La reservación se ha registrado correctamente.';
-                $reservation->idEstado = EstadoEnum::aceptado;
+                $reservation->update(["idEstado" => EstadoEnum::aceptado->value]);
             }
             else             
             {
@@ -103,7 +106,6 @@ class ReservacionController extends Controller
             }
 
             
-            $reservation->save();
 
             $status = 201;
             $data = new ReservacionResource($reservation);

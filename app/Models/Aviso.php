@@ -86,9 +86,7 @@ class Aviso extends Model
     public static function notifyNewReservation(Reservacion $reservation){
         Aviso::create([
             "visto" => 0,
-            "idUsuario" => null,
             "idReservacion" => $reservation->id,
-            "idEstado" => EstadoEnum::en_revision,
             "idTipoAviso" => TipoAvisoReservationEnum::reservacion_nueva
         ]);
         $mail = MailProvider::getReservationMail(
@@ -126,8 +124,6 @@ class Aviso extends Model
         
         Aviso::create([
             "visto" => 0,
-            "idUsuario" => $notification->usuario->id,
-            "idEstado" => $notification->idEstado,
             "idEvento" => $isEvent ? $notification->id : null,
             "idReservacion" => !$isEvent ? $notification->id : null,
             "idTipoAviso" => $replyType->value

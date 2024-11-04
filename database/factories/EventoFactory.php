@@ -25,8 +25,7 @@ class EventoFactory extends Factory
         $end = $start->modify('+1 day');
         $audiences = ["Estudiantes", "Académicos", "Personal Administrativo", "Público en general"]; 
         $scopes = ["Local/Regional","Estatal","Nacional","Internacional"];
-        $axi = ["Derechos Humanos", "Sustentabilidad","Docencia e innovación académica","Investigación e innovación", "Difusión de la cultura y extensión de los servicios"];
-        $platforms = ["Zoom", "Meet", "Teams"];
+        $axis = ["Derechos Humanos", "Sustentabilidad","Docencia e innovación académica","Investigación e innovación", "Difusión de la cultura y extensión de los servicios"];
         $themes = [
             "Biodeversidad e integridad ecosistémica", 
             "Calidad ambiental y gestión de campus",
@@ -48,28 +47,21 @@ class EventoFactory extends Factory
             "pagina" => "uv.mx/fei",
             "ambito" => $this->faker->randomElement($scopes),
             "audiencias" => $this->faker->randomElement($audiences),
-            "eje" => $this->faker->randomElement($axi),
+            "eje" => $this->faker->randomElement($axis),
             "tematicas" => $this->faker->randomElement($themes),
 
-            "inicio" => $start,
-            "fin" => $end,
             "numParticipantes" => $this->faker->numberBetween(1,100),
-            
-            "plataformas" => $this->faker->randomElement($platforms),
 
+            "constancias" => $this->faker->paragraph(1),
             "requisitosCentroComputo" => $this->faker->paragraph(1),
             "requiereTransmisionEnVivo" => $this->faker->boolean(),
-            "presidium" => $this->faker->paragraph(1),
             "decoracion" => $this->faker->paragraph(1),
             "numParticipantesExternos" => $this->faker->numberBetween(1,100),
             "requiereEstacionamiento" => $this->faker->boolean(),
             "requiereFinDeSemana" => $this->faker->boolean(),
             
-            "medios" => "Radio UV",
-            
-            "requiereConstancias" => $this->faker->boolean(),
-            "ponientes" => $this->faker->paragraph(1),
-            
+            "medios" => '["Radio UV"]',
+                        
             "idUsuario" => $this->faker->numberBetween(1,3),
             
             "idModalidad" => 1,
