@@ -16,11 +16,13 @@ class TipoAvisoSeeder extends Seeder
         $names = [
             'Nuevo evento', 
             'Evento aceptado', 
-            'Evento editado', 
+            'Evento editado por organizador', 
             'Evento evaluado', 
             'Nueva solicitud de reservación', 
             'Reservación aceptada', 
-            'Reservación rechazada'];
+            'Reservación rechazada',
+            'Evento editado por coordinador', 
+        ];
 
         foreach ($names as $name) {
             TipoAviso::factory()->create([

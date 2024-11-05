@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\EventoLightResource;
 use App\Http\Resources\EventoResource;
+use App\Models\Cambio;
 use App\Models\Cronograma;
 use App\Models\Enums\TipoAvisoEventEnum;
 use App\Models\Eventos_ProgramaEducativos;
@@ -212,7 +213,7 @@ class EventoController extends Controller
         try{
 
             $nonNullData = array_filter($request->all(), function ($value) {
-                return !is_null($value);
+                return $value !== null && $value !== "null";
             });
 
             $event = Evento::create($nonNullData);
@@ -237,14 +238,14 @@ class EventoController extends Controller
             
             $reservacionIds = json_decode($request->input("reservaciones"), true);
 
-            /*
-            foreach ($reservaciones as $reservacion) {
-                Reservacion::findOrFail($reservacion)
+            
+            foreach ($reservacionIds as $reservacionId) {
+                Reservacion::findOrFail($reservacionId)
                             ->update([
                                 "idEstado" => EstadoEnum::evaluado,
                                 "idEvento" => $event->id,
                             ]);
-            }*/
+            }
 
             $actividadesJson = $request->input("actividades");
             $actividades = json_decode($actividadesJson, true);
@@ -264,26 +265,7 @@ class EventoController extends Controller
             
             $event->load("usuario");
             
-            $mail = MailProvider::getEventMail(
-                event: $event,
-                type: TipoAvisoEventEnum::evento_nuevo
-            );
-
-
-
-            $coordinators = User::where("idRol", RolEnum::coordinador)->get();
-            foreach($coordinators as $coordinator){
-                MailService::sendEmail(
-                    to: $coordinator, 
-                    mail: $mail
-                );
-            }
-            
-            Aviso::create([
-                "visto" => 0,
-                "idEvento" => $event->id,
-                "idTipoAviso" => TipoAvisoEventEnum::evento_nuevo
-            ]);
+            Aviso::notifyNewEvent($event);
 
             $code = 201;
             \DB::commit();
@@ -342,31 +324,47 @@ class EventoController extends Controller
     public function update(Request $request, Evento $evento){
         $status = 500;
         $message = "Algo falló";
-        
+
         \DB::beginTransaction();
 
         try{
+            $user = User::findByToken($request);
+            
+            if (!$user){
+                return response()->json(["message" => "Token inválido"], 401);
+            }
+            
             $nonNullData = array_filter($request->all(), function ($value) {
                 return !is_null($value);
             });
+        
+            $evento->fill($nonNullData);
+            $updatedColumns = array_keys($evento->getCustomDirty());
+            $evento->save();
             
-
-            $evento->update($nonNullData);
-            
+            if (!empty($updatedColumns)){
+                Cambio::create([
+                    "columnas" => json_encode($updatedColumns),
+                    "idEvento" => $evento->id,
+                    "idUsuario" => $user->id,
+                ]);
+            }
+                    
             \DB::commit();
             
-            $message = "Evento actualizado";
-            
             $status = 200;
-        } catch (\Throwable $ex){
+            $message = "Evento actualizado";
+        } catch (\Throwable $ex) {
+            $message = $ex->__tostring();
             \DB::rollBack();
-            $message = $ex->getMessage();
-        }finally {
+        }finally{
+            
             return response()->json([
                 'message' => $message,
                 'data' => new EventoResource($evento),
             ], $status);
-        }
+
+        } 
     } 
     
     private static function handleEventMail(

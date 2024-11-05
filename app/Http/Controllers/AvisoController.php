@@ -69,7 +69,6 @@ class AvisoController extends Controller
         if ($idRol === RolEnum::organizador->value){
             $tipoAvisosToNotify = [
                 TipoAvisoEventEnum::evento_aceptado->value,
-                TipoAvisoEventEnum::evento_rechazado->value,
                 TipoAvisoReservationEnum::reservacion_aceptada->value,
                 TipoAvisoReservationEnum::reservacion_rechazada->value
             ];

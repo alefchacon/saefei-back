@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('cambios', function (Blueprint $table) {
             $table->id()->primary()->unsigned()->unique();
-            $table->string("columna");
+            $table->string("columnas");
             $table->unsignedBigInteger("idUsuario");
             $table->unsignedBigInteger("idEvento");
 

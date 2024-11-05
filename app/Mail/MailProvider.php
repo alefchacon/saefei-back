@@ -69,8 +69,10 @@ class MailProvider{
   }
 
 
-  private static function getReservationReplacement(Reservacion $reservation, TipoAvisoReservationEnum $type){
-
+  private static function getReservationReplacement(
+    Reservacion $reservation, 
+    TipoAvisoReservationEnum $type)
+  {
     $reservation->with(["espacio", "usuario"]);
 
     $header = "";
@@ -115,7 +117,6 @@ class MailProvider{
     $headers = [
       TipoAvisoEventEnum::evento_nuevo->value => "El siguiente evento requiere ser revisado: ",
       TipoAvisoEventEnum::evento_aceptado->value => "Su evento ha sido aceptado.",
-      TipoAvisoEventEnum::evento_rechazado->value => "Su evento ha sido rechazado.",
     ];
     $header = $headers[$type->value];
 
@@ -157,6 +158,31 @@ class MailProvider{
 
     return $encoded_array;
   }
+  private static function getEventUpdateReplacement(Evento $event, TipoAvisoEventEnum $type){
+
+    $event->with(["espacio", "usuario"]);
+
+    $header = "";
+    $headers = [
+      TipoAvisoEventEnum::evento_editado_coordinador->value => "El siguiente evento fue editado por la Coordinación de Eventos de la FEI",
+      TipoAvisoEventEnum::evento_editado_organizador->value => "El siguiente evento fue editado por su organizador.",
+    ];
+    $header = $headers[$type->value];
+
+    $user = $event->usuario;
+    $replacements = 
+    [
+      '{{header}}' => $header,
+      '{{url}}' => env('FRONTEND_URL') . "/eventos/" . $event->id,
+      '{{eventName}}' => $event->nombre,
+    ];
+
+    $encoded_array = array_map(function($value) {
+      return mb_convert_encoding($value,'ISO-8859-1', 'UTF-8');
+    }, $replacements);
+
+    return $encoded_array;
+  }
 
 
   public static function getReservationMail(Reservacion $reservation = null, TipoAvisoReservationEnum $type) {
@@ -188,6 +214,18 @@ class MailProvider{
       $htmlBody
     );
   }
+  public static function getEventUpdateMail(Evento $event = null, TipoAvisoEventEnum $type) {
+
+    $replacement = self::getEventUpdateReplacement($event, $type);
+
+    $htmlBody = file_get_contents(__DIR__ . '/eventUpdate.html');
+    $htmlBody = str_replace(array_keys($replacement), array_values($replacement), $htmlBody);
+
+    return new Mail(
+      mb_convert_encoding("Evento editado", 'ISO-8859-1', 'UTF-8'),
+      $htmlBody
+    );
+  }
 
   public static function getEventMail(Evento $event = null, TipoAvisoEventEnum $type) {
 
@@ -210,7 +248,6 @@ class MailProvider{
     $subjects = [
       TipoAvisoEventEnum::evento_nuevo->value => "Nuevo evento",
       TipoAvisoEventEnum::evento_aceptado->value => "Evento aceptado",
-      TipoAvisoEventEnum::evento_rechazado->value => "Evento rechazado",
     ];
 
     return new Mail(

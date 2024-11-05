@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+<style>
+
+  h3{
+    margin: 0
+  }
+  p{
+    margin: 0
+  }
+  .primary{
+    text-decoration: none;
+    color: white !important;
+    background-color: #18529d;
+    padding: 10px 20px;
+    border-radius: 5px;
+  }
+
+  td, th{
+    padding: 10px;
+    border-bottom: 1px solid #e4e7ec;
+    text-align: left;
+  }
+  
+  tr:nth-child(odd){
+    background-color: #e4e7ec;
+  }
+
+  .max-width{
+    max-width: 10px;
+  }
+
+</style>
+</head>
+
+
+<body 
+  style="
+    margin: 0; 
+    padding: 0 0 20px 0;">
+  <div 
+    style=" 
+      padding: 10px 0 50px 0;" 
+    class="event">
+
+    <h3>{{header}}</h3>
+    <!-- CONDITIONAL_CONTENT -->
+
+    <br>
+
+    <table>
+
+      <tr>
+        <td><b>Nombre </b></td>
+        <td>{{eventName}}</td>
+      </tr>
+      
+
+    </table>
+
+
+  </div>
+
+</body>
+</html>

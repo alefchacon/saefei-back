@@ -37,6 +37,7 @@ class EventoResource extends JsonResource
             })),
 
             'records' => $this->constancias,
+            'presidium' => $this->presidium,
 
             'decoration' => $this->decoracion,
 

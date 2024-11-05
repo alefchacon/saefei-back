@@ -33,6 +33,7 @@ return new class extends Migration
             $table->string("constancias", 1000)->nullable()->default(config('global.defaultString'));
             
             $table->string("decoracion", 1000)->nullable()->default(config('global.defaultString'));
+            $table->string("presidium", 1000)->nullable()->default(config('global.defaultString'));
             
             /*RECURSOS ADICIONALES*/
             $table->string("requisitosCentroComputo", 1000)->nullable()->default(config('global.defaultString'));

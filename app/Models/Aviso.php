@@ -5,10 +5,12 @@ namespace App\Models;
 use App\Mail\MailProvider;
 use App\Mail\MailService;
 use App\Models\Enums\EstadoEnum;
+use App\Models\Enums\RolEnum;
 use App\Models\Enums\TipoAvisoEventEnum;
 use App\Models\Enums\TipoAvisoReservationEnum;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Mail\Mail;
 use Symfony\Component\Finder\Exception\AccessDeniedException;
 
 class Aviso extends Model
@@ -104,6 +106,58 @@ class Aviso extends Model
                 mail: $mail
             );
         }
+    }
+    public static function notifyEventUpdate(Evento $evento, User $editor){
+        $editorIsCoordinator = $editor->isCoordinator();
+        $type = $editorIsCoordinator
+            ? TipoAvisoEventEnum::evento_editado_coordinador 
+            : TipoAvisoEventEnum::evento_editado_organizador ;
+        Aviso::create([
+            "visto" => 0,
+            "idEvento" => $evento->id,
+            "idTipoAviso" => $type->value
+        ]);
+        
+        $mail = MailProvider::getEventUpdateMail(
+            $evento, 
+            $type
+        );
+        
+        if ($editorIsCoordinator){
+            $evento->load("usuario");
+            MailService::sendEmail(
+                to: $evento->usuario, 
+                mail: $mail
+            );
+        }else {
+            self::notifyCoordinators($mail);
+        }
+    }
+    public static function notifyNewEvent(Evento $event){
+        Aviso::create([
+            "visto" => 0,
+            "idEvento" => $event->id,
+            "idTipoAviso" => TipoAvisoEventEnum::evento_nuevo
+        ]);
+        $mail = MailProvider::getEventMail(
+            event: $event,
+            type: TipoAvisoEventEnum::evento_nuevo
+        );
+        self::notifyCoordinators($mail);
+    }
+
+    static function notifyCoordinators(Mail $mail){
+        $coordinators = User
+        ::whereHas('roles', function($query) {
+            $query->where('roles.id', RolEnum::coordinador->value);
+        })->get();
+
+    foreach($coordinators as $coordinator){
+        MailService::sendEmail(
+            to: $coordinator, 
+            mail: $mail
+        );
+    }
     }
 
 
