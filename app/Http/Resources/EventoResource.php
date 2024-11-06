@@ -63,6 +63,7 @@ class EventoResource extends JsonResource
             'status' => new CatalogoResource($this->whenLoaded('estado')),
             'mode' => new CatalogoResource($this->whenLoaded('modalidad')),     
             'evidences' => new ArchivoCollection($this->whenLoaded("evidencias")),
+            'changes' => new CambioCollection($this->whenLoaded("cambios")),
 
         
         ];

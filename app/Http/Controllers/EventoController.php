@@ -49,6 +49,7 @@ class EventoController extends Controller
         $orderBy = $request->query("orden");
         $eventName = $request->query("q");
         $startYearMonth = $request->query("fecha");
+        $userEvents = $request->query("delUsuario");
         $returnAll = $request->query("todo");
 
         $eventos = Evento::where($queryItems);
@@ -69,6 +70,10 @@ class EventoController extends Controller
         }
         if ($includeEvidences) {
             $eventos = $eventos->with("evidencias");
+        }
+        if ($userEvents) {
+            $organizer = User::findByToken($request);
+            $eventos = $eventos->where("idUsuario", "=", $organizer->id);
         }
 
         $eventos->with(['programasEducativos', 'usuario', 'reservaciones.actividades', 'reservaciones.espacio']);
@@ -182,6 +187,12 @@ class EventoController extends Controller
             'reservaciones.actividades', 
             'archivos',
         ])->find($idEvento);
+
+        $user = User::findByToken($request);
+
+        if (isset($user) && ($user->isCoordinator() || $user->id === $evento->idUsuario)){
+            $evento->load("cambios");
+        }
 
         if (!$evento) {
             return response()->json(['message' => 'No existe ese evento'], 404);
@@ -317,23 +328,29 @@ class EventoController extends Controller
     
     /**
      * The name of the Evento parameter MUST be "$evento", else it won't work.
-     * @param \Illuminate\Http\Request $request
-     * @param \App\Models\Evento $evento
-     * @return mixed|\Illuminate\Http\JsonResponse
      */
     public function update(Request $request, Evento $evento){
         $status = 500;
-        $message = "Algo falló";
+        $message = "";
+
 
         \DB::beginTransaction();
-
+        
         try{
-            $user = User::findByToken($request);
+            $editor = User::findByToken($request);
             
-            if (!$user){
+            if (!$editor){
                 return response()->json(["message" => "Token inválido"], 401);
             }
+    
+            $canEdit = 
+                $editor->isCoordinator() 
+                || $editor->id === $evento->idUsuario;
             
+            if (!$canEdit){
+                return response()->json(["message" => "No tiene permiso para realizar esta operación"], 403);
+            }
+
             $nonNullData = array_filter($request->all(), function ($value) {
                 return !is_null($value);
             });
@@ -346,25 +363,22 @@ class EventoController extends Controller
                 Cambio::create([
                     "columnas" => json_encode($updatedColumns),
                     "idEvento" => $evento->id,
-                    "idUsuario" => $user->id,
+                    "idUsuario" => $editor->id,
                 ]);
+                $message = Aviso::notifyEventUpdate($evento, $editor);
             }
-                    
+            
             \DB::commit();
+
             
             $status = 200;
-            $message = "Evento actualizado";
         } catch (\Throwable $ex) {
             $message = $ex->__tostring();
             \DB::rollBack();
-        }finally{
-            
-            return response()->json([
-                'message' => $message,
-                'data' => new EventoResource($evento),
-            ], $status);
-
-        } 
+        }
+        return response()->json([
+            'message' => $message,
+        ], $status);
     } 
     
     private static function handleEventMail(

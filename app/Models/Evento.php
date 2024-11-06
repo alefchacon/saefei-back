@@ -76,6 +76,9 @@ class Evento extends Model
     public function reservaciones(){
         return $this->hasMany(Reservacion::class, 'idEvento', 'id');
     }
+    public function cambios(){
+        return $this->hasMany(Cambio::class, 'idEvento', 'id');
+    }
 
     public function programasEducativos(){
         return $this->belongsToMany(ProgramaEducativo::class, "eventos_programaeducativos", "idEvento", "idProgramaEducativo");

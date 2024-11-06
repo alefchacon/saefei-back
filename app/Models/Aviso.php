@@ -42,7 +42,8 @@ class Aviso extends Model
         return Aviso
             ::where(function($query) {
                 $query->where("idTipoAviso", TipoAvisoEventEnum::evento_nuevo)
-                    ->orWhere("idTipoAviso", TipoAvisoEventEnum::evento_evaluado);
+                    ->orWhere("idTipoAviso", TipoAvisoEventEnum::evento_evaluado)
+                    ->orWhere("idTipoAviso", TipoAvisoEventEnum::evento_editado_organizador);
             })
             ->where("idEvento", "<>", null)
             ->where("visto", "=", 0);
@@ -107,11 +108,13 @@ class Aviso extends Model
             );
         }
     }
-    public static function notifyEventUpdate(Evento $evento, User $editor){
+    public static function notifyEventUpdate(Evento $evento, User $editor):string { 
         $editorIsCoordinator = $editor->isCoordinator();
+        $editorIsOrganizer = $editor->id === $evento->idUsuario;
         $type = $editorIsCoordinator
             ? TipoAvisoEventEnum::evento_editado_coordinador 
-            : TipoAvisoEventEnum::evento_editado_organizador ;
+            : TipoAvisoEventEnum::evento_editado_organizador;
+            
         Aviso::create([
             "visto" => 0,
             "idEvento" => $evento->id,
@@ -122,16 +125,23 @@ class Aviso extends Model
             $evento, 
             $type
         );
+
         
-        if ($editorIsCoordinator){
+        $result = "";
+        if ($editorIsCoordinator && !$editorIsOrganizer){
             $evento->load("usuario");
             MailService::sendEmail(
                 to: $evento->usuario, 
                 mail: $mail
             );
-        }else {
+            $result = "Evento actualizado. El organizador será notificado.";
+        } else if (!$editorIsCoordinator && $editorIsOrganizer) {
             self::notifyCoordinators($mail);
+            $result = "Evento actualizado. La Coordinación de Eventos será notificada.";
+        } else {
+            $result = "Evento actualizado.";
         }
+        return $result;
     }
     public static function notifyNewEvent(Evento $event){
         Aviso::create([

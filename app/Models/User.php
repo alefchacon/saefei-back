@@ -75,6 +75,7 @@ class User extends Authenticatable
     }
 */
     public static function getTokenFrom(string $header){
+
         $tokenParts = explode("|", $header);
         if (count($tokenParts) < 2) {
             return null;
@@ -85,6 +86,11 @@ class User extends Authenticatable
     }
 
     public static function findByToken(Request $request){
+
+        $tokenHeader = $request->header("authorization"); 
+        if (!isset($tokenHeader)){
+            return null;
+        }
 
         $token = self::getTokenFrom($request->header("authorization"));
         $user = User::whereHas('tokens', function ($query) use ($token) {
