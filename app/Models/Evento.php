@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Enums\EstadoEnum;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -120,6 +121,17 @@ class Evento extends Model
             ->whereDate("fin", "<", new \DateTime())
             ->with(['evaluacion', 'usuario'])
             ->get();
+    }
+
+    public static function splitByReservations(Builder $events){
+        return $eventsQuery = $events->get()
+        ->flatMap(function ($event) {
+            return $event->reservaciones->map(function ($reservation) use ($event) {
+                $newEvent = $event->replicate();
+                $newEvent->setRelation('reservaciones', collect([$reservation]));
+                return $newEvent;
+            });
+        });
     }
 
     public function getCustomDirty()

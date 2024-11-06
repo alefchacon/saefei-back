@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\EventoCalendarioResource;
 use App\Http\Resources\EventoLightResource;
 use App\Http\Resources\EventoResource;
 use App\Models\Cambio;
@@ -50,7 +51,9 @@ class EventoController extends Controller
         $eventName = $request->query("q");
         $startYearMonth = $request->query("fecha");
         $userEvents = $request->query("delUsuario");
-        $returnAll = $request->query("todo");
+        $dontPaginate = $request->query("sinPaginar");
+        $forCalendar = $request->query("paraCalendario");
+        
 
         $eventos = Evento::where($queryItems);
         if ($eventName){
@@ -75,24 +78,55 @@ class EventoController extends Controller
             $organizer = User::findByToken($request);
             $eventos = $eventos->where("idUsuario", "=", $organizer->id);
         }
-
+        
         $eventos->with(['programasEducativos', 'usuario', 'reservaciones.actividades', 'reservaciones.espacio']);
 
+        if ($forCalendar) {
+            $eventos = Evento::splitByReservations($eventos);
+        }
 
-        if ($returnAll){
-            return new EventoCollection($eventos->get()); 
+
+        if ($dontPaginate){
+            return EventoLightResource::collection($eventos); 
         } else {
             return EventoLightResource::collection($eventos->paginate(10)->appends($request->query())); 
 
         }
-    }    
+    }   
+    
+    public function getCalendarEvents(Request $request){
+        $filter = new EventoFilter();
+        $queryItems = $filter->transform($request);
+        
+        $includeEvaluacion = $request->query("evaluacion");
+        $includeEvidences = $request->query("evidencias");
+        $includeEstado = $request->query("estado");
+        $orderBy = $request->query("orden");
+        $eventName = $request->query("q");
+        $startYearMonth = $request->query("fecha");
+        $userEvents = $request->query("delUsuario");
+        $dontPaginate = $request->query("sinPaginar");
+        $forCalendar = $request->query("paraCalendario");
+        
+
+        $eventos = Evento::where($queryItems);
+
+        if ($eventName){
+            $eventos = $this->getEventsByName($request, $eventos);
+        }
+
+        $eventos = Evento::findBy($startYearMonth);
+        
+        $eventos->with([ 'reservaciones.actividades', 'reservaciones.espacio']);
+        $eventos = Evento::splitByReservations($eventos);
+
+
+
+        return EventoCalendarioResource::collection($eventos); 
+    }
     
     public function getEventsByName(Request $request, Builder|Evento $eventos){
         if ($request->has('q')) {
-
-            /*
-                Los eventos se filtran utilizando el método Model Collection->filter()
-            */
             $searchString = $request->query('q');
             $modelEvents = $eventos->get();
             $filteredEvents = $this->filterEventsByName($modelEvents, $searchString);

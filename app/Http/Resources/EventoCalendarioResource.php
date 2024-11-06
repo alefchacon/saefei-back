@@ -6,7 +6,7 @@ use App\Models\ProgramaEducativo;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class EventoLightResource extends JsonResource
+class EventoCalendarioResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -19,16 +19,13 @@ class EventoLightResource extends JsonResource
             'id' => $this->id,
             'name' => $this->nombre,
             'createdAt' => $this->created_at,     
-            'notes' => $this->observaciones,     
-            'idEstado' => $this->idEstado,     
-
-            'start' => $this->reservaciones[0]->inicio,
-            'end' => $this->reservaciones[count($this->reservaciones) - 1]->fin,
+            'date' => $this->reservaciones->first()->fecha,
+            'start' => $this->reservaciones->first()->actividades->sortBy("hora")->first()->hora,
+            'end' => $this->reservaciones->first()->actividades->sortBy("hora")->last()->hora,
             'programs' => new CatalogoCollection($this->whenLoaded("programasEducativos")),
             'reservations' => new ReservacionCollection($this->whenLoaded("reservaciones")),
+            'space' => new CatalogoResource($this->reservaciones[0]->espacio),
             'user' => new UserResource($this->usuario),
-            'status' => new CatalogoResource($this->estado),
-            'mode' => new CatalogoResource($this->whenLoaded('modalidad')),    
         ];
     }
 }
