@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\EventoCalendarioResource;
 use App\Http\Resources\EventoLightResource;
 use App\Http\Resources\EventoResource;
+use App\Models\Cambio;
 use App\Models\Cronograma;
 use App\Models\Enums\TipoAvisoEventEnum;
 use App\Models\Eventos_ProgramaEducativos;
@@ -48,14 +50,17 @@ class EventoController extends Controller
         $orderBy = $request->query("orden");
         $eventName = $request->query("q");
         $startYearMonth = $request->query("fecha");
-        $returnAll = $request->query("todo");
+        $userEvents = $request->query("delUsuario");
+        $dontPaginate = $request->query("sinPaginar");
+        $forCalendar = $request->query("paraCalendario");
+        
 
         $eventos = Evento::where($queryItems);
         if ($eventName){
             $eventos = $this->getEventsByName($request, $eventos);
         }
         if ($startYearMonth){
-            $eventos = Evento::encontrarPor($startYearMonth);
+            $eventos = Evento::findBy($startYearMonth);
         }
         if ($orderBy == "fecha"){
             $eventos = $eventos->orderByDesc("created_at");
@@ -69,24 +74,45 @@ class EventoController extends Controller
         if ($includeEvidences) {
             $eventos = $eventos->with("evidencias");
         }
-
+        if ($userEvents) {
+            $organizer = User::findByToken($request);
+            $eventos = $eventos->where("idUsuario", "=", $organizer->id);
+        }
+        
         $eventos->with(['programasEducativos', 'usuario', 'reservaciones.actividades', 'reservaciones.espacio']);
 
+        if ($forCalendar) {
+            $eventos = Evento::splitByReservations($eventos);
+        }
 
-        if ($returnAll){
-            return new EventoCollection($eventos->get()); 
+
+        if ($dontPaginate){
+            return EventoLightResource::collection($eventos); 
         } else {
             return EventoLightResource::collection($eventos->paginate(10)->appends($request->query())); 
 
         }
-    }    
+    }   
+    
+    public function getCalendarEvents(Request $request){
+        $filter = new EventoFilter();
+        $queryItems = $filter->transform($request);
+        
+        $startYearMonth = $request->query("fecha");
+        $eventos = Evento::where($queryItems);
+
+        $eventos = Evento::findBy($startYearMonth);
+        
+        $eventos->with([ 'reservaciones.actividades', 'reservaciones.espacio']);
+        $eventos = Evento::splitByReservations($eventos);
+
+
+
+        return EventoCalendarioResource::collection($eventos); 
+    }
     
     public function getEventsByName(Request $request, Builder|Evento $eventos){
         if ($request->has('q')) {
-
-            /*
-                Los eventos se filtran utilizando el método Model Collection->filter()
-            */
             $searchString = $request->query('q');
             $modelEvents = $eventos->get();
             $filteredEvents = $this->filterEventsByName($modelEvents, $searchString);
@@ -179,9 +205,14 @@ class EventoController extends Controller
             'programasEducativos', 
             'reservaciones.espacio', 
             'reservaciones.actividades', 
-            'evaluacion.evidencias',
             'archivos',
         ])->find($idEvento);
+
+        $user = User::findByToken($request);
+
+        if (isset($user) && ($user->isCoordinator() || $user->id === $evento->idUsuario)){
+            $evento->load("cambios");
+        }
 
         if (!$evento) {
             return response()->json(['message' => 'No existe ese evento'], 404);
@@ -200,21 +231,20 @@ class EventoController extends Controller
     public function store(Request $request)
     {
         $code = 500;
-        $message = 'Evaluación registrada';
+        $message = 'Algo salió mal';
 
-        
 
         \DB::beginTransaction();
         $event = new Evento;
 
-        $test = "";
         $actividadesCorrespondientes = [];
         $reservacionIds = [];
         try{
 
             $nonNullData = array_filter($request->all(), function ($value) {
-                return !is_null($value);
-            });
+                    return $value !== null && $value !== "null";
+                }
+            );
 
             $event = Evento::create($nonNullData);
             $event->save();
@@ -225,7 +255,7 @@ class EventoController extends Controller
                 $idEvento, 
                 TiposArchivosEnum::PUBLICIDAD
             );
-            $test = $this->storeArchivo(
+            $this->storeArchivo(
                 $request, 
                 $idEvento, 
                 TiposArchivosEnum::CRONOGRAMA
@@ -238,54 +268,37 @@ class EventoController extends Controller
             
             $reservacionIds = json_decode($request->input("reservaciones"), true);
 
-            /*
-            foreach ($reservaciones as $reservacion) {
-                Reservacion::findOrFail($reservacion)
+            
+            foreach ($reservacionIds as $reservacionId) {
+                Reservacion::findOrFail($reservacionId)
                             ->update([
                                 "idEstado" => EstadoEnum::evaluado,
                                 "idEvento" => $event->id,
                             ]);
-            }*/
+            }
 
             $actividadesJson = $request->input("actividades");
             $actividades = json_decode($actividadesJson, true);
             
-            foreach($reservacionIds as $reservacionId){
-                $actividadesCorrespondientes = array_filter(
-                    $actividades, 
-                    function($actividad) use ($reservacionId) {
-                        return $actividad['idReservacion'] === $reservacionId;
+            if (isset($actividades)){
+                    foreach($reservacionIds as $reservacionId){
+                        $actividadesCorrespondientes = array_filter(
+                        $actividades, 
+                        function($actividad) use ($reservacionId) {
+                            return $actividad['idReservacion'] === $reservacionId;
+                        }
+                    );
+                    foreach ($actividadesCorrespondientes as $actividad){
+                        Actividad::create($actividad);
                     }
-                );
-                foreach ($actividadesCorrespondientes as $actividad){
-                    Actividad::create($actividad);
                 }
             }
             
             
             $event->load("usuario");
             
-            $mail = MailProvider::getEventMail(
-                event: $event,
-                type: TipoAvisoEventEnum::evento_nuevo
-            );
-
-            $coordinators = User::where("idRol", RolEnum::coordinador)->get();
-            foreach($coordinators as $coordinator){
-                MailService::sendEmail(
-                    to: $coordinator, 
-                    mail: $mail
-                );
-            }
-            
-            Aviso::create([
-                "visto" => 0,
-                "idUsuario" => null,
-                "idEvento" => $event->id,
-                "idEstado" => EstadoEnum::en_revision,
-                "idTipoAviso" => TipoAvisoEventEnum::evento_nuevo
-            ]);
-
+            Aviso::notifyNewEvent($event);
+            $message = 'Evento registrado';
             $code = 201;
             \DB::commit();
 
@@ -315,59 +328,80 @@ class EventoController extends Controller
         }            
         $archivos = $request->file($tipoArchivo->getKey());
 
-        foreach ($archivos as $archivo){
-            if (!$archivo->isValid()) {
-                return response()->json(['error' => 'El archivo ' . $archivo->getClientOriginalName() . 'no es válido.'], 400);
-            }
-        }
-
-        $tipoArchivo->getKey();
-        foreach ($archivos as $archivo) {
-            $path = $archivo->store("uploads", 'public');
-            $archivoModel = new Archivo();
-            $archivoModel->ruta = basename($path);
-            $archivoModel->nombre = $archivo->getClientOriginalName();
-            $archivoModel->idEvento = $idEvento;
-            $archivoModel->idTipoArchivo = $tipoArchivo->value;
-            $archivoModel->save();
-        }
+        Archivo::bulkCreate($idEvento, $tipoArchivo, $archivos);
         
     }
     
-    
-    public function update(Request $request, Evento $event){
+    /**
+     * The name of the Evento parameter MUST be "$evento", else it won't work.
+     * Also, this method will NOT not work with FormData for some reason. Which
+     * means updating the files has to be done in multiple calls :/
+     */
+    public function update(Request $request, Evento $evento){
         $status = 500;
-        $message = "Algo falló";
-        
+        $message = "";
+
+
         \DB::beginTransaction();
-
-        //return response()->json(["sadf" => $request->input("model")["id"]]);
-
+        
         try{
-            $nonNullData = array_filter($request->all(), function ($value) {
-                return !is_null($value);
-            });
+            $editor = User::findByToken($request);
             
-            $event = Evento::findOrFail($request->all()["id"]);
+            if (!$editor){
+                return response()->json(["message" => "Token inválido"], 401);
+            }
+    
+            $canEdit = 
+                $editor->isCoordinator() 
+                || $editor->id === $evento->idUsuario;
+            
+            if (!$canEdit){
+                return response()->json(["message" => "No tiene permiso para realizar esta operación"], 403);
+            }
 
-            $event->update($nonNullData);
+            $nonNullData = array_filter($request->all(), function ($value) {
+                return $value !== null && $value !== '';
+            });
+            $evento->fill($nonNullData);
+            $evento->save();
+            
+            $this->storeArchivo(
+                $request, 
+                $evento->id, 
+                TiposArchivosEnum::PUBLICIDAD
+            );
+            $this->storeArchivo(
+                $request, 
+                $evento->id, 
+                TiposArchivosEnum::CRONOGRAMA
+            );
+            
+            /*
+            $updatedColumns = array_keys($evento->getCustomDirty());
+            if (!empty($updatedColumns)){
+                Cambio::create([
+                    "columnas" => json_encode($updatedColumns),
+                    "idEvento" => $evento->id,
+                    "idUsuario" => $editor->id,
+                ]);
+                $message = Aviso::notifyEventUpdate($evento, $editor);
+            }*/
+
+            $message = "fuck";
             
             \DB::commit();
-            
-            $message = "Evento actualizado";
+
             
             $status = 200;
-        } catch (\Throwable $ex){
+        } catch (\Throwable $ex) {
+            $message = $ex->__tostring();
             \DB::rollBack();
-            $message = $ex->getMessage();
-        }finally {
-            return response()->json([
-                'message' => $message,
-                'data' => new EventoResource($event),
-            ], $status);
         }
+        return response()->json([
+            'message' => $request->input("nombre"),
+        ], $status);
     } 
-    
+
     private static function handleEventMail(
         Evento $event, 
         int $originalIdEstado

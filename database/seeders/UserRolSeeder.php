@@ -13,10 +13,8 @@ class UserRolSeeder extends Seeder
     {
         // First, ensure you have some roles
         $roles = [
-            ['nombre' => 'ORGANIZADOR'],
             ['nombre' => 'COORDINADOR'],
-            ['nombre' => 'ADMINISTRADOR A'],
-            ['nombre' => 'ADMINISTRADOR B'],
+            ['nombre' => 'ADMINISTRADOR'],
         ];
 
         foreach ($roles as $role) {
@@ -31,7 +29,7 @@ class UserRolSeeder extends Seeder
                 'email' => 'vitocfdz@gmail.com',
                 'apellidoMaterno' => 'Fernandez',
                 'puesto' => 'best boy',
-                'roles' => ['ORGANIZADOR', 'COORDINADOR', 'ADMINISTRADOR B']
+                'roles' => ['COORDINADOR', 'ADMINISTRADOR']
             ],
             [
                 'nombres' => 'Karla',
@@ -39,7 +37,7 @@ class UserRolSeeder extends Seeder
                 'email' => 'maledict@protonmail.com',
                 'apellidoMaterno' => 'Zamora',
                 'puesto' => 'best girl',
-                'roles' => ['ORGANIZADOR']
+                'roles' => []
             ],
             [
                 'nombres' => 'Esteban',
@@ -47,7 +45,15 @@ class UserRolSeeder extends Seeder
                 'email' => 'maledict@proton.me',
                 'apellidoMaterno' => 'Gonzáles',
                 'puesto' => 'my man',
-                'roles' => ['ORGANIZADOR', 'ADMINISTRADOR A']
+                'roles' => ['ADMINISTRADOR']
+            ],
+            [
+                'nombres' => 'Otra persona',
+                'apellidoPaterno' => 'ASDF',
+                'email' => 'zs20015745@estudiantes.uv.mx',
+                'apellidoMaterno' => 'asdf',
+                'puesto' => 'dummy!',
+                'roles' => ['ADMINISTRADOR']
             ],
         ];
 

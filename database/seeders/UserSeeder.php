@@ -36,5 +36,12 @@ class UserSeeder extends Seeder
             'apellidoMaterno' => 'Gonzáles',
             'puesto' => 'my man',
         ]);
+        User::create([
+            'nombres' => 'Otra persona',
+            'apellidoPaterno' => 'ASDF',
+            'email' => 'zs20015745@estudiantes.uv.mx',
+            'apellidoMaterno' => 'asdf',
+            'puesto' => 'dummy!',
+        ]);
     }
 }

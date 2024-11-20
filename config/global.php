@@ -1,6 +1,7 @@
 <?php
 return [
     'defaultString' => 'N/A',
-    'unauthorized' => "Expiró la sesión",
+    'unauthorizedExpired' => "Expiró la sesión",
+    'unauthorized' => "Inicie sesión",
     'forbidden' => "Inicie sesión"
 ];

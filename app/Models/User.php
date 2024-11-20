@@ -9,6 +9,8 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Http\Request;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use App\Models\Enums\RolEnum;
+
 
 class User extends Authenticatable
 {
@@ -62,6 +64,10 @@ class User extends Authenticatable
     public function roles(){
         return $this->belongsToMany(Rol::class, "users_roles", "idUsuario", "idRol");
     }
+
+    public function administradores(){
+        return $this->belongsToMany(Administrador::class, 'users_administradores', "idUsuario", "idAdministrador");
+    }
         
 /*
     public function roles(){
@@ -69,6 +75,7 @@ class User extends Authenticatable
     }
 */
     public static function getTokenFrom(string $header){
+
         $tokenParts = explode("|", $header);
         if (count($tokenParts) < 2) {
             return null;
@@ -80,16 +87,58 @@ class User extends Authenticatable
 
     public static function findByToken(Request $request){
 
-        $token = self::getTokenFrom($request->header("authorization"));
+        $tokenHeader = $request->header("authorization"); 
+        if (!isset($tokenHeader)){
+            return null;
+        }
 
-        $user = \DB::table("users")
-            ->join("personal_access_tokens", "users.id", "=", "personal_access_tokens.tokenable_id")
-            ->where("personal_access_tokens.token", "=", hash("sha256", $token))
-            ->select(["users.*"])
-            ->get()->first();
+        $token = self::getTokenFrom($request->header("authorization"));
+        $user = User::whereHas('tokens', function ($query) use ($token) {
+            $query->where('token', hash('sha256', $token));
+        })
+        ->with('roles')
+        ->first();
 
 
         return $user;
     }
 
+    public function isCoordinator(){
+        return in_array(
+            needle: RolEnum::coordinador->value, 
+            haystack: $this->getRoleIds(), 
+            strict: false
+        );
+    }
+    public function isAdministrator(){
+        return in_array(
+            needle: RolEnum::administrador->value, 
+            haystack: $this->getRoleIds(), 
+            strict: false
+        );
+    }
+    public function isAdministrator2(){
+        return $this->administradores()->get()->count() > 0;
+    }
+    public function isAdministratorOf(int $idEspacio){
+
+        if (!$this->isAdministrator()){
+            return false;
+        }
+
+        $espacio = Espacio::find($idEspacio);
+
+        foreach($this->administradores()->get() as $admin){
+            if ($admin->id === $espacio->idAdministrador){
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+
+    public function getRoleIds(){
+        return $this->roles->pluck('id')->toArray();
+    }
 }

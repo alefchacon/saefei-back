@@ -17,7 +17,6 @@ class AvisoResource extends JsonResource
         return [
             'id' => $this->id,
             'read' => $this->visto,
-            'idUsuario' => $this->idUsuario,
             'idEvento' => $this->idEvento,
             'idReservacion' => $this->idReservacion,
             'idEstado' => $this->idEstado,

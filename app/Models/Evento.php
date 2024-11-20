@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Enums\EstadoEnum;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -14,34 +15,31 @@ class Evento extends Model
     protected $fillable = [
         "nombre",
         "descripcion",
-        "pagina",
-        "ambito",
+        "numParticipantes",
         "audiencias",
+        "ambito",
         "eje",
         "tematicas",
+        "pagina",
 
-        "inicio",
-        "fin",
-        "numParticipantes",
+        "medios",
 
-        "plataformas",
+        "constancias",
+
+        "presidium",
+
+        "decoracion",
 
         "requisitosCentroComputo",
         "requiereTransmisionEnVivo",
-        "presidium",
-        "decoracion",
+        
         "numParticipantesExternos",
         "requiereEstacionamiento",
         "requiereFinDeSemana",
         
-        "medios",
-
-        "requiereConstancias",
-        "ponientes",
-        
         "adicional",
 
-        "observaciones",
+        "respuesta",
 
         "idUsuario",
         "idModalidad",
@@ -53,9 +51,6 @@ class Evento extends Model
         return $this->belongsTo( User::class, 'idUsuario', 'id');
     }
 
-    public function evidencias(){
-        return $this->hasManyThrough(Evidencia::class, Evaluacion::class, "idEvento", "idEvaluacion", "id", "id");
-    }
 
 
     public function evaluacion() {
@@ -82,13 +77,16 @@ class Evento extends Model
     public function reservaciones(){
         return $this->hasMany(Reservacion::class, 'idEvento', 'id');
     }
+    public function cambios(){
+        return $this->hasMany(Cambio::class, 'idEvento', 'id');
+    }
 
     public function programasEducativos(){
         return $this->belongsToMany(ProgramaEducativo::class, "eventos_programaeducativos", "idEvento", "idProgramaEducativo");
     }
 
-    public function aviso(){
-        return $this->hasOne(Aviso::class, 'idEvento', 'id');
+    public function avisos(){
+        return $this->hasMany(Aviso::class, 'idEvento', 'id');
     }
     public function respuesta(){
         return $this->belongsTo(Respuesta::class, 'idRespuesta', 'id');
@@ -98,7 +96,7 @@ class Evento extends Model
         return $this->hasMany(Archivo::class, 'idEvento', 'id');
     }
 
-    public static function scopeEncontrarPor($query, $startYearMonth,){
+    public static function scopeFindBy($query, $startYearMonth,){
         return $query->select('eventos.*')
         ->joinSub(
             Reservacion::select('idEvento')
@@ -124,4 +122,47 @@ class Evento extends Model
             ->with(['evaluacion', 'usuario'])
             ->get();
     }
+
+    public static function splitByReservations(Builder $events){
+        return $eventsQuery = $events->get()
+        ->flatMap(function ($event) {
+            return $event->reservaciones->map(function ($reservation) use ($event) {
+                $newEvent = $event->replicate();
+                $newEvent->setRelation('reservaciones', collect([$reservation]));
+                return $newEvent;
+            });
+        });
+    }
+
+    public function getCustomDirty()
+    {
+        $dirty = [];
+    
+        foreach ($this->getAttributes() as $key => $value) {
+            // Check if the original value exists
+            if ($this->isDirty($key)) {
+                // Get the original value
+                $original = $this->getOriginal($key);
+    
+                // Normalize original and new values for comparison
+                if (is_string($original)) {
+                    $original = json_decode($original, true); // Decode JSON string
+                }
+    
+                // Compare arrays (consider both to be arrays for comparison)
+                if (is_array($value) && is_array($original)) {
+                    if ($value !== $original) {
+                        $dirty[$key] = $value;
+                    }
+                } else {
+                    // For non-arrays, rely on Laravel's default dirty check
+                    $dirty[$key] = $value;
+                }
+            }
+        }
+    
+        return $dirty;
+    }
+    
+
 }

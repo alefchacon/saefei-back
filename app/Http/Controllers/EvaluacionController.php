@@ -70,9 +70,7 @@ class EvaluacionController extends Controller
             
             Aviso::create([
                 "visto" => 0,
-                "idUsuario" => null,
                 "idEvento" => $event->id,
-                "idEstado" => EstadoEnum::evaluado,
                 "idTipoAviso" => TipoAvisoEventEnum::evento_evaluado
             ]);
 

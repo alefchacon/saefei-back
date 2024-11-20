@@ -17,54 +17,54 @@ class EventoResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->nombre,
-            'page' => $this->pagina,
-
-            'audiences' => $this->audiencias,
-            'scope' => $this->ambito,
-            'axi' => $this->eje,
-            'themes' => $this->tematicas,
-            'platforms' => $this->plataformas,
-
             'description' => $this->descripcion,
             'numParticipants' => $this->numParticipantes,
-            'computerCenterRequirements' => $this->requisitosCentroComputo,
-            'numExternalParticipants' => $this->numParticipantesExternos,
-            'needsParking' => $this->requiereEstacionamiento,
-            'needsLivestream' => $this->requiereTransmisionEnVivo,
-            'needsRecords' => $this->requiereConstancias,
-            'needsWeekend' => $this->requiereFinDeSemana,
-            "needsComputerCenterSupport" => $this->requiereApoyoCentroComputo,
-            'additional' => $this->adicional,
-            'createdAt' => $this->created_at,     
-            'reply' => $this->observaciones,     
-            'media' => $this->medios,
-            'presidium' => $this->presidium,
-            'decoration' => $this->decoracion,
-            'speakers' => $this->ponientes,
+            'reservations' => new ReservacionCollection($this->whenLoaded('reservaciones')),
+            'chronogram' => new ArchivoResource($this->whenLoaded('archivos', function () {            
+                return $this->archivos->where('idTipoArchivo', 1)->first();
+            })),
+            'programs' => new CatalogoCollection($this->whenLoaded("programasEducativos")),
+            'audiences' => $this->audiencias,
+            'type' => new CatalogoResource($this->whenLoaded('tipo')),
+            'scope' => $this->ambito,
+            'axis' => $this->eje,
+            'themes' => $this->tematicas,
+            'page' => $this->pagina,
+            
+            'media' => is_array($this->medios) ? $this->medios : json_decode($this->medios, true),
+            'publicity' => new ArchivoCollection($this->whenLoaded('archivos', function () {            
+                return $this->archivos->where('idTipoArchivo', 3);
+            })),
 
-            'wasAccepted' => $this->idEstado === 2 || $this->idEstado === 3,
+            'records' => $this->constancias,
+            'presidium' => $this->presidium,
+
+            'decoration' => $this->decoracion,
+
+            'computerCenterRequirements' => $this->requisitosCentroComputo,
+            'needsLivestream' => $this->requiereTransmisionEnVivo,
+
+            'numParticipantsExternal' => $this->numParticipantesExternos,
+            'needsParking' => $this->requiereEstacionamiento,
+            'needsWeekend' => $this->requiereFinDeSemana,
+            
+            'additional' => $this->adicional,
+
+            'createdAt' => $this->created_at,     
+            'reply' => $this->respuesta,     
 
             "idEstado" => $this->idEstado,
             "idUsuario" => $this->idUsuario,
-
-
             'start' => $this->inicio,
             'end' => $this->fin,
 
             'evaluation' => new EvaluacionResource($this->whenLoaded('evaluacion')),
-            'reservations' => new ReservacionCollection($this->whenLoaded('reservaciones')),
             'user' => new UserResource($this->whenLoaded('usuario')),
-            'type' => new CatalogoResource($this->whenLoaded('tipo')),
             'status' => new CatalogoResource($this->whenLoaded('estado')),
             'mode' => new CatalogoResource($this->whenLoaded('modalidad')),     
-            'programs' => new CatalogoCollection($this->whenLoaded("programasEducativos")),
             'evidences' => new ArchivoCollection($this->whenLoaded("evidencias")),
-            'chronogram' => new ArchivoResource($this->whenLoaded('archivos', function () {            
-                return $this->archivos->where('idTipoArchivo', 1)->first();
-            })),
-            'publicity' => new ArchivoCollection($this->whenLoaded('archivos', function () {            
-                return $this->archivos->where('idTipoArchivo', 3);
-            })),
+            'changes' => new CambioCollection($this->whenLoaded("cambios")),
+
         
         ];
     }

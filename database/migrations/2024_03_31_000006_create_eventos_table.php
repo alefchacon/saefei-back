@@ -20,43 +20,34 @@ return new class extends Migration
             /*DETALLES DEL EVENTO*/
             $table->string("nombre", 1000)->nullable();
             $table->string("descripcion", 1000)->nullable();
-            $table->string("pagina")->nullable()->default("uv.mx/fei");
-            $table->string("ambito", 1000)->nullable();
+            $table->integer("numParticipantes")->default(0)->nullable();
             $table->string("audiencias", 1000)->nullable();
+            $table->string("ambito", 1000)->nullable();
             $table->string("eje", 1000)->nullable();
             $table->string("tematicas", 1000)->nullable();
-            
-            /*DETALLES LOGÍSTICOS*/
-            $table->date("inicio")->nullable();
-            $table->date("fin")->nullable();
-            $table->integer("numParticipantes")->default(0)->nullable();
-            
-            /*ESPACIOS FISICOS*/
-            /*ESPACIOS VIRTUAL*/
-            /*ESPACIOS FISICO Y VIRTUAL*/
-            $table->string("plataformas", 1000)->nullable()->default(config('global.defaultString'))->nullable();
-
-            /*RECURSOS ADICIONALES*/
-            $table->string("requisitosCentroComputo", 1000)->nullable()->default(config('global.defaultString'));
-            $table->boolean("requiereTransmisionEnVivo")->default(false)->nullable();
-            $table->string("presidium", 1000)->nullable()->default(config('global.defaultString'));
-            $table->string("decoracion", 1000)->nullable()->default(config('global.defaultString'));
-            $table->integer("numParticipantesExternos")->nullable()->default(0);
-            $table->boolean("requiereEstacionamiento")->nullable()->default(false);
-            $table->boolean("requiereFinDeSemana")->nullable()->default(false);
+            $table->string("pagina")->nullable()->default("uv.mx/fei");
             
             /*DIFUSION DEL EVENTO*/
             $table->string("medios", 1000)->nullable();
+
+            $table->string("constancias", 1000)->nullable()->default(config('global.defaultString'));
             
-            /*CONSTANCIAS*/
-            $table->boolean("requiereConstancias")->nullable()->default(false);
-            $table->string("ponientes", 1000)->nullable()->default(false);
+            $table->string("decoracion", 1000)->nullable()->default(config('global.defaultString'));
+            $table->string("presidium", 1000)->nullable()->default(config('global.defaultString'));
+            
+            /*RECURSOS ADICIONALES*/
+            $table->string("requisitosCentroComputo", 1000)->nullable()->default(config('global.defaultString'));
+            $table->boolean("requiereTransmisionEnVivo")->default(false)->nullable();
+
+            $table->integer("numParticipantesExternos")->nullable()->default(0);
+            $table->boolean("requiereEstacionamiento")->nullable()->default(false);
+            $table->boolean("requiereFinDeSemana")->nullable()->default(false);
             
             /*OTROS COMENTARIOS O SOLICITUDES ESPECIALES*/
             $table->string("adicional", 1000)->nullable()->default(config('global.defaultString'));
 
 
-            $table->string("observaciones", 1000)->nullable()->default(config('global.defaultString'));
+            $table->string("respuesta", 1000)->nullable()->default(config('global.defaultString'));
 
             
             $table->unsignedBigInteger("idEstado");
