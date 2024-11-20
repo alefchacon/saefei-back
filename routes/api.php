@@ -76,6 +76,7 @@ Route::group(['/api'], function () {
 
     Route::apiResource('avisos', AvisoController::class)->middleware(AuthCustom::class);
     Route::put('avisos', [AvisoController::class, "update"])->middleware(AuthCustom::class);
+
     //Route::post('avisos/marcarLeidasUsuario', [AvisoController::class, "markAsUserRead"]);
 
     Route::apiResource('cronogramas', CronogramaController::class);

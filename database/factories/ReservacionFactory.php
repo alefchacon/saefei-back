@@ -20,18 +20,26 @@ class ReservacionFactory extends Factory
      */
     public function definition(): array
     {
-        $start = $this->faker->dateTime();
-        $end = $start->modify('+1 hour');
+        $year = 2024; // Specify the year
+        $month = 11; // Specify the month
+        
+        // Create the start and end dates for the given month and year
+        $startDate = "$year-$month-01";
+        $endDate = "$year-$month-" . cal_days_in_month(CAL_GREGORIAN, $month, $year);
+        
+        // Generate a random date within the specified range
+        $randomDate = $this->faker->dateTimeBetween($startDate, $endDate);
+        $end = $randomDate->modify('+1 hour');
         return [
             "respuesta" => $this->faker->word(),
             "motivo" => $this->faker->word(),
-            "fecha" => $start,
-            "inicio" => $start,
+            "fecha" => $randomDate,
+            "inicio" => $randomDate,
             "fin" => $end,
             "idUsuario" => 1,  
             "idEspacio" => $this->faker->numberBetween(1,4),
             "idEvento" => $this->faker->numberBetween(1,4), 
-            "idEstado" =>  $this->faker->numberBetween(1,4), 
+            "idEstado" =>  2, 
         ];
     }
 }

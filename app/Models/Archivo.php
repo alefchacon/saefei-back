@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use App\Models\Enums\TiposArchivosEnum;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Request;
 
 class Archivo extends Model
 {
@@ -20,5 +22,23 @@ class Archivo extends Model
     }
     public function tipoArchivo(){
         return $this->belongsTo(TipoArchivo::class, 'idTipoArchivo', 'id');
+    }
+    public static function bulkCreate(int $idEvento, TiposArchivosEnum $tipoArchivo, $archivos){
+
+        foreach ($archivos as $archivo){
+            if (!$archivo->isValid()) {
+                return response()->json(['error' => 'El archivo ' . $archivo->getClientOriginalName() . 'no es válido.'], 400);
+            }
+        }
+
+        foreach ($archivos as $archivo) {
+            $path = $archivo->store("/", 'public');
+            $archivoModel = new Archivo();
+            $archivoModel->ruta = basename($path);
+            $archivoModel->nombre = $archivo->getClientOriginalName();
+            $archivoModel->idEvento = $idEvento;
+            $archivoModel->idTipoArchivo = $tipoArchivo->value;
+            $archivoModel->save();
+        }
     }
 }

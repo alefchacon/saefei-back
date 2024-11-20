@@ -24,7 +24,7 @@ class EventoCalendarioResource extends JsonResource
             'end' => $this->reservaciones->first()->actividades->sortBy("hora")->last()->hora,
             'programs' => new CatalogoCollection($this->whenLoaded("programasEducativos")),
             'reservations' => new ReservacionCollection($this->whenLoaded("reservaciones")),
-            'space' => new CatalogoResource($this->reservaciones[0]->espacio),
+            'space' => new CatalogoResource($this->reservaciones->first()->espacio),
             'user' => new UserResource($this->usuario),
         ];
     }

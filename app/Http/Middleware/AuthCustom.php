@@ -18,13 +18,13 @@ class AuthCustom
     public function handle(Request $request, Closure $next): Response
     {
         if (!$request->header("authorization")){
-            return response()->json(["message" => config('global.forbidden')], 403);
+            return response()->json(["message" => config('global.unauthorized')], 401);
         }
         
         $user = User::findByToken($request);
         
         if (!$user) {
-            return response()->json(["message" => config('global.forbidden')], 403);
+            return response()->json(["message" => config('global.unauthorized')], 401);
         }
         
         $latestToken =  \DB::select(
@@ -46,7 +46,7 @@ class AuthCustom
                  WHERE tokenable_id = :id', 
                  ['id' => $user->id]
             );
-            return response()->json(["message" => config('global.unauthorized')], 401);
+            return response()->json(["message" => config('global.unauthorizedExpired')], 401);
         }
 
         return $next($request);

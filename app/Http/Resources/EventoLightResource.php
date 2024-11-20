@@ -22,8 +22,6 @@ class EventoLightResource extends JsonResource
             'notes' => $this->observaciones,     
             'idEstado' => $this->idEstado,     
 
-            'start' => $this->reservaciones[0]->inicio,
-            'end' => $this->reservaciones[count($this->reservaciones) - 1]->fin,
             'programs' => new CatalogoCollection($this->whenLoaded("programasEducativos")),
             'reservations' => new ReservacionCollection($this->whenLoaded("reservaciones")),
             'user' => new UserResource($this->usuario),

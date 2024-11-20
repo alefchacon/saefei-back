@@ -11,6 +11,7 @@ use App\Models\Enums\TipoAvisoReservationEnum;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Mail\Mail;
+use Request;
 use Symfony\Component\Finder\Exception\AccessDeniedException;
 
 class Aviso extends Model
