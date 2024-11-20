@@ -16,7 +16,7 @@ return [
     |
     */
 
-    'default' => 'mariadb',
+    'default' => env('DB_CONNECTION', 'sqlite'),
 
     /*
     |--------------------------------------------------------------------------
@@ -41,15 +41,15 @@ return [
 
         'mysql' => [
             'driver' => 'mysql',
-            'url' => '',
-            'host' =>  '127.0.0.1',
-            'port' =>  '3306',
-            'database' => 'saefei',
-            'username' =>  'saefei_admin',
-            'password' =>  's78@0X3l8s9_eiGM',
-            'unix_socket' =>  '',
-            'charset' =>  'utf8mb4',
-            'collation' =>  'utf8mb4_unicode_ci',
+            'url' => env('DB_URL'),
+            'host' => env('DB_HOST', '127.0.0.1'),
+            'port' => env('DB_PORT', '3306'),
+            'database' => env('DB_DATABASE', 'laravel'),
+            'username' => env('DB_USERNAME', 'seafei'),
+            'password' => env('DB_PASSWORD', '3VvZ]BQsw4wLQ(Se'),
+            'unix_socket' => env('DB_SOCKET', ''),
+            'charset' => env('DB_CHARSET', 'utf8mb4'),
+            'collation' => env('DB_COLLATION', 'utf8mb4_unicode_ci'),
             'prefix' => '',
             'prefix_indexes' => true,
             'strict' => true,
@@ -61,15 +61,15 @@ return [
 
         'mariadb' => [
             'driver' => 'mariadb',
-            'url' => '',
-            'host' =>  '127.0.0.1',
-            'port' =>  '3306',
-            'database' => 'saefei',
-            'username' =>  'saefei_admin',
-            'password' =>  's78@0X3l8s9_eiGM',
-            'unix_socket' =>  '',
-            'charset' =>  'utf8mb4',
-            'collation' =>  'utf8mb4_unicode_ci',
+            'url' => env('DB_URL'),
+            'host' => env('DB_HOST', '127.0.0.1'),
+            'port' => env('DB_PORT', '3306'),
+            'database' => env('DB_DATABASE', 'saefei'),
+            'username' => env('DB_USERNAME', 'saefei_admin'),
+            'password' => env('DB_PASSWORD', 's78@0X3l8s9_eiGM'),
+            'unix_socket' => env('DB_SOCKET', ''),
+            'charset' => env('DB_CHARSET', 'utf8mb4'),
+            'collation' => env('DB_COLLATION', 'utf8mb4_unicode_ci'),
             'prefix' => '',
             'prefix_indexes' => true,
             'strict' => true,
