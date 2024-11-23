@@ -16,7 +16,7 @@ class ReservacionResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'notes' => $this->respuesta,
+            'response' => $this->respuesta,
             'date' => $this->fecha,
             'start' => $this->inicio,
             'end' => $this->fin,

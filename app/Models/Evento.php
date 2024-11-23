@@ -139,23 +139,20 @@ class Evento extends Model
         $dirty = [];
     
         foreach ($this->getAttributes() as $key => $value) {
-            // Check if the original value exists
-            if ($this->isDirty($key)) {
-                // Get the original value
-                $original = $this->getOriginal($key);
+             if ($this->isDirty($key)) {
+                 $original = $this->getOriginal($key);
     
-                // Normalize original and new values for comparison
                 if (is_string($original)) {
-                    $original = json_decode($original, true); // Decode JSON string
+                    $original = json_decode($original, true);
                 }
     
-                // Compare arrays (consider both to be arrays for comparison)
+                
                 if (is_array($value) && is_array($original)) {
                     if ($value !== $original) {
                         $dirty[$key] = $value;
                     }
                 } else {
-                    // For non-arrays, rely on Laravel's default dirty check
+                    
                     $dirty[$key] = $value;
                 }
             }

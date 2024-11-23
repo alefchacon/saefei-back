@@ -19,7 +19,7 @@ class EventoLightResource extends JsonResource
             'id' => $this->id,
             'name' => $this->nombre,
             'createdAt' => $this->created_at,     
-            'notes' => $this->observaciones,     
+            'response' => $this->respuesta,     
             'idEstado' => $this->idEstado,     
 
             'programs' => new CatalogoCollection($this->whenLoaded("programasEducativos")),

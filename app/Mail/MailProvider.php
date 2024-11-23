@@ -99,7 +99,7 @@ class MailProvider{
       '{{job}}' => $reservation->usuario->puesto,
       '{{email}}' => $reservation->usuario->email,
       '{{linkText}}' => "Responder", 
-      '{{notes}}' => $reservation->respuesta,
+      '{{response}}' => $reservation->respuesta,
     ];
 
     $encoded_array = array_map(function($value) {
@@ -116,7 +116,7 @@ class MailProvider{
     $header = "";
     $headers = [
       TipoAvisoEventEnum::evento_nuevo->value => "El siguiente evento requiere ser revisado: ",
-      TipoAvisoEventEnum::evento_aceptado->value => "Su evento ha sido aceptado.",
+      TipoAvisoEventEnum::evento_aceptado->value => "Respuesta a notificación de evento: $event->nombre",
     ];
     $header = $headers[$type->value];
 
@@ -124,7 +124,7 @@ class MailProvider{
     $replacements = 
     [
       '{{header}}' => $header,
-      '{{notes}}' => $event->observaciones,
+      '{{response}}' => $event->respuesta,
       '{{url}}' => env('FRONTEND_URL') . "/eventos/" . $event->id,
       '{{eventName}}' => $event->nombre,
       '{{description}}' => $event->descripcion,
@@ -194,7 +194,7 @@ class MailProvider{
 
     if ($isReplying) {
         $conditionalContent = mb_convert_encoding(
-          "<p><b>Observaciones:</b> {{notes}} </p>", 
+          "<p><b>Observaciones:</b> {{response}} </p>", 
           'ISO-8859-1', 
           'UTF-8');        
     }
@@ -236,7 +236,7 @@ class MailProvider{
 
     if ($isReplying) {
         $conditionalContent = mb_convert_encoding(
-          "<p><b>Observaciones:</b> {{notes}} </p>", 
+          "<p><b>Observaciones:</b> {{response}} </p>", 
           'ISO-8859-1', 
           'UTF-8');        
     }
@@ -247,7 +247,7 @@ class MailProvider{
 
     $subjects = [
       TipoAvisoEventEnum::evento_nuevo->value => "Nuevo evento",
-      TipoAvisoEventEnum::evento_aceptado->value => "Evento aceptado",
+      TipoAvisoEventEnum::evento_aceptado->value => "Repuesta a notificación de evento: $event->nombre",
     ];
 
     return new Mail(

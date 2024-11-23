@@ -341,43 +341,40 @@ class EventoController extends Controller
         $status = 500;
         $message = "";
 
-
         \DB::beginTransaction();
-        
+
+        $updatedColumns = [];
+        $isResponse = false;
         try{
+
+            
+            
             $editor = User::findByToken($request);
             
             if (!$editor){
                 return response()->json(["message" => "Token inválido"], 401);
             }
-    
+            
             $canEdit = 
-                $editor->isCoordinator() 
-                || $editor->id === $evento->idUsuario;
+            $editor->isCoordinator() 
+            || $editor->id === $evento->idUsuario;
             
             if (!$canEdit){
                 return response()->json(["message" => "No tiene permiso para realizar esta operación"], 403);
             }
+            
+            unset($request["respuesta"]);
 
             $nonNullData = array_filter($request->all(), function ($value) {
                 return $value !== null && $value !== '';
             });
             $evento->fill($nonNullData);
+            $updatedColumns = array_keys($evento->getDirty());
+            
+            /*Make sure to save AFTER getting $updatedColumns*/
             $evento->save();
+
             
-            $this->storeArchivo(
-                $request, 
-                $evento->id, 
-                TiposArchivosEnum::PUBLICIDAD
-            );
-            $this->storeArchivo(
-                $request, 
-                $evento->id, 
-                TiposArchivosEnum::CRONOGRAMA
-            );
-            
-            /*
-            $updatedColumns = array_keys($evento->getCustomDirty());
             if (!empty($updatedColumns)){
                 Cambio::create([
                     "columnas" => json_encode($updatedColumns),
@@ -385,9 +382,16 @@ class EventoController extends Controller
                     "idUsuario" => $editor->id,
                 ]);
                 $message = Aviso::notifyEventUpdate($evento, $editor);
-            }*/
+            }
+            
 
-            $message = "fuck";
+            $isResponse = in_array("respuesta", $updatedColumns);
+            
+            if ($isResponse){
+                $this::handleResponseMail($evento, $updatedColumns);
+            }
+
+            $message = "Evento actualizado";
             
             \DB::commit();
 
@@ -398,22 +402,64 @@ class EventoController extends Controller
             \DB::rollBack();
         }
         return response()->json([
-            'message' => $request->input("nombre"),
+            'message' => $evento->getChanges(),
         ], $status);
     } 
 
-    private static function handleEventMail(
-        Evento $event, 
-        int $originalIdEstado
-    ){
-        $replyingToEventOrganizer = 
-            $originalIdEstado !== $event->idEstado;
+    public function respond(Request $request, Evento $evento){
+        $status = 500;
+        $message = "";
+        
+        \DB::beginTransaction();
 
+        try{
+
+            $editor = User::findByToken($request);
+            
+            if (!$editor){
+                return response()->json(["message" => "Token inválido"], 401);
+            }
+            
+            if (!$editor->isCoordinator()){
+                return response()->json(["message" => "No tiene permiso para realizar esta operación"], 403);
+            }
+            
+            $nonNullData = array_filter($request->all(), function ($value) {
+                return $value !== null && $value !== '';
+            });
+            $evento->update(["respuesta" => $request->input("respuesta")]);
+            
+            $this::handleResponseMail($evento, $updatedColumns);
+
+            $message = "Respuesta enviada";
+            
+            \DB::commit();
+
+            
+            $status = 200;
+        } catch (\Throwable $ex) {
+            $message = $ex->__tostring();
+            \DB::rollBack();
+        }
+        return response()->json([
+            'message' => $message,
+        ], $status);
+    }
+
+    private static function handleResponseMail(
+        Evento $event, 
+        array $updatedColumns
+    ){
+        /*
+        $replyingToEventOrganizer = 
+        $originalIdEstado !== $event->idEstado;
+        
         if (!$replyingToEventOrganizer){
             return;
         }
+        */
 
-        $type = TipoAvisoEventEnum::tryFrom($event->idEstado);
+        $type = TipoAvisoEventEnum::tryFrom(2);
         
         $mail = MailProvider::getEventMail(
             event: $event, 

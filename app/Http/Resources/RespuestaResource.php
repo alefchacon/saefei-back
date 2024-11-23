@@ -17,7 +17,7 @@ class RespuestaResource extends JsonResource
 
         return [
             'id' => $this->id,
-            'notes' => $this->observaciones,
+            'response' => $this->respuesta,
             'organizerRead' => $this->vistoOrganizador,
             'staffRead' => $this->vistoStaff,
             'idEstado' => $this->idEstado,
