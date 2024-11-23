@@ -347,7 +347,12 @@ class EventoController extends Controller
         $isResponse = false;
         try{
 
-            
+            if(isset($request["respuesta"])){
+                return response()->json([
+                    'message' => "No puede utilizar este endpoint para responder a un evento. Utilice `eventos/responder/{idEvento}`",
+                ], 400);
+            }
+            unset($request["respuesta"]);
             
             $editor = User::findByToken($request);
             
@@ -363,7 +368,6 @@ class EventoController extends Controller
                 return response()->json(["message" => "No tiene permiso para realizar esta operación"], 403);
             }
             
-            unset($request["respuesta"]);
 
             $nonNullData = array_filter($request->all(), function ($value) {
                 return $value !== null && $value !== '';
@@ -383,13 +387,6 @@ class EventoController extends Controller
                 ]);
                 $message = Aviso::notifyEventUpdate($evento, $editor);
             }
-            
-
-            $isResponse = in_array("respuesta", $updatedColumns);
-            
-            if ($isResponse){
-                $this::handleResponseMail($evento, $updatedColumns);
-            }
 
             $message = "Evento actualizado";
             
@@ -402,7 +399,7 @@ class EventoController extends Controller
             \DB::rollBack();
         }
         return response()->json([
-            'message' => $evento->getChanges(),
+            'message' => $message,
         ], $status);
     } 
 
@@ -429,7 +426,7 @@ class EventoController extends Controller
             });
             $evento->update(["respuesta" => $request->input("respuesta")]);
             
-            $this::handleResponseMail($evento, $updatedColumns);
+            $this::handleResponseMail($evento);
 
             $message = "Respuesta enviada";
             
@@ -448,16 +445,7 @@ class EventoController extends Controller
 
     private static function handleResponseMail(
         Evento $event, 
-        array $updatedColumns
     ){
-        /*
-        $replyingToEventOrganizer = 
-        $originalIdEstado !== $event->idEstado;
-        
-        if (!$replyingToEventOrganizer){
-            return;
-        }
-        */
 
         $type = TipoAvisoEventEnum::tryFrom(2);
         
