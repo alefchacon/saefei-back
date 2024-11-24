@@ -347,11 +347,6 @@ class EventoController extends Controller
         $isResponse = false;
         try{
 
-            if(isset($request["respuesta"])){
-                return response()->json([
-                    'message' => "No puede utilizar este endpoint para responder a un evento. Utilice `eventos/responder/{idEvento}`",
-                ], 400);
-            }
             unset($request["respuesta"]);
             
             $editor = User::findByToken($request);
@@ -403,7 +398,7 @@ class EventoController extends Controller
         ], $status);
     } 
 
-    public function respond(Request $request, Evento $evento){
+    public function reply(Request $request, Evento $evento){
         $status = 500;
         $message = "";
         
@@ -424,7 +419,10 @@ class EventoController extends Controller
             $nonNullData = array_filter($request->all(), function ($value) {
                 return $value !== null && $value !== '';
             });
-            $evento->update(["respuesta" => $request->input("respuesta")]);
+            $evento->update([
+                "respuesta" => $request->input("respuesta"),
+                "respondido" => true,
+            ]);
             
             $this::handleResponseMail($evento);
 

@@ -63,13 +63,16 @@ class EventoSeeder extends Seeder
             ]);
             */
         Evento::factory()
-            ->count(40) // Create 10 events
+            ->count(40)
             ->has(
                 Reservacion::factory()
-                    ->count(1) // Each event has 5 reservations
+                    ->state([
+                        'idEstado' => 3, // Override default values here
+                    ])
+                    ->count(1)
                     ->has(
                         Actividad::factory()
-                            ->count(2), // Each reservation has 3 activities
+                            ->count(2),
                             'actividades'
                     ),
                     'reservaciones'

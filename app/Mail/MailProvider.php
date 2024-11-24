@@ -83,6 +83,7 @@ class MailProvider{
     ];
     $header = $headers[$type->value];
 
+
     $replacements = 
     [
       '{{header}}' => $header,
@@ -99,7 +100,7 @@ class MailProvider{
       '{{job}}' => $reservation->usuario->puesto,
       '{{email}}' => $reservation->usuario->email,
       '{{linkText}}' => "Responder", 
-      '{{response}}' => $reservation->respuesta,
+      '{{reply}}' => nl2br($reservation->respuesta),
     ];
 
     $encoded_array = array_map(function($value) {
@@ -124,7 +125,7 @@ class MailProvider{
     $replacements = 
     [
       '{{header}}' => $header,
-      '{{response}}' => $event->respuesta,
+      '{{reply}}' => nl2br($event->respuesta),
       '{{url}}' => env('FRONTEND_URL') . "/eventos/" . $event->id,
       '{{eventName}}' => $event->nombre,
       '{{description}}' => $event->descripcion,
@@ -194,7 +195,7 @@ class MailProvider{
 
     if ($isReplying) {
         $conditionalContent = mb_convert_encoding(
-          "<p><b>Observaciones:</b> {{response}} </p>", 
+          "<p><b>Observaciones:</b> {{reply}} </p>", 
           'ISO-8859-1', 
           'UTF-8');        
     }
@@ -236,7 +237,7 @@ class MailProvider{
 
     if ($isReplying) {
         $conditionalContent = mb_convert_encoding(
-          "<p><b>Observaciones:</b> {{response}} </p>", 
+          "<p><b>Observaciones:</b> {{reply}} </p>", 
           'ISO-8859-1', 
           'UTF-8');        
     }

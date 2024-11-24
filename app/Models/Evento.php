@@ -23,6 +23,7 @@ class Evento extends Model
         "pagina",
 
         "medios",
+        "mediosNotificados",
 
         "constancias",
 
@@ -40,6 +41,7 @@ class Evento extends Model
         "adicional",
 
         "respuesta",
+        "respondido",
 
         "idUsuario",
         "idModalidad",

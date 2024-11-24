@@ -28,7 +28,7 @@ class DatabaseSeeder extends Seeder
             AdministradorSeeder::class,
             EspacioSeeder::class,
             EventoSeeder::class,
-            //ReservacionSeeder::class,
+            ReservacionSeeder::class,
             ProgramaEducativoSeeder::class,
             AvisoSeeder::class,
         ]);

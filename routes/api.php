@@ -44,7 +44,7 @@ Route::group(['/api'], function () {
     Route::post('evidencias', [EvidenciaController::class, "getEvidencesFor"]);
     Route::apiResource('estados', EstadoController::class);
     Route::get('eventos/{id}', [EventoController::class, "show"]);
-    Route::put('eventos/responder/{evento}', [EventoController::class, "respond"]);
+    Route::put('eventos/responder/{evento}', [EventoController::class, "reply"]);
     
     Route::apiResource('usuarios', UserController::class);
     Route::put('usuarios', [UserController::class, "update"]);

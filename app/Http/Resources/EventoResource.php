@@ -52,6 +52,8 @@ class EventoResource extends JsonResource
 
             'createdAt' => $this->created_at,     
             'reply' => $this->respuesta,     
+            'replied' => $this->respondido,     
+            'mediaNotified' => $this->mediosNotificados,     
 
             "idEstado" => $this->idEstado,
             "idUsuario" => $this->idUsuario,

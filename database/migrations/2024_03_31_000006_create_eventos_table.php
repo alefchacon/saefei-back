@@ -30,13 +30,13 @@ return new class extends Migration
             /*DIFUSION DEL EVENTO*/
             $table->string("medios", 1000)->nullable();
 
-            $table->string("constancias", 1000)->nullable()->default(config('global.defaultString'));
+            $table->string("constancias", 1000)->nullable();
             
-            $table->string("decoracion", 1000)->nullable()->default(config('global.defaultString'));
-            $table->string("presidium", 1000)->nullable()->default(config('global.defaultString'));
+            $table->string("decoracion", 1000)->nullable();
+            $table->string("presidium", 1000)->nullable();
             
             /*RECURSOS ADICIONALES*/
-            $table->string("requisitosCentroComputo", 1000)->nullable()->default(config('global.defaultString'));
+            $table->string("requisitosCentroComputo", 1000)->nullable();
             $table->boolean("requiereTransmisionEnVivo")->default(false)->nullable();
 
             $table->integer("numParticipantesExternos")->nullable()->default(0);
@@ -44,10 +44,12 @@ return new class extends Migration
             $table->boolean("requiereFinDeSemana")->nullable()->default(false);
             
             /*OTROS COMENTARIOS O SOLICITUDES ESPECIALES*/
-            $table->string("adicional", 1000)->nullable()->default(config('global.defaultString'));
+            $table->string("adicional", 1000)->nullable();
+            $table->string("mediosNotificados", 1000)->nullable();
+            $table->boolean("respondido")->nullable()->default(false);
 
 
-            $table->string("respuesta", 1000)->nullable()->default(config('global.defaultString'));
+            $table->string("respuesta", 3000)->nullable();
 
             
             $table->unsignedBigInteger("idEstado");
