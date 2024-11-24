@@ -39,7 +39,7 @@ class ReservacionSeeder extends Seeder
             "inicio" => "2024-12-12 10:00",
             "fin" => "2024-12-12 16:00",
             "motivo" => "PRUEBA",
-            "idUsuario" => 1,
+            "idUsuario" => 2,
             "idEspacio" => 2,
             "idEstado" => 2,
             

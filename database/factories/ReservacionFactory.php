@@ -36,7 +36,7 @@ class ReservacionFactory extends Factory
             "fecha" => $randomDate,
             "inicio" => $randomDate,
             "fin" => $end,
-            "idUsuario" => 1,  
+            "idUsuario" => 2,  
             "idEspacio" => $this->faker->numberBetween(1,4),
             "idEvento" => $this->faker->numberBetween(1,4), 
             "idEstado" =>  2, 
