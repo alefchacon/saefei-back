@@ -52,7 +52,7 @@ class ReservacionSeeder extends Seeder
             "fin" => "2024-12-23 11:30",
             "motivo" => "Conferencia de Claudia Sheinbaum",
             "idUsuario" => 1,
-            "idEspacio" => 3,
+            "idEspacio" => 2,
             "idEstado" => 1,
         ]);
         Reservacion::create([
