@@ -26,14 +26,44 @@ class ReservacionSeeder extends Seeder
 
         $dates = [$date1, $date2, $date3];
 
+        /*
         foreach ($dates as $date) {
             Reservacion::factory()->hasRespuesta()->hasActividades(5)->create([
                 'fecha' => $date,
                 'inicio' => $date,
                 'fin' => $date,
+                
             ]);
         }
+            */
 
+        Reservacion::create([
+            "fecha" => "2024-11-15",
+            "inicio" => "2024-11-15 10:00",
+            "fin" => "2024-11-15 12:00",
+            "motivo" => "Seminario de investigación en ingeniería de software",
+            "idUsuario" => 2,
+            "idEspacio" => 2,
+            "idEstado" => 1,
+        ]);
+        Reservacion::create([
+            "fecha" => "2024-12-23",
+            "inicio" => "2024-12-23 07:00",
+            "fin" => "2024-12-23 11:30",
+            "motivo" => "Conferencia de Claudia Sheinbaum",
+            "idUsuario" => 1,
+            "idEspacio" => 3,
+            "idEstado" => 1,
+        ]);
+        Reservacion::create([
+            "fecha" => "2024-12-27",
+            "inicio" => "2024-12-27 10:00",
+            "fin" => "2024-12-27 16:00",
+            "motivo" => "Foro de divulgación científica de estadística",
+            "idUsuario" => 3,
+            "idEspacio" => 1,
+            "idEstado" => 1,
+        ]);
         Reservacion::create([
             "fecha" => "2024-12-12",
             "inicio" => "2024-12-12 10:00",
@@ -42,7 +72,6 @@ class ReservacionSeeder extends Seeder
             "idUsuario" => 2,
             "idEspacio" => 2,
             "idEstado" => 2,
-            
         ]);
     }
 }

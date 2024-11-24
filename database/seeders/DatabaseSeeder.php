@@ -27,8 +27,8 @@ class DatabaseSeeder extends Seeder
             UserRolSeeder::class,
             AdministradorSeeder::class,
             EspacioSeeder::class,
-            EventoSeeder::class,
             ReservacionSeeder::class,
+            EventoSeeder::class,
             ProgramaEducativoSeeder::class,
             AvisoSeeder::class,
         ]);
