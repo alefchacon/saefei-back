@@ -78,6 +78,23 @@ class EventoSeeder extends Seeder
                     'reservaciones'
             )
             ->create();
+        Evento::factory()
+            ->state(["nombre" => "Foro de Divulgación Científica en Ciencias de la Computación"])
+            ->count(1)
+            ->has(
+                Reservacion::factory()
+                    ->state([
+                        'idEstado' => 3, // Override default values here
+                    ])
+                    ->count(1)
+                    ->has(
+                        Actividad::factory()
+                            ->count(2),
+                            'actividades'
+                    ),
+                    'reservaciones'
+            )
+            ->create();
 
     }
 }

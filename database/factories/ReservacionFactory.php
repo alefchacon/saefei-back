@@ -21,7 +21,7 @@ class ReservacionFactory extends Factory
     public function definition(): array
     {
         $year = 2024; // Specify the year
-        $month = 11; // Specify the month
+        $month = 12; // Specify the month
         
         // Create the start and end dates for the given month and year
         $startDate = "$year-$month-01";

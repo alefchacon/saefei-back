@@ -24,7 +24,7 @@ class ReservacionSeeder extends Seeder
         $date4 = clone $date1;
         $date4->modify('+9 days');
 
-        $dates = [$date1, $date2, $date3, $date4];
+        $dates = [$date1, $date2, $date3];
 
         foreach ($dates as $date) {
             Reservacion::factory()->hasRespuesta()->hasActividades(5)->create([
@@ -33,5 +33,16 @@ class ReservacionSeeder extends Seeder
                 'fin' => $date,
             ]);
         }
+
+        Reservacion::create([
+            "fecha" => "2024-12-12",
+            "inicio" => "2024-12-12 10:00",
+            "fin" => "2024-12-12 16:00",
+            "motivo" => "PRUEBA",
+            "idUsuario" => 1,
+            "idEspacio" => 2,
+            "idEstado" => 2,
+            
+        ]);
     }
 }
