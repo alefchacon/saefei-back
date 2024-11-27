@@ -89,7 +89,7 @@ class EventoSeeder extends Seeder
 
             foreach ($names as $name) {
                 Evento::factory()
-                ->state(["nombre" => $name])
+                ->state(["nombre" => $name, "idUsuario" => 2])
                 ->count(1)
                 ->has(
                     Reservacion::factory()
