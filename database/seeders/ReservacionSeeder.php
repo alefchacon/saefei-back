@@ -73,5 +73,23 @@ class ReservacionSeeder extends Seeder
             "idEspacio" => 2,
             "idEstado" => 2,
         ]);
+        Reservacion::create([
+            "fecha" => "2024-12-12",
+            "inicio" => "2024-12-12 11:00",
+            "fin" => "2024-12-12 18:30",
+            "motivo" => "PRUEBA",
+            "idUsuario" => 2,
+            "idEspacio" => 1,
+            "idEstado" => 2,
+        ]);
+        Reservacion::create([
+            "fecha" => "2024-12-12",
+            "inicio" => "2024-12-12 12:00",
+            "fin" => "2024-12-12 18:00",
+            "motivo" => "PRUEBA",
+            "idUsuario" => 2,
+            "idEspacio" => 2,
+            "idEstado" => 2,
+        ]);
     }
 }

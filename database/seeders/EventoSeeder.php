@@ -95,7 +95,8 @@ class EventoSeeder extends Seeder
                     Reservacion::factory()
                         ->state([
                             'idEstado' => 3, // Override default values here
-                            "fecha" => "2024-12-01"
+                            "fecha" => "2024-12-01",
+                            "idUsuario" => 2,
                         ])
                         ->count(1)
                         ->has(
