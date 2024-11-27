@@ -78,23 +78,36 @@ class EventoSeeder extends Seeder
                     'reservaciones'
             )
             ->create();
-        Evento::factory()
-            ->state(["nombre" => "Foro de Divulgación Científica en Ciencias de la Computación"])
-            ->count(1)
-            ->has(
-                Reservacion::factory()
-                    ->state([
-                        'idEstado' => 3, // Override default values here
-                    ])
-                    ->count(1)
-                    ->has(
-                        Actividad::factory()
-                            ->count(2),
-                            'actividades'
-                    ),
-                    'reservaciones'
-            )
-            ->create();
+
+            $names = [
+                "Seminario de Investigación de Ingeniería de Software",
+                "Foro de Divulgación Cientfífica de Ciencias Computacionales",
+                "Coloquio de Sistemas Centrados en el Usuario",
+                "Exposición de perritos",
+                "Taller 'El Reggaeton y sus estragos en la sociedad'"
+            ];
+
+            foreach ($names as $name) {
+                Evento::factory()
+                ->state(["nombre" => $name])
+                ->count(1)
+                ->has(
+                    Reservacion::factory()
+                        ->state([
+                            'idEstado' => 3, // Override default values here
+                            "fecha" => "2024-12-01"
+                        ])
+                        ->count(1)
+                        ->has(
+                            Actividad::factory()
+                                ->count(2),
+                                'actividades'
+                        ),
+                        'reservaciones'
+                )
+                ->create();
+            }
+
 
     }
 }
