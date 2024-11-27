@@ -69,7 +69,7 @@ class ReservacionSeeder extends Seeder
             "inicio" => "2024-12-12 10:00",
             "fin" => "2024-12-12 16:00",
             "motivo" => "PRUEBA",
-            "idUsuario" => 2,
+            "idUsuario" => 1,
             "idEspacio" => 2,
             "idEstado" => 2,
         ]);
@@ -78,7 +78,7 @@ class ReservacionSeeder extends Seeder
             "inicio" => "2024-12-12 11:00",
             "fin" => "2024-12-12 18:30",
             "motivo" => "PRUEBA",
-            "idUsuario" => 2,
+            "idUsuario" => 1,
             "idEspacio" => 1,
             "idEstado" => 2,
         ]);
@@ -87,7 +87,7 @@ class ReservacionSeeder extends Seeder
             "inicio" => "2024-12-12 12:00",
             "fin" => "2024-12-12 18:00",
             "motivo" => "PRUEBA",
-            "idUsuario" => 2,
+            "idUsuario" => 1,
             "idEspacio" => 2,
             "idEstado" => 2,
         ]);
